@@ -2,9 +2,8 @@ require('dotenv').config();
 var http  = require('http');
 var https = require('https');
 
-var port = process.env.PORT;
+var port             = process.env.PORT;
 var telegramApiToken = process.env.TELEGRAM_API_TOKEN;
-
 
 http.createServer((request, response) => {
 	let body = '';
@@ -20,9 +19,9 @@ http.createServer((request, response) => {
 				response.write(JSON.stringify(body));
 				response.end();
 			} catch(e) {
-				console.log(e);
-				response.writeHead(500);
-				response.end();
+                console.log(e);
+                response.writeHead(500);
+                response.end();
 			}
 		} else {
 			response.writeHead(200, {'Content-Type': 'text/plain'});
