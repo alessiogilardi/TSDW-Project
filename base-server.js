@@ -6,8 +6,41 @@ var port = process.env.PORT;
 var telegramApiToken = process.env.TELEGRAM_API_TOKEN;
 
 
-var message = '';
+http.createServer((request, response) => {
+	let body = '';
+	request.on('error', err => {
+		console.error(err);
+	}).on('data', chunck => {
+		body += chunck.toString();
+	}).on('end', () => {
+		if (request.method === 'POST' && request.headers['content-type'] === 'application/json') {
+			try {
+				body = JSON.parse(body);
+				response.writeHead(200, {'Content-Type': 'application/json'});
+				response.write(JSON.stringify(body));
+				response.end();
+			} catch(e) {
+				console.log(e);
+				response.writeHead(500);
+				response.end();
+			}
+		} else {
+			response.writeHead(200, {'Content-Type': 'text/plain'});
+			response.write('Use POST');
+			response.end();
+		}
+	})
 
+}).listen(port, err => {
+	if (err) {
+		console.error(err);
+	} else {
+		console.log('Server started');
+		console.log('Listeninig on port: ' + port)
+	}
+});
+
+/*
 function parseRequestData(request, callback) {
     var body = '';
     request.on('data', chunk => {
@@ -39,3 +72,4 @@ server.listen(port, err => {
     }
     console.log('Listening on port: ' + port);
 });
+*/
