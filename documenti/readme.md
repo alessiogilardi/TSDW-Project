@@ -12,11 +12,11 @@
 
 ### Node.js
 [Visual Studio Code - Free](https://code.visualstudio.com/)
-> Ottimo __IDE__ per __Node.js__ gratuito
+> Ottimo __IDE__ per __Node.js__ gratuito.
 
 [WebStorm - Trial](https://www.jetbrains.com/webstorm/)
-> Ottimo __IDE__ ma a pagamento
+> Ottimo __IDE__ ma a pagamento.
 
 ### Richieste HTTP
 [Postman](https://www.getpostman.com/)
-> Utile __tool__ per inviare richieste __HTTP__
+> Utile __tool__ per inviare richieste __HTTP__.
