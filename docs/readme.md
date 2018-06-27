@@ -20,3 +20,10 @@
 ### Richieste HTTP
 [Postman](https://www.getpostman.com/)
 > Utile __tool__ per inviare richieste __HTTP__.
+
+### Webhook Telegram
+[Telegraf](https://github.com/telegraf/telegraf)
+> Framework in __Node.js__ per __Telegram BOT__.
+
+## Guide 
+[Telegram WebHook](https://core.telegram.org/bots/webhooks)
