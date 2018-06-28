@@ -12,4 +12,4 @@ ___
 * Definire un __elenco__ di __permessi/azioni__ che è necessario avere/poter compiere.
 ___
 * Definire quali __informazioni__ vanno tenute rigurado ogni __utente__.
-* Informazioni da tenere sui __droni_.
+* Informazioni da tenere sui __droni__.
