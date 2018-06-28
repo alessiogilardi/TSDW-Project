@@ -7,26 +7,26 @@
 ## Strumenti utili
 
 ### MongoDB
-[Web MongoUI](https://github.com/azat-co/mongoui)
-> Tool scritto in __Node.js__ per amministrare database __MongoDB__.
+* [Web MongoUI](https://github.com/azat-co/mongoui)
+  > Tool scritto in __Node.js__ per amministrare database __MongoDB__.
 
-[NoSQLBooster](https://nosqlbooster.com/)
-> Tool grafico per amministrare database __MongoDB__.
+* [NoSQLBooster](https://nosqlbooster.com/)
+  > Tool grafico per amministrare database __MongoDB__.
 
 ### Node.js
-[Visual Studio Code - Free](https://code.visualstudio.com/)
-> Ottimo __IDE__ per __Node.js__ gratuito.
+* [Visual Studio Code - Free](https://code.visualstudio.com/)
+  > Ottimo __IDE__ per __Node.js__ gratuito.
 
-[WebStorm - Trial](https://www.jetbrains.com/webstorm/)
-> Ottimo __IDE__ ma a pagamento.
+* [WebStorm - Trial](https://www.jetbrains.com/webstorm/)
+  > Ottimo __IDE__ ma a pagamento.
 
 ### Richieste HTTP
-[Postman](https://www.getpostman.com/)
-> Utile __tool__ per inviare richieste __HTTP__.
+* [Postman](https://www.getpostman.com/)
+  > Utile __tool__ per inviare richieste __HTTP__.
 
 ### Webhook Telegram
-[Telegraf](https://github.com/telegraf/telegraf)
-> Framework in __Node.js__ per __Telegram BOT__.
+* [Telegraf](https://github.com/telegraf/telegraf)
+  > Framework in __Node.js__ per __Telegram BOT__.
 
 ## Guide 
-[Telegram WebHook](https://core.telegram.org/bots/webhooks)
+* [Telegram WebHook](https://core.telegram.org/bots/webhooks)
