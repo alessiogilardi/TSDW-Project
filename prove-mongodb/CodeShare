@@ -1,0 +1,73 @@
+// Inserimento singolo
+db.tabella.insertOne(
+  {item: "k", altro: "h"}
+);
+
+// Inserimento multiplo
+db.tabella.insertMany([
+  {item: "", altro: ""},
+  {item: "a", altro: "b"}
+]);
+
+
+  
+// Ricerca
+db.tabella.find(
+  {item: "a"}
+);
+
+// Ricerca con ID
+db.tabella.find(
+  {_id: ObjectID("5b76c18db4c02e0996144ca9")}
+);
+
+// Ricerca con campi filtrati
+db.tabella.find(
+  {_id: ObjectID("5b76c18db4c02e0996144ca9")}, {name: 1, location: 1}
+);
+
+// Ricerca sottocampo
+db.operatore.find({ "location.city" : "Genova" })
+
+// -------------------------------------------------------------------------------------------------------------------------------------------------------
+
+//Inserimento nuovo operatore
+db.operatore.insertOne(
+	{name: "nuovoOperatore", location: {country: "Italia", city: "Genova", address: "via da qui"}, roles: {AM: "", CQM: "", SM: ""}, bases: []}
+)
+
+// BASI
+// Inserimento basi
+db.basi.insertMany([
+	{name: "Squali", operator: "nuovoOperatore", location: {country: "Italia", city: "Genova", address: "corso d'opera"}, roles: {viceAM: "", baseSupervisor: ""},
+  staff: {pilots: [], equip: [], mainteiners: []}, drones: []},
+  {name: "Delfini", operator: "nuovoOperatore", location: {country: "Italia", city: "Genova", address: "Via da me"}, roles: {viceAM: "", baseSupervisor: ""},
+  staff: {pilots: [], equip: [], mainteiners: []}, drones: []},
+  {name: "Merluzzi", operator: "nuovoOperatore", location: {country: "Italia", city: "Savona", address: "Via da li"}, roles: {viceAM: "", baseSupervisor: ""},
+  staff: {pilots: [], equip: [], mainteiners: []}, drones: []}
+])
+
+// Prendo l'id della base appena inserita e lo aggiungo all'array delle basi dell'operatore aereo corrispondente
+db.operatore.update(
+	{name: "nuovoOperatore"},
+  {$push: {bases: ObjectId("5b76c6b9b4c02e0996144caa")}}
+);
+
+/* {
+   $lookup:
+     {
+       from: <collection to join>,
+       localField: <field from the input documents>,
+       foreignField: <field from the documents of the "from" collection>,
+       as: <output array field>
+     }
+}
+https://docs.mongodb.com/master/reference/operator/aggregation/lookup/#pipe._S_lookup*/
+
+
+/*
+Returns:	A document containing:
+A boolean acknowledged as true if the operation ran with write concern or false if write concern was disabled.
+A field insertedId with the _id value of the inserted document.
+*/
+//https://www.w3schools.com/nodejs/nodejs_mongodb_update.asp
