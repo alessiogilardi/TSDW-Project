@@ -1,0 +1,19 @@
+{
+	"id": ,
+	"date": ,
+	"location": {
+		"lat": ,
+		"long": 
+	},
+	"type": ,
+	"base": ,
+	"supervisor": ,
+	"duration": ,
+	"description": ,
+	"drones": [],
+	"pilots": [],
+	"equip": [],
+	"mainteiners": [],
+	"logbooks": [],
+	"qtb": []
+}

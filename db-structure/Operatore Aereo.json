@@ -1,0 +1,15 @@
+{
+	"id": ,
+	"name": ,
+	"location": {
+		"country": ,
+		"city": ,
+		"address": 
+	},
+	"roles": {
+		"AM": ,
+		"CQM": ,
+		"SM": 
+	},
+	"bases": []
+}

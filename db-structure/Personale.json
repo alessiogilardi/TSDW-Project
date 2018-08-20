@@ -1,0 +1,25 @@
+{
+	"id": ,
+	"idTelegram": ,
+	"name": ,
+	"surname": ,
+	"cf": ,
+	"location": {
+		"country": ,
+		"city": ,
+		"address": 
+	},
+	"operator": ,
+	"base": ,
+	"roles": [],
+	"missions": [],
+	"locPermission": ,
+	"pilotInfo": {
+		"license": {
+						"id": ,
+						"type": ,
+						"expiring": 
+		},
+		"droneTypes": []
+	}
+}

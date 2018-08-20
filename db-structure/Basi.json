@@ -1,0 +1,20 @@
+{
+	"id": ,
+	"name": ,
+	"operator": ,
+	"location": {
+		"country": ,
+		"city": ,
+		"address": 
+	},
+	"roles": {
+		"ViceAM": ,
+		"BaseSupervisor": 
+	},
+	"staff": {
+		"pilots": [],
+		"equip": [],
+		"mainteiners": []
+	},
+	drones: []
+}
