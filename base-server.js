@@ -4,7 +4,7 @@ var http  = require('http');
 
 //var port             = process.env.PORT || 88;
 //var telegramApiToken = process.env.TELEGRAM_API_TOKEN;
-var port             = 8443;
+var port             = 4040;
 
 
 http.createServer((request, response) => {
@@ -14,18 +14,7 @@ http.createServer((request, response) => {
 	}).on('data', chunck => {
 		body += chunck.toString();
 	}).on('end', () => {
-        try {
-            body = JSON.parse(body);
-            console.log(JSON.stringify(body));
-            response.writeHead(200, {'Content-Type': 'text/plain'});
-            response.end();
-        } catch(e) {
-            console.log(e);
-            response.writeHead(500);
-            response.end();
-        }
-        /*
-		if (request.method === 'POST' && request.headers['content-type'] === 'application/json') {
+        if (request.method === 'POST' && request.headers['content-type'] === 'application/json') {
 			try {
 				body = JSON.parse(body);
 				response.writeHead(200, {'Content-Type': 'application/json'});
@@ -42,7 +31,7 @@ http.createServer((request, response) => {
 			response.write('Use POST');
 			response.end();
 		}
-        */
+        
 	})
 
 }).listen(port, err => {
