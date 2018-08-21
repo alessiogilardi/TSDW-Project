@@ -8,7 +8,7 @@ var port             = 88;
 
 
 http.createServer((request, response) => {
-    let body = '';
+    var body = '';
 	request.on('error', err => {
 		console.error(err);
 	}).on('data', chunck => {
