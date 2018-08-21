@@ -14,10 +14,16 @@ http.createServer((request, response) => {
 	}).on('data', chunck => {
 		body += chunck.toString();
 	}).on('end', () => {
-        body = JSON.parse(body);
-        console.log(JSON.stringify(body))
-        response.writeHead(200, {'Content-Type': 'text/plain'});
-        response.end();
+        try {
+            body = JSON.parse(body);
+            console.log(JSON.stringify(body))
+            response.writeHead(200, {'Content-Type': 'text/plain'});
+            response.end();
+        } catch(e) {
+            console.log(e);
+            response.writeHead(500);
+            response.end();
+        }
         /*
 		if (request.method === 'POST' && request.headers['content-type'] === 'application/json') {
 			try {
