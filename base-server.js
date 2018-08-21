@@ -15,6 +15,8 @@ http.createServer((request, response) => {
 		body += chunck.toString();
 	}).on('end', () => {
         console.log(body)
+        response.writeHead(200, {'Content-Type': 'text/plain'});
+        response.end();
         /*
 		if (request.method === 'POST' && request.headers['content-type'] === 'application/json') {
 			try {
