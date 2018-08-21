@@ -16,7 +16,7 @@ http.createServer((request, response) => {
 	}).on('end', () => {
         try {
             body = JSON.parse(body);
-            console.log(JSON.stringify(body))
+            console.log(JSON.stringify(body));
             response.writeHead(200, {'Content-Type': 'text/plain'});
             response.end();
         } catch(e) {
