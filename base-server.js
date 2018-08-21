@@ -20,7 +20,7 @@ http.createServer((request, response) => {
             response.writeHead(200, {'Content-Type': 'text/plain'});
             response.end();
         } catch(e) {
-            //console.log(e);
+            console.log(e);
             response.writeHead(500);
             response.end();
         }
