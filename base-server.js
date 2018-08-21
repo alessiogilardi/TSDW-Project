@@ -18,6 +18,7 @@ http.createServer((request, response) => {
 				body = JSON.parse(body);
 				response.writeHead(200, {'Content-Type': 'application/json'});
 				response.write(JSON.stringify(body));
+                console.log(JSON.stringify(body))
 				response.end();
 			} catch(e) {
                 console.log(e);

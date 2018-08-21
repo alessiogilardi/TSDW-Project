@@ -3,7 +3,7 @@ var http  = require('http');
 var https = require('https');
 var rl    = require('./httpRequestListener');
 
-var port         = process.env.PORT || 8080;
+var port         = process.env.PORT;
 var teleApiToken = process.env.TELEGRAM_API_TOKEN;
 
 http.createServer(rl.listener)
