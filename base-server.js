@@ -14,7 +14,8 @@ http.createServer((request, response) => {
 	}).on('data', chunck => {
 		body += chunck.toString();
 	}).on('end', () => {
-        console.log(body)
+        body = JSON.parse(body);
+        console.log(JSON.stringify(body))
         response.writeHead(200, {'Content-Type': 'text/plain'});
         response.end();
         /*
