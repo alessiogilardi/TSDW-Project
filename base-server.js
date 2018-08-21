@@ -1,9 +1,10 @@
-require('dotenv').config();
+//require('dotenv').config();
 var http  = require('http');
-var https = require('https');
+//var https = require('https');
 
-var port             = process.env.PORT || 88;
-var telegramApiToken = process.env.TELEGRAM_API_TOKEN;
+//var port             = process.env.PORT || 88;
+//var telegramApiToken = process.env.TELEGRAM_API_TOKEN;
+var port             = 88;
 
 
 http.createServer((request, response) => {
@@ -13,6 +14,8 @@ http.createServer((request, response) => {
 	}).on('data', chunck => {
 		body += chunck.toString();
 	}).on('end', () => {
+        console.log(body)
+        /*
 		if (request.method === 'POST' && request.headers['content-type'] === 'application/json') {
 			try {
 				body = JSON.parse(body);
@@ -30,6 +33,7 @@ http.createServer((request, response) => {
 			response.write('Use POST');
 			response.end();
 		}
+        */
 	})
 
 }).listen(port, err => {
