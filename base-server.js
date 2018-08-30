@@ -1,13 +1,14 @@
 require('dotenv').config();
-var fs = require('fs'); 
-var https = require('https'); 
+const fs = require('fs'); 
+const https = require('https'); 
 var http  = require('http');
 
-var port    = process.env.PORT || 89;
-var options = { 
-    key: fs.readFileSync('encryption/server-key.pem'), 
-    cert: fs.readFileSync('encryption/server-crt.pem'), 
-    ca: fs.readFileSync('encryption/ca-crt.pem'), 
+var port    = process.env.PORT || 8443;
+var options = {
+    key: fs.readFileSync( 'encryption/localhost.key' ),
+    cert: fs.readFileSync( 'encryption/localhost.cert' ),
+    requestCert: false,
+    rejectUnauthorized: false
 };
 
 
