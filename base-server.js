@@ -23,6 +23,8 @@ https.createServer(options, (request, response) => {
         console.log("Chunk");
 	}).on('end', () => {
         console.log('Message');
+        response.writeHead(200, {'Content-Type': 'text/plain'});
+        response.end();
         /*
         if (request.method === 'POST' && request.headers['content-type'] === 'application/json') {
 			try {
