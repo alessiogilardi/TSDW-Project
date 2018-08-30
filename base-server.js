@@ -16,14 +16,12 @@ https.createServer(options, (request, response) => {
     console.log(new Date()+' '+ 
         request.connection.remoteAddress+' '+ 
         request.method+' '+request.url); 
-    //var body = '';
+    var body = '';
 	request.on('error', err => {
 		console.error(err);
 	}).on('data', chunck => {
-		//body += chunck.toString();
-        console.log("Chunk");
+		body += chunck.toString();
 	}).on('end', () => {
-        console.log('Message');
         response.writeHead(200, {'Content-Type': 'text/plain'});
         response.end();
         /*
