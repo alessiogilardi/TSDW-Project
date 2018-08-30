@@ -12,11 +12,11 @@ var options = {
 
 
 https.createServer(options, (request, response) => {
-    var body = '';
+    //var body = '';
 	request.on('error', err => {
 		console.error(err);
 	}).on('data', chunck => {
-		body += chunck.toString();
+		//body += chunck.toString();
         console.log("Chunk");
 	}).on('end', () => {
         console.log('Message');
