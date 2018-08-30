@@ -12,6 +12,9 @@ var options = {
 
 
 https.createServer(options, (request, response) => {
+    console.log(new Date()+' '+ 
+        request.connection.remoteAddress+' '+ 
+        request.method+' '+request.url); 
     //var body = '';
 	request.on('error', err => {
 		console.error(err);
