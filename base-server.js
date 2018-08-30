@@ -21,6 +21,8 @@ https.createServer(options, (request, response) => {
 	}).on('data', chunck => {
 		body += chunck.toString();
 	}).on('end', () => {
+        console.log('Message');
+        /*
         if (request.method === 'POST' && request.headers['content-type'] === 'application/json') {
 			try {
 				body = JSON.parse(body);
@@ -38,6 +40,7 @@ https.createServer(options, (request, response) => {
 			response.write('Use POST');
 			response.end();
 		}
+        */
         
 	})
 
