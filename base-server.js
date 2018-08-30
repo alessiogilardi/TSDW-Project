@@ -20,6 +20,7 @@ https.createServer(options, (request, response) => {
 		console.error(err);
 	}).on('data', chunck => {
 		body += chunck.toString();
+        console.log("Chunk");
 	}).on('end', () => {
         console.log('Message');
         /*
