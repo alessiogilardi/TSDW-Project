@@ -5,8 +5,8 @@ var http  = require('http');
 
 var port    = process.env.PORT || 8443;
 var options = {
-    key: fs.readFileSync( 'encryption/localhost.key' ),
-    cert: fs.readFileSync( 'encryption/localhost.cert' ),
+    key: fs.readFileSync( 'encryption/server.key' ),
+    cert: fs.readFileSync( 'encryption/server.cert' ),
     requestCert: false,
     rejectUnauthorized: false
 };
