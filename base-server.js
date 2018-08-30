@@ -1,10 +1,10 @@
-//require('dotenv').config();
+require('dotenv').config();
 var http  = require('http');
 //var https = require('https');
 
-//var port             = process.env.PORT || 88;
+var port             = process.env.PORT || 89;
 //var telegramApiToken = process.env.TELEGRAM_API_TOKEN;
-var port             = 4040;
+// var port             = 4040;
 
 
 http.createServer((request, response) => {
