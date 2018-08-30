@@ -20,10 +20,10 @@ https.createServer(options, (request, response) => {
 	request.on('error', err => {
 		console.error(err);
 	}).on('data', chunck => {
-		body += chunck.toString();
+		//body += chunck.toString();
 	}).on('end', () => {
         response.writeHead(200, {'Content-Type': 'text/plain'});
-        response.end();
+        response.end('JwxwyWRZJwpSCfA46guds_sQ4-0T_P-0jCHNxBPBZAY.T553NBEQenjJdYYDfFkw_TG1vhGCq_TTvnEbmDQ1Goc');
         /*
         if (request.method === 'POST' && request.headers['content-type'] === 'application/json') {
 			try {
