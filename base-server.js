@@ -1,13 +1,20 @@
 require('dotenv').config();
-var http  = require('http');
+var fs = require('fs'); 
+var https = require('https'); 
+// var http  = require('http');
 //var https = require('https');
 
 var port             = process.env.PORT || 89;
+var options = { 
+    key: fs.readFileSync('encryption/server-key.pem'), 
+    cert: fs.readFileSync('encryption/server-crt.pem'), 
+    ca: fs.readFileSync('encryption/ca-crt.pem'), 
+};
 //var telegramApiToken = process.env.TELEGRAM_API_TOKEN;
 // var port             = 4040;
 
 
-http.createServer((request, response) => {
+https.createServer(options, (request, response) => {
     var body = '';
 	request.on('error', err => {
 		console.error(err);
