@@ -16,9 +16,9 @@
 	"locPermission": ,
 	"pilotInfo": {
 		"license": {
-						"id": ,
-						"type": ,
-						"expiring": 
+			"id": ,
+			"type": ,
+			"expiring": 
 		},
 		"droneTypes": []
 	}

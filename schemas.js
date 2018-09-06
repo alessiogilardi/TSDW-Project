@@ -1,7 +1,7 @@
-var  mongoose = require('mongoose');
+var mongoose = require('mongoose');
 var ObjectId = mongoose.Schema.Types.ObjectId;
 
-var operatoreAereoSchema = new mongoose.Schema({
+var airOperatorSchema = new mongoose.Schema({
   _id: ObjectId,
   name: String,
   location: {
@@ -17,9 +17,35 @@ var operatoreAereoSchema = new mongoose.Schema({
   bases: [{type: ObjectId, default: null}]
 });
 
-exports.newOperatore = (mName, mCountry, mCity, mAddress) => {
-    var Operatore = mongoose.model('Operator', operatoreAereoSchema);
-    var instance = new Operatore({
+var personnelSchema = new mongoose.Schema({
+    _id: ObjectId,
+    idTelegram: String,
+    name: String,
+    surname: String,
+    cf: String,
+    location: {
+        country: String,
+        city: String,
+        address: String
+    },
+    airOperator: ObjectId,
+    base: ObjectId,
+    roles: [String],
+    missions: [ObjectId],
+    locPermission: Boolean,
+    pilotInfo: {
+        license: {
+            id: String,
+            type: String,
+            expiring: Date
+        },
+        droneTypes: [String]
+    }
+});
+
+exports.newOperator = (mName, mCountry, mCity, mAddress) => {
+    var Operator = mongoose.model('Operator', airOperatorSchema);
+    var instance = new Operator({
         _id: new mongoose.Types.ObjectId(),
         name: mName,
         location: {
