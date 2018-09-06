@@ -1,7 +1,11 @@
+/**
+ * Modulo che conserva i vari Schema della struttura del DB
+**/
+
 const mongoose = require('mongoose');
 const ObjectId = mongoose.Schema.Types.ObjectId;
 
-var airOperatorSchema = new mongoose.Schema({
+exports.airOperatorSchema = new mongoose.Schema({
   _id: ObjectId,
   name: String,
   location: {
@@ -17,7 +21,7 @@ var airOperatorSchema = new mongoose.Schema({
   bases: [{type: ObjectId, default: null}]
 });
 
-var personnelSchema = new mongoose.Schema({
+exports.personnelSchema = new mongoose.Schema({
     _id: ObjectId,
     idTelegram: String,
     name: String,
@@ -43,7 +47,7 @@ var personnelSchema = new mongoose.Schema({
     }
 });
 
-var basesSchema = new mongoose.Schema({
+exports.basesSchema = new mongoose.Schema({
     _id: ObjectId ,
     name: String,
     airOperator: ObjectId,
@@ -66,7 +70,7 @@ var basesSchema = new mongoose.Schema({
     drones: [{type: ObjectId, default: null}]
 });
 
-var dronesSchema = new mongoose.Schema({
+exports.dronesSchema = new mongoose.Schema({
     _id: ObjectId,
     number: String, /* Non sapendo se sia numerico o alfanumerico */
     type: String,
@@ -80,7 +84,7 @@ var dronesSchema = new mongoose.Schema({
     missions: [{type: ObjectId, default: null}]
 });
 
-var missionsSchema = new mongoose.Schema({
+exports.missionsSchema = new mongoose.Schema({
     id: ObjectId,
     date: Date,
     location: {
@@ -95,7 +99,7 @@ var missionsSchema = new mongoose.Schema({
         effectiveDuration: Number
     },
     description: String,
-    flightPlan: String
+    flightPlan: String,
     drones: [ObjectId],
     pilots: [ObjectId],
     equip: [ObjectId],
@@ -104,7 +108,7 @@ var missionsSchema = new mongoose.Schema({
     qtb: [{type: ObjectId, default: null}]
 });
 
-var logbooksSchema = new mongoose.Schema({
+exports.logbooksSchema = new mongoose.Schema({
     _id: ObjectId,
     pilotWriter: ObjectId,
     mission: ObjectId,
@@ -114,7 +118,7 @@ var logbooksSchema = new mongoose.Schema({
     }
 });
 
-var qtbSchema = new mongoose.Schema({
+exports.qtbSchema = new mongoose.Schema({
     _id: ObjectId,
     drone: ObjectId,
     mission: ObjectId,
@@ -123,6 +127,9 @@ var qtbSchema = new mongoose.Schema({
         notes: String
     }
 });
+
+/*
+exports.Operator = mongoose.model('Operator', airOperatorSchema);
 
 exports.newOperator = (mName, mCountry, mCity, mAddress) => {
     var Operator = mongoose.model('Operator', airOperatorSchema);
@@ -140,3 +147,4 @@ exports.newOperator = (mName, mCountry, mCity, mAddress) => {
             return console.log(err);
     });
 }
+*/
