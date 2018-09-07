@@ -15,10 +15,8 @@ exports.connect = () => {
     return mongoose;  
 }
 
-
-
-exports.disconnect = () => {
+exports.disconnect = (time = 1500) => {
     setTimeout(() => {
         mongoose.disconnect();
-    }, 1500);
+    }, time);
 }
