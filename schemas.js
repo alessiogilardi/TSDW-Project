@@ -7,7 +7,7 @@ const ObjectId = mongoose.Schema.Types.ObjectId;
 
 exports.airOperatorSchema = new mongoose.Schema({
   _id: ObjectId,
-  name: String,
+  name: {type: String, unique: true},
   location: {
     country: String,
     city: String,
@@ -18,7 +18,7 @@ exports.airOperatorSchema = new mongoose.Schema({
     CQM: {type: ObjectId, default: null},
     SM: {type: ObjectId, default: null}
   },
-  bases: [{type: ObjectId, default: null}]
+  bases: [{type: ObjectId, default: []}]
 });
 
 exports.personnelSchema = new mongoose.Schema({
@@ -26,7 +26,7 @@ exports.personnelSchema = new mongoose.Schema({
     idTelegram: String,
     name: String,
     surname: String,
-    cf: String,
+    cf: {type: String, unique: true},
     location: {
         country: String,
         city: String,
@@ -35,21 +35,22 @@ exports.personnelSchema = new mongoose.Schema({
     airOperator: ObjectId,
     base: ObjectId,
     roles: [String],
-    missions: [ObjectId],
-    locPermission: Boolean,
+    missions: [{type: ObjectId, default: []}],
+    locPermission: {type: Boolean, default: false},
     pilotInfo: {
         license: {
-            id: String,
-            type: String,
-            expiring: Date
+            id: {type: String, default: null},
+            type: {type: String, default: null},
+            expiring: {type: Date, default: null}
         },
-        droneTypes: [String]
+        droneTypes: [{type: String, default: null}]
+                                      
     }
 });
 
 exports.basesSchema = new mongoose.Schema({
     _id: ObjectId ,
-    name: String,
+    name: {type: String, unique: true},
     airOperator: ObjectId,
     location: {
         country: String,
@@ -63,16 +64,16 @@ exports.basesSchema = new mongoose.Schema({
         BaseSupervisor: {type: ObjectId, default: null}
     },
     staff: {
-        pilots: [{type: ObjectId, default: null}],
-        equip: [{type: ObjectId, default: null}],
-        mainteiners: [{type: ObjectId, default: null}]
+        pilots: [{type: ObjectId, default: []}],
+        equip: [{type: ObjectId, default: []}],
+        mainteiners: [{type: ObjectId, default: []}]
     },
-    drones: [{type: ObjectId, default: null}]
+    drones: [{type: ObjectId, default: []}]
 });
 
 exports.dronesSchema = new mongoose.Schema({
     _id: ObjectId,
-    number: String, /* Non sapendo se sia numerico o alfanumerico */
+    number: {type: String, unique: true}, /* Non sapendo se sia numerico o alfanumerico */
     type: String,
     operator: ObjectId,
     base: ObjectId,
@@ -81,7 +82,7 @@ exports.dronesSchema = new mongoose.Schema({
         lastMaintenance: Date,
         notes: String
     },
-    missions: [{type: ObjectId, default: null}]
+    missions: [{type: ObjectId, default: []}]
 });
 
 exports.missionsSchema = new mongoose.Schema({
@@ -103,9 +104,9 @@ exports.missionsSchema = new mongoose.Schema({
     drones: [ObjectId],
     pilots: [ObjectId],
     equip: [ObjectId],
-    mainteiners: [{type: ObjectId, default: null}],
-    logbooks: [{type: ObjectId, default: null}],
-    qtb: [{type: ObjectId, default: null}]
+    mainteiners: [{type: ObjectId, default: []}],
+    logbooks: [{type: ObjectId, default: []}],
+    qtb: [{type: ObjectId, default: []}]
 });
 
 exports.logbooksSchema = new mongoose.Schema({
@@ -127,24 +128,3 @@ exports.qtbSchema = new mongoose.Schema({
         notes: String
     }
 });
-
-/*
-exports.Operator = mongoose.model('Operator', airOperatorSchema);
-
-exports.newOperator = (mName, mCountry, mCity, mAddress) => {
-    var Operator = mongoose.model('Operator', airOperatorSchema);
-    var instance = new Operator({
-        _id: new mongoose.Types.ObjectId(),
-        name: mName,
-        location: {
-            country: mCountry,
-            city: mCity,
-            address: mAddress
-        }
-    });
-    instance.save((err) => {
-        if (err)
-            return console.log(err);
-    });
-}
-*/
