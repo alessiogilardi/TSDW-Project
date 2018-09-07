@@ -64,7 +64,3 @@ typings/
 .cnf
 .pem
 .srl
-
-# Windows
-*.bat
-*.lnk
