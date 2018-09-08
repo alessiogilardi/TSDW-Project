@@ -2,9 +2,9 @@ const mongoose = require('mongoose');
 const models = require('./models.js');
 
 /* Rinominare le funzioni create in insert */
-exports.AirOperator = {
+exports.AirOperator = AirOperator = {
 
-  create: (oName, oCountry, oCity, oAddress, oAM = undefined, oCQM = undefined, oSM = undefined, oBases = []) => {
+  insert: (oName, oCountry, oCity, oAddress, oAM = undefined, oCQM = undefined, oSM = undefined, oBases = []) => {
     new models.AirOperator({
       _id: new mongoose.Types.ObjectId(),
       name: oName,
@@ -25,7 +25,7 @@ exports.AirOperator = {
     });
   },
 
-  create2: (airOperator) => {
+  insert2: (airOperator) => {
     new models.AirOperator({
       _id: new mongoose.Types.ObjectId(),
       name: airOperator.name,
@@ -51,42 +51,49 @@ exports.AirOperator = {
       if (err)
         console.log(err);
     });
+  },
+
+  updateById: (id, newValues) => {
+    models.AirOperator.updateOne({_id: id}, newValues, (err) => {
+      if (err)
+        console.log(err);
+    });
   }
 };
 
-exports.Base = {
+exports.Base = Base = {
 	
-  create: (oName, oAirOperator, oCountry, oCity, oLatitude = undefined, oLongitude = undefined, oViceAM = undefined, oBaseSupervisor = undefined, oPilots = undefined, \
-		   oEquip = undefined, oMain, oMainteiners = undefined, oDrones = []) => {
-	new models.Base({
-		_id: new mongoose.Types.ObjectId(),
-		name: oName,
-		airOperator: oAirOperator,
-		location: {
-			country: oCountry,
-			city: oCity,
-			address: oAddress,
-			latitude: oLatitude,
-			longitude: oLatitude,
-		},
-		roles: {
-			ViceAM: oViceAM,
-			BaseSupervisor: oBaseSupervisor
-		},
-		staff: {
-			pilots: oPilots,
-			equip: oEquip,
-			mainteiners: oMainteiners
-		},
-		drones: oDrones
-	}).save((err, results) => {
-		// results contiene il documento json della base appena creata
-		if (err)
+  insert: (oName, oAirOperator, oCountry, oCity, oAddress, oLatitude = undefined, oLongitude = undefined, oViceAM = undefined, oBaseSupervisor = undefined, oPilots = undefined,
+                oEquip = undefined, oMainteiners = undefined, oDrones = []) => {
+  	new models.Base({
+  		_id: new mongoose.Types.ObjectId(),
+  		name: oName,
+  		airOperator: oAirOperator,
+  		location: {
+  			country: oCountry,
+  			city: oCity,
+  			address: oAddress,
+  			latitude: oLatitude,
+  			longitude: oLatitude,
+  		},
+  		roles: {
+  			ViceAM: oViceAM,
+  			BaseSupervisor: oBaseSupervisor
+  		},
+  		staff: {
+  			pilots: oPilots,
+  			equip: oEquip,
+  			mainteiners: oMainteiners
+  		},
+  		drones: oDrones
+  	}).save((err, result) => {
+    		// results contiene il documento json della base appena creata
+        if (err)
           return console.log(err);
-		// Quando la query viene eseguita, devo aggiungere l'id della base appena creata alla lista di basi dell'operatore aereo corrispondente
-		var edited = {$push: {'bases': results._id}};
-		AirOperator.updateByName(results.airOperator, edited);
-	});
+    		// Quando la query viene eseguita, devo aggiungere l'id della base appena creata alla lista di basi dell'operatore aereo corrispondente
+    		var edited = {$push: {'bases': result._id}};
+    		AirOperator.updateById(result.airOperator, edited);
+  	});
   },
   
   updateByName: () => {
@@ -97,7 +104,7 @@ exports.Base = {
   }
 };
 
-exports.Personnel = {
+exports.Personnel = Personnel = {
 	
   create: () => {
 
