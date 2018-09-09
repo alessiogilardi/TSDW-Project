@@ -74,7 +74,18 @@ exports.AirOperator = AirOperator = {
 	while(ret == null)
 		deasync.runLoopOnce();
 	return ret;
+  },
+
+  findByName2: (opName, projection) => {
+    models.AirOperator.findOne()
+    .where('name').equals(opName)
+    .select(projection)
+    .exec((err, res) => {
+      console.log(JSON.stringify(res));
+    });
   }
+
+
 };
 
 exports.Base = Base = {
@@ -82,7 +93,7 @@ exports.Base = Base = {
   insert: (oName, oAirOperator, oCountry, oCity, oAddress, oLatitude = undefined, oLongitude = undefined, oViceAM = undefined, oBaseSupervisor = undefined, oPilots = undefined,
                 oEquip = undefined, oMainteiners = undefined, oDrones = []) => {
 	// Prima cerco l'id dell'operatore aereo conoscendone il nome (oAirOperator)
-    //var airOp = AirOperator.findByName(oAirOpeator, '_id');
+    // var airOp = AirOperator.findByName(oAirOperator, '_id');
 	
   	new models.Base({
   		_id: new mongoose.Types.ObjectId(),
