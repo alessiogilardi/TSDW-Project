@@ -82,12 +82,12 @@ exports.Base = Base = {
   insert: (oName, oAirOperator, oCountry, oCity, oAddress, oLatitude = undefined, oLongitude = undefined, oViceAM = undefined, oBaseSupervisor = undefined, oPilots = undefined,
                 oEquip = undefined, oMainteiners = undefined, oDrones = []) => {
 	// Prima cerco l'id dell'operatore aereo conoscendone il nome (oAirOperator)
-	airOp = AirOperator.findByName(oAirOperator, '_id');
+    //var airOp = AirOperator.findByName(oAirOpeator, '_id');
 	
   	new models.Base({
   		_id: new mongoose.Types.ObjectId(),
   		name: oName,
-  		airOperator: airOp._id,
+  		airOperator: AirOperator.findByName(oAirOperator, '_id')._id,
   		location: {
   			country: oCountry,
   			city: oCity,
@@ -109,9 +109,9 @@ exports.Base = Base = {
     	// results contiene il documento json della base appena creata
         if (err)
           return console.log(err);
-		// Quando la query viene eseguita, devo aggiungere l'id della base appena creata alla lista di basi dell'operatore aereo corrispondente
-		var edited = {$push: {'bases': result._id}};
-		AirOperator.updateById(result.airOperator, edited);
+        // Quando la query viene eseguita, devo aggiungere l'id della base appena creata alla lista di basi dell'operatore aereo corrispondente
+        //var edited = {$push: {'bases': result._id}};
+        AirOperator.updateById(result.airOperator, {$push: {'bases': result._id}});
   	});
   },
   
