@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const models = require('./models.js');
+const deasync = require('deasync');
 
 /* Rinominare le funzioni create in insert */
 exports.AirOperator = AirOperator = {
@@ -58,6 +59,21 @@ exports.AirOperator = AirOperator = {
       if (err)
         console.log(err);
     });
+  },
+  
+  // La funzione esterna (findByName) è sincrona, ma la funzione di callback è asincrona. Il valore di ritorno (doc) è conosciuto solo dalla funzione di callback.
+  // Dovrei quindi ritornare il valore dalla funzione di callback, ma non posso perché è asincrona.
+  findByName: (oName, projection) => {
+	var ret = null;
+	models.AirOperator.findOne({name: oName}, projection, (err, doc) => {
+		if (err)
+			return console.log(err);
+		ret = doc;
+	});
+	//BUSY WAITING!!!!!!
+	while(ret == null)
+		deasync.runLoopOnce();
+	return ret;
   }
 };
 
@@ -65,10 +81,13 @@ exports.Base = Base = {
 	
   insert: (oName, oAirOperator, oCountry, oCity, oAddress, oLatitude = undefined, oLongitude = undefined, oViceAM = undefined, oBaseSupervisor = undefined, oPilots = undefined,
                 oEquip = undefined, oMainteiners = undefined, oDrones = []) => {
+	// Prima cerco l'id dell'operatore aereo conoscendone il nome (oAirOperator)
+	airOp = AirOperator.findByName(oAirOperator, '_id');
+	
   	new models.Base({
   		_id: new mongoose.Types.ObjectId(),
   		name: oName,
-  		airOperator: oAirOperator,
+  		airOperator: airOp._id,
   		location: {
   			country: oCountry,
   			city: oCity,
@@ -87,12 +106,12 @@ exports.Base = Base = {
   		},
   		drones: oDrones
   	}).save((err, result) => {
-    		// results contiene il documento json della base appena creata
+    	// results contiene il documento json della base appena creata
         if (err)
           return console.log(err);
-    		// Quando la query viene eseguita, devo aggiungere l'id della base appena creata alla lista di basi dell'operatore aereo corrispondente
-    		var edited = {$push: {'bases': result._id}};
-    		AirOperator.updateById(result.airOperator, edited);
+		// Quando la query viene eseguita, devo aggiungere l'id della base appena creata alla lista di basi dell'operatore aereo corrispondente
+		var edited = {$push: {'bases': result._id}};
+		AirOperator.updateById(result.airOperator, edited);
   	});
   },
   

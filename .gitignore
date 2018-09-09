@@ -68,3 +68,4 @@ typings/
 # Windows
 *.bat
 *.lnk
+*.env
