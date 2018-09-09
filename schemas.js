@@ -14,11 +14,11 @@ exports.airOperatorSchema = new mongoose.Schema({
     address: String
   },
   roles: {
-    AM: {type: ObjectId, default: null},
+    AM: {type: ObjectId, default: null, ref: 'personnel'},
     CQM: {type: ObjectId, default: null},
     SM: {type: ObjectId, default: null}
   },
-  bases: [{type: ObjectId, default: []}]
+  bases: [{type: ObjectId, default: [], ref: 'base'}]
 });
 
 exports.personnelSchema = new mongoose.Schema({
@@ -33,9 +33,9 @@ exports.personnelSchema = new mongoose.Schema({
         address: String
     },
     airOperator: ObjectId,
-    base: ObjectId,
+    base: {type: ObjectId, ref: 'base'},
     roles: [String],
-    missions: [{type: ObjectId, default: []}],
+    missions: [{type: ObjectId, default: [], ref: 'mission'}],
     locPermission: {type: Boolean, default: false},
     pilotInfo: {
         license: {
@@ -51,7 +51,7 @@ exports.personnelSchema = new mongoose.Schema({
 exports.basesSchema = new mongoose.Schema({
     _id: ObjectId ,
     name: {type: String, unique: true},
-    airOperator: ObjectId,
+    airOperator: {type: ObjectId, ref: 'air_operator'},
     location: {
         country: String,
         city: String,

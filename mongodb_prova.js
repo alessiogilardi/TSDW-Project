@@ -12,7 +12,14 @@ var mongoose = db.connect();
 
 //queries.AirOperator.updateByName('qwe', edited);
 
-queries.Base.insert("Base 2", 'eurodrone' , "Italy", "La Spezia", "22", "22");
+//queries.Base.insert("Base 3", 'eurodrone' , "Italy", "La Speza", "22", "22");
+
+
+models.Base.findOne()
+.populate('airOperator')
+.exec((err, res) => {
+	console.log(res);
+});
 
 
 

@@ -63,8 +63,19 @@ exports.AirOperator = AirOperator = {
   
   // La funzione esterna (findByName) è sincrona, ma la funzione di callback è asincrona. Il valore di ritorno (doc) è conosciuto solo dalla funzione di callback.
   // Dovrei quindi ritornare il valore dalla funzione di callback, ma non posso perché è asincrona.
-  findByName: (oName, projection) => {
-	var ret = null;
+  findByName: (name, projection) => {
+    let ret;
+    models.AirOperator.findOne()
+    .where('name').equals(name)
+    .select(projection)
+    .exec((err, res) => {
+      ret = res;
+    });
+    while (ret == null)
+      deasync.runLoopOnce();
+    return ret;
+    /*
+	let ret = null;
 	models.AirOperator.findOne({name: oName}, projection, (err, doc) => {
 		if (err)
 			return console.log(err);
@@ -74,15 +85,7 @@ exports.AirOperator = AirOperator = {
 	while(ret == null)
 		deasync.runLoopOnce();
 	return ret;
-  },
-
-  findByName2: (opName, projection) => {
-    models.AirOperator.findOne()
-    .where('name').equals(opName)
-    .select(projection)
-    .exec((err, res) => {
-      console.log(JSON.stringify(res));
-    });
+  */
   }
 
 
