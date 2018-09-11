@@ -74,6 +74,34 @@ exports.AirOperator = AirOperator = {
     while (ret == null)
       deasync.runLoopOnce();
     return ret;
+
+
+    /* CODICE DA PROVARE - SE FUNZIONA EVITA IL BUSY WAITING */
+    var promise = models.AirOperator.findOne()
+    .where('name').equals(name)
+    .select(projection)
+    .exec();
+    assert.ok(promise instanceof Promise);
+    promise.then((doc) => {
+      ret = doc;
+    });
+
+    return ret;
+
+    /********************************************************/
+
+
+    /* ALTRA VERSIONE DA PROVARE */
+    var cursor = Person.find({ occupation: /host/ }).cursor();
+    cursor.on('data', function(doc) {
+      // Called once for every document
+    });
+    cursor.on('close', function() {
+      // Called when done
+    });
+
+    /*********************************************************/
+
     /*
 	let ret = null;
 	models.AirOperator.findOne({name: oName}, projection, (err, doc) => {
@@ -129,21 +157,51 @@ exports.Base = Base = {
   	});
   },
   
-  updateByName: () => {
-	models.Base.updateOne({name: oName}, newValues, (err) => {
-		if (err)
-			console.log(err);
+  updateByName: (oName, newValues) => {
+    models.Base.updateOne({name: oName}, newValues, (err) => {
+      if (err)
+        console.log(err);
     });
+  },
+
+  updateById: (id, newValues) => {
+    models.Base.updateOne({_id: id}, newValues, (err) => {
+      if (err)
+        console.log(err);
+    });
+  },
+
+  findByName: (oName) => {
+
   }
 };
 
 exports.Personnel = Personnel = {
 	
-  create: () => {
+  insert: () => {
 
   },
   
-  updateByName: () => {
+  updateByCf: () => {
+
+  },
+
+  updateById: () => {
+
+  },
+
+  findByCf: (oCf) => {
 
   }
+
 };
+
+exports.Drone = Drone = {
+  insert: () => {
+
+  },
+
+  updateByNumber: (oNumber, newValues) => {
+    
+  }
+}
