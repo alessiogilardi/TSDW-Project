@@ -1,8 +1,7 @@
-const mongoose = require('mongoose');
-const models = require('./models.js');
-const deasync = require('deasync');
+const mongoose  = require('mongoose');
+const models    = require('./models.js');
+const deasync   = require('deasync');
 
-/* Rinominare le funzioni create in insert */
 exports.AirOperator = AirOperator = {
 
   insert: (oName, oCountry, oCity, oAddress, oAM = undefined, oCQM = undefined, oSM = undefined, oBases = []) => {
@@ -61,9 +60,20 @@ exports.AirOperator = AirOperator = {
     });
   },
   
+  findByName: (name, projection, callback) => {
+    var ret;
+    models.AirOperator.findOne()
+    .where('name').equals(name)
+    .select(projection)
+    .exec((err, doc) => {
+      callback(doc);
+    });
+  },
+
   // La funzione esterna (findByName) è sincrona, ma la funzione di callback è asincrona. Il valore di ritorno (doc) è conosciuto solo dalla funzione di callback.
   // Dovrei quindi ritornare il valore dalla funzione di callback, ma non posso perché è asincrona.
-  findByName: (name, projection) => {
+
+  findByNameSync: (name, projection) => {
     let ret;
     models.AirOperator.findOne()
     .where('name').equals(name)
@@ -74,62 +84,57 @@ exports.AirOperator = AirOperator = {
     while (ret == null)
       deasync.runLoopOnce();
     return ret;
-
-
-    /* CODICE DA PROVARE - SE FUNZIONA EVITA IL BUSY WAITING */
-    var promise = models.AirOperator.findOne()
-    .where('name').equals(name)
-    .select(projection)
-    .exec();
-    assert.ok(promise instanceof Promise);
-    promise.then((doc) => {
-      ret = doc;
-    });
-
-    return ret;
-
-    /********************************************************/
-
-
-    /* ALTRA VERSIONE DA PROVARE */
-    var cursor = Person.find({ occupation: /host/ }).cursor();
-    cursor.on('data', function(doc) {
-      // Called once for every document
-    });
-    cursor.on('close', function() {
-      // Called when done
-    });
-
-    /*********************************************************/
-
-    /*
-	let ret = null;
-	models.AirOperator.findOne({name: oName}, projection, (err, doc) => {
-		if (err)
-			return console.log(err);
-		ret = doc;
-	});
-	//BUSY WAITING!!!!!!
-	while(ret == null)
-		deasync.runLoopOnce();
-	return ret;
-  */
   }
 
 
 };
 
 exports.Base = Base = {
+
+  insert2: (oName, oAirOperator, oCountry, oCity, oAddress, oLatitude = undefined, oLongitude = undefined, oViceAM = undefined, oBaseSupervisor = undefined, oPilots = undefined,
+                oEquip = undefined, oMainteiners = undefined, oDrones = []) => {
+    AirOperator.findByName(oAirOperator, '_id', (doc) => {
+
+      new models.Base({
+        _id: new mongoose.Types.ObjectId(),
+        name: oName,
+        airOperator: doc._id,
+        location: {
+          country: oCountry,
+          city: oCity,
+          address: oAddress,
+          latitude: oLatitude,
+          longitude: oLatitude,
+        },
+        roles: {
+          ViceAM: oViceAM,
+          BaseSupervisor: oBaseSupervisor
+        },
+        staff: {
+          pilots: oPilots,
+          equip: oEquip,
+          mainteiners: oMainteiners
+        },
+        drones: oDrones
+      }).save((err, result) => {
+      // results contiene il documento json della base appena creata
+        if (err)
+          return console.log(err);
+        // Quando la query viene eseguita, devo aggiungere l'id della base appena creata alla lista di basi dell'operatore aereo corrispondente
+        //var edited = {$push: {'bases': result._id}};
+        AirOperator.updateById(result.airOperator, {$push: {'bases': result._id}});
+    });
+
+    });
+  },
 	
   insert: (oName, oAirOperator, oCountry, oCity, oAddress, oLatitude = undefined, oLongitude = undefined, oViceAM = undefined, oBaseSupervisor = undefined, oPilots = undefined,
                 oEquip = undefined, oMainteiners = undefined, oDrones = []) => {
-	// Prima cerco l'id dell'operatore aereo conoscendone il nome (oAirOperator)
-    // var airOp = AirOperator.findByName(oAirOperator, '_id');
-	
+	 // Prima cerco l'id dell'operatore aereo conoscendone il nome (oAirOperator)
   	new models.Base({
   		_id: new mongoose.Types.ObjectId(),
   		name: oName,
-  		airOperator: AirOperator.findByName(oAirOperator, '_id')._id,
+  		airOperator: AirOperator.findByNameSync(oAirOperator, '_id')._id,
   		location: {
   			country: oCountry,
   			city: oCity,
