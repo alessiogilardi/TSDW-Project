@@ -34,6 +34,7 @@ exports.personnelSchema = new mongoose.Schema({
     },
     airOperator: {type: ObjectId, ref: 'air_operator'},
     base: {type: ObjectId, ref: 'base'},
+    /* Da rivedere il campo roles e i suoi scopi */
     roles: [String],
     missions: [{type: ObjectId, default: [], ref: 'mission'}],
     locPermission: {type: Boolean, default: false},
