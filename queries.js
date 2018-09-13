@@ -61,7 +61,6 @@ exports.AirOperator = AirOperator = {
   },
   
   findByName: (name, projection, callback) => {
-    var ret;
     models.AirOperator.findOne()
     .where('name').equals(name)
     .select(projection)
