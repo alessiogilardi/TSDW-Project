@@ -73,7 +73,7 @@ exports.AirOperator = AirOperator = {
   // Dovrei quindi ritornare il valore dalla funzione di callback, ma non posso perché è asincrona.
 
   findByNameSync: (name, projection) => {
-    let ret;
+    var ret = null;
     models.AirOperator.findOne()
     .where('name').equals(name)
     .select(projection)
@@ -161,41 +161,108 @@ exports.Base = Base = {
   	});
   },
   
-  updateByName: (oName, newValues) => {
-    models.Base.updateOne({name: oName}, newValues, (err) => {
+  updateByName: (aName, newValues) => {
+    models.Base.updateOne({name: aName}, newValues, (err) => {
       if (err)
         console.log(err);
     });
   },
 
-  updateById: (id, newValues) => {
-    models.Base.updateOne({_id: id}, newValues, (err) => {
+  updateById: (aId, newValues) => {
+    models.Base.updateOne({_id: aId}, newValues, (err) => {
       if (err)
         console.log(err);
     });
   },
 
-  findByName: (oName) => {
+  findByName: (name, projection, callback) => {
+    models.Base.findOne()
+    .where('name').equals(name)
+    .select(projection)
+    .exec((err, doc) => {
+      callback(doc);
+    });
+  },
 
+  findByNameSync: (name, projection) =>  {
+    var ret = null;
+    models.Base.findOne()
+    .where('name').equals(name)
+    .select(projection)
+    .exec((err, doc) => {
+      ret = doc;
+    });
+    while (ret == null)
+      deasync.runLoopOnce();
+    return ret;
   }
 };
 
 exports.Personnel = Personnel = {
 	
-  insert: () => {
-
+  insert: (aIdTelegram, aName, aSurname, aCf, aCountry, aCity, aAddress, aAirOperatorName, aBaseName, aRoles = [], aMissions = [], aLocPermission = false, aLicenseId = undefined, aLicenseType = undefined, aLicenseExpireDate = undefined, aDroneTypes = undefined) => {
+    AirOperator.findByName(aAirOperatorName, '_id', (aAirOperator) => {
+      Base.findByName(aBaseName, '_id', (aBase) => {
+        new models.Personnel({
+          _id: mongoose.Types.ObjectId(),
+          idTelegram: aIdTelegram,
+          name: aName,
+          surname: aSurname,
+          cf: aCf,
+          location: {
+              country: aCountry,
+              city: aCity,
+              address: aAddress
+          },
+          airOperator: aAirOperator._id,
+          base: aBase._id,
+          roles: aRoles,
+          missions: aMissions,
+          locPermission: aLocPermission,
+          pilotInfo: {
+              license: {
+                  id: aLicenseId,
+                  type: aLicenseType,
+                  expiring: aLicenseExpireDate
+              },
+              droneTypes: aDroneTypes
+          }
+        }).save((err, personnel) => {
+          if (err)
+            return console.log(err);
+        });
+      });
+    });
   },
   
-  updateByCf: () => {
-
+  updateByCf: (aCf, newValues) => {
+    models.Personnel.updateOne({cf: aCf}, newValues, (err) => {});
   },
 
-  updateById: () => {
-
+  updateById: (aId, newValues) => {
+    models.Personnel.updateOne({_id: id}, newValues, (err) => {});
   },
 
-  findByCf: (oCf) => {
+  findByCf: (aCf, projection, callback) => {
+    models.Personnel.findOne()
+    .where('cf').equals(aCf)
+    .select(projection)
+    .exec((err, personnel) => {
+      callback(personnel);
+    });
+  },
 
+  findByCfSync: (aCf, projection) => {
+    var ret = null;
+    models.Personnel.findOne()
+    .where('cf').equals(aCf)
+    .select(projection)
+    .exec((err, personnel) => {
+      ret = personnel;
+    });
+    while (ret == null)
+      deasync.runLoopOnce();
+    return ret;
   }
 
 };
