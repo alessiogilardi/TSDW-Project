@@ -123,8 +123,8 @@ exports.missionsSchema = new mongoose.Schema({
 */
 exports.logbooksSchema = new mongoose.Schema({
     _id: ObjectId,
-    pilotWriter: {type: ObjectId, ref: 'personnel'}
-    mission: {type: ObjectId, ref: 'mission'}
+    pilotWriter: {type: ObjectId, ref: 'personnel'},
+    mission: {type: ObjectId, ref: 'mission'},
     info: {
         flightTime: Number,
         notes: String
