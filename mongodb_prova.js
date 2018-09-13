@@ -12,7 +12,7 @@ var mongoose = db.connect();
 
 //queries.AirOperator.updateByName('qwe', edited);
 
-queries.Base.insert("Base 4", 'eurodrone' , "Italy", "La Speza", "22", "22");
+//queries.Base.insert("Base 4", 'eurodrone' , "Italy", "La Speza", "22", "22");
 /*
 queries.AirOperator.prova('eurodrone', (doc) => {
 	console.log(doc);
@@ -30,5 +30,6 @@ models.Base.findOne()
 });
 */
 
+queries.Personnel.insert2('42', 'Alessio', 'Bollea', 'ilmiocf', 'Italy', 'Genoa', 'nonvelodico', 'eurodrone', 'Base 4', ['AM', 'BaseSupervisor', 'pilot']);
 
 db.disconnect();

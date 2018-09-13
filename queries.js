@@ -235,6 +235,56 @@ exports.Personnel = Personnel = {
     });
   },
   
+  insert2: (aIdTelegram, aName, aSurname, aCf, aCountry, aCity, aAddress, aAirOperatorName, aBaseName, aRoles = [], aMissions = [], aLocPermission = false,
+				aLicenseId = undefined, aLicenseType = undefined, aLicenseExpireDate = undefined, aDroneTypes = undefined) => {
+	new models.Personnel({
+	  _id: mongoose.Types.ObjectId(),
+	  idTelegram: aIdTelegram,
+	  name: aName,
+	  surname: aSurname,
+	  cf: aCf,
+	  location: {
+		  country: aCountry,
+		  city: aCity,
+		  address: aAddress
+	  },
+	  airOperator: AirOperator.findByNameSync(aAirOperatorName, '_id')._id,
+	  base: Base.findByNameSync(aBaseName, '_id')._id,
+	  roles: aRoles,
+	  missions: aMissions,
+	  locPermission: aLocPermission,
+	  pilotInfo: {
+		  license: {
+			  id: aLicenseId,
+			  type: aLicenseType,
+			  expiring: aLicenseExpireDate
+		  },
+		  droneTypes: aDroneTypes
+	  }
+	}).save((err, personnel) => {
+	  if (err)
+		return console.log(err);
+	  // Se la persona inserita ha un ruolo pilota, manutentore o equipaggio devo aggiornare la base in cui lavora
+	  if (personnel.roles.includes('pilot'))
+		Base.updateById(personnel.base, {$push: {'staff.pilots': personnel._id}});
+	  if (personnel.roles.includes('equip'))
+		Base.updateById(personnel.base, {$push: {'staff.equip': personnel._id}});
+	  if (personnel.roles.includes('mainteiner'))
+		Base.updateById(personnel.base, {$push: {'staff.mainteiners': personnel._id}});
+	  // Se la persona inserita ha un ruolo di comando devo aggiornare la base e/o l'operatore aereo corrispondente
+	  if (personnel.roles.includes('AM'))
+		AirOperator.updateById(personnel.airOperator, {'roles.AM': personnel._id});
+	  if (personnel.roles.includes('CQM'))
+		AirOperator.updateById(personnel.airOperator, {'roles.CQM': personnel._id});
+	  if (personnel.roles.includes('SM'))
+		AirOperator.updateById(personnel.airOperator, {'roles.SM': personnel._id});
+	  if (personnel.roles.includes('ViceAM'))
+		Base.updateById(personnel.base, {'roles.ViceAM': personnel._id});
+	  if (personnel.roles.includes('BaseSupervisor'))
+		Base.updateById(personnel.base, {'roles.BaseSupervisor': personnel._id});
+	});
+  },
+  
   updateByCf: (aCf, newValues) => {
     models.Personnel.updateOne({cf: aCf}, newValues, (err) => {});
   },
