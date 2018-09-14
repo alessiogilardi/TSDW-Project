@@ -49,14 +49,14 @@ exports.AirOperator = AirOperator = {
   updateByName: (oName, newValues) => {
     models.AirOperator.updateOne({name: oName}, newValues, (err) => {
       if (err)
-        console.log(err);
+        return console.log(err);
     });
   },
 
   updateById: (id, newValues) => {
     models.AirOperator.updateOne({_id: id}, newValues, (err) => {
       if (err)
-        console.log(err);
+        return console.log(err);
     });
   },
   
@@ -318,11 +318,51 @@ exports.Personnel = Personnel = {
 };
 
 exports.Drone = Drone = {
-  insert: () => {
-
+  insert: (aNumber, aType, aAirOperatorName, aBaseName, aState, aLastMaint = undefined, aNotes = undefined, aMissions = []) => {
+	new models.Drone({
+	  _id: mongoose.Types.ObjectId(),
+	  number: aNumber,
+	  type: aType,
+	  airOperator: AirOperator.findByNameSync(aAirOperatorName, '_id')._id,
+	  base: Base.findByNameSync(aBaseName, '_id')._id,
+	  state: {
+	    generalState: aState,
+		lastMaintenance: aLastMaint,
+		notes: aNotes
+	  },
+	  missions: aMissions
+	}).save((err, drone) => {
+	  if (err)
+	    return console.log(err);
+	  // Il drone deve essere aggiunto alla lista di droni della base corrispondente
+	  Base.updateById(drone.base, {$push: {drones: drone._id}});
+	});
   },
 
-  updateByNumber: (oNumber, newValues) => {
-    
+  updateByNumber: (aNumber, newValues) => {
+    models.Drone.updateOne({number: aNumber}, newValues, (err) => {
+      if (err)
+        return console.log(err);
+    });
+  },
+  
+  updateById: (aId, newValues) => {
+	models.Drone.updateOne({_id: aId}, newValues, (err) => {
+	  if (err)
+		  return console.log(err);
+	});
+  },
+  
+  findByNumberSync: (aNumber, projection) =>  {
+    var ret = null;
+    models.Base.findOne()
+    .where('number').equals(aNumber)
+    .select(projection)
+    .exec((err, doc) => {
+      ret = doc;
+    });
+    while (ret == null)
+      deasync.runLoopOnce();
+    return ret;
   }
 }

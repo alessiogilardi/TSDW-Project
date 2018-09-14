@@ -30,6 +30,7 @@ models.Base.findOne()
 });
 */
 
-queries.Personnel.insert2('42', 'Alessio', 'Bollea', 'ilmiocf', 'Italy', 'Genoa', 'nonvelodico', 'eurodrone', 'Base 4', ['AM', 'BaseSupervisor', 'pilot']);
+//queries.Personnel.insert2('42', 'Alessio', 'Bollea', 'ilmiocf', 'Italy', 'Genoa', 'nonvelodico', 'eurodrone', 'Base 4', ['AM', 'BaseSupervisor', 'pilot']);
+queries.Drone.insert('1lm10dr0n3', 'Heavy', 'eurodrone', 'Base 4', 'Ready');
 
 db.disconnect();
