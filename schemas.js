@@ -36,7 +36,10 @@ exports.personnelSchema = new mongoose.Schema({
     base: {type: ObjectId, ref: 'base'},
     /* Da rivedere il campo roles e i suoi scopi */
     roles: [String],
-    missions: [{type: ObjectId, default: [], ref: 'mission'}],
+    missions: {
+        completed: [{type: ObjectId, default: [], ref: 'mission'}],
+        pending: [{type: ObjectId, default: [], ref: 'mission'}]
+    },
     locPermission: {type: Boolean, default: false},
     pilotInfo: {
         license: {
@@ -83,7 +86,10 @@ exports.dronesSchema = new mongoose.Schema({
         lastMaintenance: Date,
         notes: String
     },
-    missions: [{type: ObjectId, default: [], ref: 'mission'}]
+    missions: {
+        completed: [{type: ObjectId, default: [], ref: 'mission'}],
+        pending: [{type: ObjectId, default: [], ref: 'mission'}]
+    }
 });
 
 exports.missionsSchema = new mongoose.Schema({
