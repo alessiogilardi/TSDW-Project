@@ -53,7 +53,7 @@ exports.personnelSchema = new mongoose.Schema({
 });
 
 exports.basesSchema = new mongoose.Schema({
-    _id: ObjectId ,
+    _id: ObjectId,
     name: {type: String, unique: true},
     airOperator: {type: ObjectId, ref: 'air_operator'},
     location: {
@@ -91,7 +91,13 @@ exports.dronesSchema = new mongoose.Schema({
         pending: [{type: ObjectId, default: [], ref: 'mission'}]
     }
 });
-
+/*
+    Propongo di inserire un campo che inichi lo stato di una missione:
+        - Instanziata (Senza personale inserito)
+        - In corso
+        - Completata
+        - Altro...
+*/
 exports.missionsSchema = new mongoose.Schema({
     id: ObjectId,
     date: Date,
