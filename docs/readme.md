@@ -7,7 +7,7 @@
 ## Strumenti utili
 
 ### MongoDB
-* [Web MongoUI](https://github.com/azat-co/mongoui)
+* [Web MongoUI](https://github.com/azat-co/mongoui) (Non utile)
   > Tool scritto in __Node.js__ per amministrare database __MongoDB__.
 
 * [NoSQLBooster](https://nosqlbooster.com/)
@@ -23,6 +23,8 @@
 ### Richieste HTTP
 * [Postman](https://www.getpostman.com/)
   > Utile __tool__ per inviare richieste __HTTP__.
+* [Axios](https://www.npmjs.com/package/axios)
+  > Framework in __Node.js__ per effettuare richieste __HTTP__ promise based.
 
 ### Webhook Telegram
 * [Telegraf](https://github.com/telegraf/telegraf)
