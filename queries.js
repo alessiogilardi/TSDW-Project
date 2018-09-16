@@ -365,4 +365,88 @@ exports.Drone = Drone = {
       deasync.runLoopOnce();
     return ret;
   }
-}
+};
+
+exports.Mission = Mission = {
+  insert: () => {
+    new models.Mission({
+      _id: mongoose.Types.ObjectId(),
+      date: aDate,
+      location: { /* Da eliminare nel caso */
+        longitude: aLongitude, /* Da eliminare nel caso */
+        latitude: aLatitude /* Da eliminare nel caso */
+      },
+      type: aType,
+      base: aBase,
+      supervisor: aSupervisor, /* Da controllare che il supervisiore afferisca alla base giusta */
+      duration: {
+          expectedDuration: aExpectedDuration,
+          effectiveDuration: aEffectiveDuration
+      },
+      description: aDescription,
+      flightPlan: aFlightPlan
+      /*drones: Inseriti successivamente */
+      /*pilots: Inseriti successivamente */
+      /*equip: Inseriti successivamente */
+      /*mainteiners: Inseriti successivamente se la missione ha durata maggiore di 3h */
+    }).save((err, mission) => {
+      if (err)
+        return console.log(err);
+      
+      // Inserisco una pendingMission al supervisore della base che l'ha richiesta, 
+      // in questo modo potrà selezionare in un momento successivo personale e droni
+      Personnel.updateById(mission.supervisor, {$push: {pendingMissions: mission._id}});
+      // Dovrebbe essere reso comprensibile se una pendingMission in Personnel sia 
+      // di un supervisore che deve finire di definire squadra e droni o
+      // di un pilota che ancora non ha inserito il Logbook
+
+    });
+  },
+
+  addPilot: (aMissionId, aPilotId) => {
+    Mission.updateById(aMissionId, {$push: {pilots: aPilotId}});
+    // Aggiungo la missione alle pendingMissions del pilota
+    Personnel.updateById(aPilotId, {$push: {pendingMissions: aMissionId}});
+  },
+
+  addEquipMember: (aMissionId, aEquipId) => {
+    Mission.updateById(aMissionId, {$push: {equip: aEquipId}});
+    // Va aggiunta la missione alle missioni svolte ma bisogna decidere dove inserirla
+    // se nelle completate o se rivedere un attimo lo schema personnel
+  },
+
+  addMaintainer: (aMissionId, aMaintainerId) => {
+    Mission.updateById(aMissionId, {$push: {maintainers: aMaintainerId}});
+    // Va aggiunta la missione alle missioni svolte ma bisogna decidere dove inserirla
+    // se nelle completate o se rivedere un attimo lo schema personnel
+  },
+
+  addDrone: (aMissionId, aDroneId) => {
+    Mission.updateById(aMissionId, {$push: {drones: aDroneId}});
+    // Aggiungo la missione alle pendingMissions del drone
+    Drone.updateById(aDroneId, {$push: {pendingMissions: aMissionId}});
+  },
+
+  updateById: (aId, newValues) => {
+    models.Mission.updateOne({_id: aId}, newValues, err => {
+      if (err)
+        return console.log(err);
+    });
+  },
+
+  findByIdSync: (aId, projection) => {
+    var ret = null;
+    models.Mission.findOne()
+    .where('_id').equals(aId)
+    .select(projection)
+    .exec((err, doc) => {
+      ret = doc;
+    });
+
+    while (ret == null)
+      deasync.runLoopOnce();
+    return ret;
+  }
+
+};
+
