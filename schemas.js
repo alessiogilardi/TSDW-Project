@@ -62,6 +62,12 @@ exports.personnelSchema = new mongoose.Schema({
         },
         maintainer: {
             missions: [{type: ObjectId, default: [], ref: 'mission'}],
+        },
+        supervisor: {
+            missions: {
+                pending: [{type: ObjectId, default: [], ref: 'mission'}],
+                completed: [{type: ObjectId, default: [], ref: 'mission'}]
+            }
         }
     }
     */
