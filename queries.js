@@ -46,17 +46,19 @@ exports.AirOperator = AirOperator = {
     });
   },
 
-  updateByName: (oName, newValues) => {
-    models.AirOperator.updateOne({name: oName}, newValues, (err) => {
+  updateByName: (aName, newValues) => {
+    models.AirOperator.updateOne({name: aName}, newValues, err => {
       if (err)
         return console.log(err);
+        console.log('Updated AirOperator with name: ' + aName);
     });
   },
 
-  updateById: (id, newValues) => {
-    models.AirOperator.updateOne({_id: id}, newValues, (err) => {
+  updateById: (aId, newValues) => {
+    models.AirOperator.updateOne({_id: aId}, newValues, err => {
       if (err)
         return console.log(err);
+      console.log('Updated AirOperator with _id: ' + aId);
     });
   },
   
@@ -65,7 +67,9 @@ exports.AirOperator = AirOperator = {
     models.AirOperator.findOne()
     .where('name').equals(aName)
     .select(projection)
-    .exec(callback(err, doc));
+    .exec((err, doc) => {
+      callback(err, doc);
+    });
     /*
     models.AirOperator.findOne()
     .where('name').equals(aName)
@@ -99,8 +103,10 @@ exports.Base = Base = {
 
   insert2: (oName, oAirOperator, oCountry, oCity, oAddress, oLatitude = undefined, oLongitude = undefined, oViceAM = undefined, oBaseSupervisor = undefined, oPilots = undefined,
                 oEquip = undefined, oMainteiners = undefined, oDrones = []) => {
-    AirOperator.findByName(oAirOperator, '_id', (doc) => {
-
+    AirOperator.findByName(oAirOperator, '_id', (err, doc) => {
+      if (err)
+        return console.log(err);
+        
       new models.Base({
         _id: new mongoose.Types.ObjectId(),
         name: oName,
@@ -123,12 +129,13 @@ exports.Base = Base = {
         },
         drones: oDrones
       }).save((err, base) => {
-      // results contiene il documento json della base appena creata
-        if (err)
-          return console.log(err);
-        // Quando la query viene eseguita, devo aggiungere l'id della base appena creata alla lista di basi dell'operatore aereo corrispondente
-        AirOperator.updateById(result.airOperator, {$push: {'bases': base._id}});
-    });
+        // results contiene il documento json della base appena creata
+          if (err)
+            return console.log(err);
+          console.log('Inserted new base with _id: ' + base._id);
+          // Quando la query viene eseguita, devo aggiungere l'id della base appena creata alla lista di basi dell'operatore aereo corrispondente
+          AirOperator.updateById(base.airOperator, {$push: {'bases': base._id}});
+      });
 
     });
   },
@@ -162,7 +169,7 @@ exports.Base = Base = {
         if (err)
           return console.log(err);
         // Quando la query viene eseguita, devo aggiungere l'id della base appena creata alla lista di basi dell'operatore aereo corrispondente
-        AirOperator.updateById(result.airOperator, {$push: {'bases': base._id}});
+        AirOperator.updateById(base.airOperator, {$push: {'bases': base._id}});
   	});
   },
   
