@@ -60,22 +60,29 @@ exports.AirOperator = AirOperator = {
     });
   },
   
-  findByName: (name, projection, callback) => {
+  /* Nuovo tentativo da fare */
+  findByName: (aName, projection, callback) => {
     models.AirOperator.findOne()
-    .where('name').equals(name)
+    .where('name').equals(aName)
+    .select(projection)
+    .exec(callback(err, doc));
+    /*
+    models.AirOperator.findOne()
+    .where('name').equals(aName)
     .select(projection)
     .exec((err, doc) => {
       callback(doc);
     });
+    */
   },
 
   // La funzione esterna (findByName) è sincrona, ma la funzione di callback è asincrona. Il valore di ritorno (doc) è conosciuto solo dalla funzione di callback.
   // Dovrei quindi ritornare il valore dalla funzione di callback, ma non posso perché è asincrona.
 
-  findByNameSync: (name, projection) => {
+  findByNameSync: (aName, projection) => {
     var ret = null;
     models.AirOperator.findOne()
-    .where('name').equals(name)
+    .where('name').equals(aName)
     .select(projection)
     .exec((err, res) => {
       ret = res;
@@ -115,13 +122,12 @@ exports.Base = Base = {
           mainteiners: oMainteiners
         },
         drones: oDrones
-      }).save((err, result) => {
+      }).save((err, base) => {
       // results contiene il documento json della base appena creata
         if (err)
           return console.log(err);
         // Quando la query viene eseguita, devo aggiungere l'id della base appena creata alla lista di basi dell'operatore aereo corrispondente
-        //var edited = {$push: {'bases': result._id}};
-        AirOperator.updateById(result.airOperator, {$push: {'bases': result._id}});
+        AirOperator.updateById(result.airOperator, {$push: {'bases': base._id}});
     });
 
     });
@@ -151,13 +157,12 @@ exports.Base = Base = {
   			mainteiners: oMainteiners
   		},
   		drones: oDrones
-  	}).save((err, result) => {
+  	}).save((err, base) => {
     	// results contiene il documento json della base appena creata
         if (err)
           return console.log(err);
         // Quando la query viene eseguita, devo aggiungere l'id della base appena creata alla lista di basi dell'operatore aereo corrispondente
-        //var edited = {$push: {'bases': result._id}};
-        AirOperator.updateById(result.airOperator, {$push: {'bases': result._id}});
+        AirOperator.updateById(result.airOperator, {$push: {'bases': base._id}});
   	});
   },
   
@@ -179,9 +184,7 @@ exports.Base = Base = {
     models.Base.findOne()
     .where('name').equals(name)
     .select(projection)
-    .exec((err, doc) => {
-      callback(doc);
-    });
+    .exec(callback(err, doc));
   },
 
   findByNameSync: (name, projection) =>  {
@@ -368,7 +371,7 @@ exports.Drone = Drone = {
 };
 
 exports.Mission = Mission = {
-  insert: () => {
+  insert: (aDate, aType, aBase, aDescription, aFlightPlan) => {
     new models.Mission({
       _id: mongoose.Types.ObjectId(),
       date: aDate,
