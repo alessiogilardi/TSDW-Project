@@ -10,7 +10,13 @@ exports.connect = () => {
     var db = mongoose.connection;
     db.on('error', console.error.bind(console, 'connection error:'));
     db.once('open', () => {
-        console.log('Connected!');
+        console.log('Mongoose connection started');
+        process.on('SIGINT', () => {
+            mongoose.disconnect(() => {
+                console.log('Closing Mongoose connection');
+                process.exit(0);
+            });
+        });
     });
     return mongoose;  
 }
