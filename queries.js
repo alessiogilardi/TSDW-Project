@@ -450,3 +450,51 @@ exports.Mission = Mission = {
 
 };
 
+exports.Logbook = Logbook = {
+    insert: () => {
+
+    },
+
+    updateById: (aId, newValues) => {
+        models.Logbook.updateOne({_id: aId}, newValues);
+    },
+
+    findByIdSync: (aId, projection) => {
+        var ret = null;
+        models.Logbook.findOne()
+        .where('_id').equals(aId)
+        .select(projection)
+        .exec((err, doc) => {
+            ret = doc;
+        });
+
+        while (ret == null)
+            deasync.runLoopOnce();
+        return ret;
+    }
+};
+
+exports.Qtb = Qtb = {
+    insert: () => {
+
+    },
+    
+    updateById: (aId, newValues) => {
+        models.Qtb.updateOne({_id: aId}, newValues);
+    },
+
+    findByIdSync: (aId, projection) => {
+        var ret = null;
+        models.Qtb.findOne()
+        .where('_id').equals(aId)
+        .select(projection)
+        .exec((err, doc) => {
+            ret = doc;
+        });
+
+        while (ret == null)
+            deasync.runLoopOnce();
+        return ret;
+    }
+};
+
