@@ -34,9 +34,6 @@ exports.personnelSchema = new mongoose.Schema({
     },
     airOperator: {type: ObjectId, ref: 'air_operator'},
     base: {type: ObjectId, ref: 'base'},
-    /* Da rivedere il campo roles e i suoi scopi */
-    roles: [String], /* Rimuovere nel caso */
-    /*
     roles: {
         command: {
             airOperator: String, // AM, CQM, SM
@@ -44,47 +41,32 @@ exports.personnelSchema = new mongoose.Schema({
         },
         occupation: String // Pilota, equipaggio, manutentore
     },
-    info: {
-        pilot: {
-            license: {
-                id: {type: String, default: null},
-                type: {type: String, default: null},
-                expiring: {type: Date, default: null}
-            },
-            droneTypes: [{type: String, default: null}],
-            missions: {
-                completed: [{type: ObjectId, default: [], ref: 'mission'}],
-                pending: [{type: ObjectId, default: [], ref: 'mission'}]
-            }
+    pilot: {
+        license: {
+            id: {type: String, default: null},
+            type: {type: String, default: null},
+            maxMissionRank: {type: String, default: null},
+            expiring: {type: Date, default: null}
         },
-        equip: {
-            missions: [{type: ObjectId, default: [], ref: 'mission'}],
-        },
-        maintainer: {
-            missions: [{type: ObjectId, default: [], ref: 'mission'}],
-        },
-        supervisor: {
-            missions: {
-                pending: [{type: ObjectId, default: [], ref: 'mission'}],
-                completed: [{type: ObjectId, default: [], ref: 'mission'}]
-            }
-        }
-    }
-    */
-    missions: { /* Rimuovere nel caso */
-        completed: [{type: ObjectId, default: [], ref: 'mission'}], /* Rimuovere nel caso */
-        pending: [{type: ObjectId, default: [], ref: 'mission'}] /* Rimuovere nel caso */
+        droneTypes: [{type: String, default: null}]
     },
-    locPermission: {type: Boolean, default: false},
-    pilotInfo: { /* Rimuovere nel caso */
-        license: { /* Rimuovere nel caso */
-            id: {type: String, default: null}, /* Rimuovere nel caso */
-            type: {type: String, default: null}, /* Rimuovere nel caso */
-            expiring: {type: Date, default: null} /* Rimuovere nel caso */
+    missions: {
+        supervisor:  {
+            completed: [{type: ObjectId, default: [], ref: 'mission'}],
+            pending: [{type: ObjectId, default: [], ref: 'mission'}]
         },
-        droneTypes: [{type: String, default: null}] /* Rimuovere nel caso */
-                                      
-    }
+        pilot: {
+            completed: [{type: ObjectId, default: [], ref: 'mission'}],
+            waitingForLogbook: [{type: ObjectId, default: [], ref: 'mission'}]
+        },
+        crew:  {
+            completed: [{type: ObjectId, default: [], ref: 'mission'}],
+        },
+        maintainers:  {
+            completed: [{type: ObjectId, default: [], ref: 'mission'}],
+        },
+    },
+    locPermission: {type: Boolean, default: false}
 });
 
 exports.basesSchema = new mongoose.Schema({
@@ -95,8 +77,10 @@ exports.basesSchema = new mongoose.Schema({
         country: String,
         city: String,
         address: String,
-        latitude: Number,
-        longitude: Number
+        coordinates: {
+            latitude: Number,
+            longitude: Number
+        }
     },
     roles: {
         ViceAM: {type: ObjectId, default: null, ref: 'personnel'},
@@ -104,7 +88,7 @@ exports.basesSchema = new mongoose.Schema({
     },
     staff: {
         pilots: [{type: ObjectId, default: [], ref: 'personnel'}],
-        equip: [{type: ObjectId, default: [], ref: 'personnel'}],
+        crew: [{type: ObjectId, default: [], ref: 'personnel'}],
         mainteiners: [{type: ObjectId, default: [], ref: 'personnel'}]
     },
     drones: [{type: ObjectId, default: [], ref: 'drone'}]
@@ -117,97 +101,79 @@ exports.dronesSchema = new mongoose.Schema({
     airOperator: {type: ObjectId, ref: 'air_operator'},
     base: {type: ObjectId, ref: 'base'},
     state: {
-        generalState: String,
+        availability: Number, /* 0 -> Disponibile, 1 -> In Uso, 2 -> In manutenzione */
+        generalState: String, /* Potrebbe non servire */
         lastMaintenance: Date,
+        flightTimeSinceLastMaintenance: Number, /* Aggiornato ogni qual volta viene inserito un QTB, campo utilizzato per verificare lo stato di usura */
         notes: String
     },
     missions: {
         completed: [{type: ObjectId, default: [], ref: 'mission'}],
-        pending: [{type: ObjectId, default: [], ref: 'mission'}] /* Missioni per cui non è ancora stato inserito un QTB */
+        waitingForQtb: [{type: ObjectId, default: [], ref: 'mission'}] /* Missioni per cui non è ancora stato inserito un QTB */
     }
 });
 
-/*
-    Propongo di inserire un campo che indichi lo stato di una missione:
-        - Instanziata (Senza personale inserito)
-        - In corso
-        - Completata
-        - Altro...
-*/
 exports.missionsSchema = new mongoose.Schema({
     id: ObjectId,
     date: Date,
-    location: { /* Da rimuovere */
-        latitude: Number, /* Da rimuovere */
-        longitude: Number /* Da rimuovere */
-    },
     type: String,
     base: {type: ObjectId, ref: 'base'},
     supervisor: {type: ObjectId, ref: 'personnel'},
-    duration: {
-        expectedDuration: Number,
-        effectiveDuration: Number
+    status: Number, /* 0 -> Instantiated, 1 -> Pending, 2 -> Running, 3 -> Completed */
+    pilots: {
+        notified: [{type: ObjectId, ref: 'personnel'}],
+        accepted: [{type: ObjectId, ref: 'personnel'}], /* Nome del campo da rivedere */
+        chosen: [{type: ObjectId, ref: 'personnel'}] /* Nome del campo da rivedere */
     },
-    description: String,
-    flightPlan: String,
-    drones: [{type: ObjectId, ref: 'drone'},],
-    pilots: [{type: ObjectId, ref: 'personnel'},],
-    equip: [{type: ObjectId, ref: 'personnel'},],
-    mainteiners: [{type: ObjectId, default: [], ref: 'personnel'}],
+    crew: {
+        notified: [{type: ObjectId, ref: 'personnel'}],
+        accepted: [{type: ObjectId, ref: 'personnel'}], /* Nome del campo da rivedere */
+        chosen: [{type: ObjectId, ref: 'personnel'}] /* Nome del campo da rivedere */
+    },
+    mainteiners: {
+        notified: [{type: ObjectId, ref: 'personnel'}],
+        accepted: [{type: ObjectId, ref: 'personnel'}], /* Nome del campo da rivedere */
+        chosen: [{type: ObjectId, ref: 'personnel'}] /* Nome del campo da rivedere */
+    },
+    description: {
+        duration: { /* Durata della missione, può differire dai tempi di volo */
+            expectedDuration: Number,
+            effectiveDuration: Number
+        },
+        rank: Number, /* Difficoltà della missione (0 -> 5) */
+        flightPlan: String,
+        notes: String
+    },
+    drones: [{type: ObjectId, ref: 'drone'}],
+    teams: [{
+        pilots: {
+            chief: {type: ObjectId, ref: 'personnel'},
+            co: {type: ObjectId, ref: 'personnel'}
+        },
+        crew: [{type: ObjectId, ref: 'personnel'}],
+        maintainers: [{type: ObjectId, ref: 'personnel'}]
+    }],
     logbooks: [{type: ObjectId, default: [], ref: 'logbook'}],
     qtb: [{type: ObjectId, default: [], ref: 'qtb'}]
 });
 
-/*
-    Il tempo di volo ptrebbe essere composto da voli separati?
-    Nel caso io lo strutturerei in questo modo:
-    info: {
-        fligths: [{
-            flightStart: Date,
-            flightEnd: Date,
-            notes: String
-        }],
-        totalFlightTime: Number  // Non so se serva mantenerlo o sia meglio desumerlo dai campi sopra
-    }
-*/
 exports.logbooksSchema = new mongoose.Schema({
     _id: ObjectId,
-    pilotWriter: {type: ObjectId, ref: 'personnel'},
-    mission: {type: ObjectId, ref: 'mission'},
-    location: {
-        latitude: Number,
-        longitude: Number
-    },
     date: Date,
-    info: {
-        flightTime: Number,
-        notes: String
-    }
+    documentRef: String,
+    pilot: {type: ObjectId, ref: 'personnel'},
+    mission: {type: ObjectId, ref: 'mission'},
 });
 
-/*
-    Stesso discorso, come sopra, anzi forse qui è più importante 
-    dato che sono dati sicuramente più precisi presi dal drone stesso
-    info: {
-        fligths: [{
-            flightStart: Date,
-            flightEnd: Date,
-            notes: String
-        }],
-        totalFlightTime: Number  // Non so se serva mantenerlo o sia meglio desumerlo dai campi sopra
-    }
-*/
 exports.qtbSchema = new mongoose.Schema({
     _id: ObjectId,
+    date: Date,
     drone:  {type: ObjectId, ref: 'drone'},
     mission:  {type: ObjectId, ref: 'mission'},
-    location: {
-        latitude: Number,
-        longitude: Number
-    },
-    date: Date,
-    info: {
-        fligthTime: Number,
+    flights: [{
+        flightStart: Date,
+        flightEnd: Date,
+        batteryCode: String,
         notes: String
-    }
+    }]
 });
