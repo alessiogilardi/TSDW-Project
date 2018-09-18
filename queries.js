@@ -25,27 +25,6 @@ exports.AirOperator = AirOperator = {
     });
   },
 
-  insert2: (airOperator) => {
-    new models.AirOperator({
-      _id: new mongoose.Types.ObjectId(),
-      name: airOperator.name,
-      location: {
-        country: airOperator.location.country,
-        city: airOperator.location.city,
-        address: airOperator.location.address
-      },
-      roles: {
-        AM: airOperator.roles.AM,
-        CQM: airOperator.roles.CQM,
-        SM: airOperator.roles.SM
-      },
-      bases: airOperator.bases
-    }).save((err) => {
-      if (err)
-        return console.log(err);
-    });
-  },
-
   updateByName: (aName, newValues) => {
     models.AirOperator.updateOne({name: aName}, newValues, err => {
       if (err)
@@ -62,7 +41,6 @@ exports.AirOperator = AirOperator = {
     });
   },
   
-  /* Nuovo tentativo da fare */
   findByName: (aName, projection, callback) => {
     models.AirOperator.findOne()
     .where('name').equals(aName)
@@ -70,18 +48,7 @@ exports.AirOperator = AirOperator = {
     .exec((err, doc) => {
       callback(err, doc);
     });
-    /*
-    models.AirOperator.findOne()
-    .where('name').equals(aName)
-    .select(projection)
-    .exec((err, doc) => {
-      callback(doc);
-    });
-    */
   },
-
-  // La funzione esterna (findByName) è sincrona, ma la funzione di callback è asincrona. Il valore di ritorno (doc) è conosciuto solo dalla funzione di callback.
-  // Dovrei quindi ritornare il valore dalla funzione di callback, ma non posso perché è asincrona.
 
   findByNameSync: (aName, projection) => {
     var ret = null;
@@ -95,14 +62,11 @@ exports.AirOperator = AirOperator = {
       deasync.runLoopOnce();
     return ret;
   }
-
-
 };
 
 exports.Base = Base = {
 
-  insert2: (oName, oAirOperator, oCountry, oCity, oAddress, oLatitude = undefined, oLongitude = undefined, oViceAM = undefined, oBaseSupervisor = undefined, oPilots = undefined,
-                oEquip = undefined, oMainteiners = undefined, oDrones = []) => {
+  insert: (oName, oAirOperator, oCountry, oCity, oAddress, oLatitude = undefined, oLongitude = undefined, oViceAM = undefined, oBaseSupervisor = undefined, oPilots = undefined, oEquip = undefined, oMainteiners = undefined, oDrones = []) => {
     AirOperator.findByName(oAirOperator, '_id', (err, doc) => {
       if (err)
         return console.log(err);
@@ -115,8 +79,10 @@ exports.Base = Base = {
           country: oCountry,
           city: oCity,
           address: oAddress,
-          latitude: oLatitude,
-          longitude: oLatitude,
+          coordinates: {
+            latitude: oLatitude,
+            longitude: oLongitude
+          }
         },
         roles: {
           ViceAM: oViceAM,
@@ -129,48 +95,14 @@ exports.Base = Base = {
         },
         drones: oDrones
       }).save((err, base) => {
-        // results contiene il documento json della base appena creata
           if (err)
             return console.log(err);
+          
           console.log('Inserted new base with _id: ' + base._id);
           // Quando la query viene eseguita, devo aggiungere l'id della base appena creata alla lista di basi dell'operatore aereo corrispondente
           AirOperator.updateById(base.airOperator, {$push: {'bases': base._id}});
       });
-
     });
-  },
-	
-  insert: (oName, oAirOperator, oCountry, oCity, oAddress, oLatitude = undefined, oLongitude = undefined, oViceAM = undefined, oBaseSupervisor = undefined, oPilots = undefined,
-                oEquip = undefined, oMainteiners = undefined, oDrones = []) => {
-	 // Prima cerco l'id dell'operatore aereo conoscendone il nome (oAirOperator)
-  	new models.Base({
-  		_id: new mongoose.Types.ObjectId(),
-  		name: oName,
-  		airOperator: AirOperator.findByNameSync(oAirOperator, '_id')._id,
-  		location: {
-  			country: oCountry,
-  			city: oCity,
-  			address: oAddress,
-  			latitude: oLatitude,
-  			longitude: oLatitude,
-  		},
-  		roles: {
-  			ViceAM: oViceAM,
-  			BaseSupervisor: oBaseSupervisor
-  		},
-  		staff: {
-  			pilots: oPilots,
-  			equip: oEquip,
-  			mainteiners: oMainteiners
-  		},
-  		drones: oDrones
-  	}).save((err, base) => {
-    	// results contiene il documento json della base appena creata
-        if (err)
-          return console.log(err);
-        // Quando la query viene eseguita, devo aggiungere l'id della base appena creata alla lista di basi dell'operatore aereo corrispondente
-        AirOperator.updateById(base.airOperator, {$push: {'bases': base._id}});
-  	});
   },
   
   updateByName: (aName, newValues) => {
@@ -191,7 +123,9 @@ exports.Base = Base = {
     models.Base.findOne()
     .where('name').equals(name)
     .select(projection)
-    .exec(callback(err, doc));
+    .exec((err, doc) => {
+      callback(err, doc);
+    });
   },
 
   findByNameSync: (name, projection) =>  {
@@ -209,8 +143,62 @@ exports.Base = Base = {
 };
 
 exports.Personnel = Personnel = {
-	
-  insert: (aIdTelegram, aName, aSurname, aCf, aCountry, aCity, aAddress, aAirOperatorName, aBaseName, aRoles = [], aMissions = [], aLocPermission = false, aLicenseId = undefined, aLicenseType = undefined, aLicenseExpireDate = undefined, aDroneTypes = undefined) => {
+  
+  insert: (aIdTelegram, aName, aSurname, aCf, aCountry, aCity, aAddress, aAirOperatorName, aBaseName, aOccupation, aAirOperatorRole = undefined, aBaseRole = undefined, aLocPermission = false, aLicenseId = undefined, aLicenseType = undefined, aLicenseExpireDate = undefined, aDroneTypes = undefined) => {
+    AirOperator.findByName(aAirOperatorName, '_id', (err, aAirOperator) => {
+      Base.findByName(aBaseName, '_id', (err, aBase) => {
+        new models.Personnel({
+          _id: ObjectId,
+          idTelegram: String,
+          name: String,
+          surname: String,
+          cf: {type: String, unique: true},
+          location: {
+              country: String,
+              city: String,
+              address: String
+          },
+          airOperator: {type: ObjectId, ref: 'air_operator'},
+          base: {type: ObjectId, ref: 'base'},
+          roles: {
+              command: {
+                  airOperator: String, // AM, CQM, SM
+                  base: String // ViceAM, Supervisor
+              },
+              occupation: String // Pilota, equipaggio, manutentore
+          },
+          pilot: {
+              license: {
+                  id: {type: String, default: null},
+                  type: {type: String, default: null},
+                  maxMissionRank: {type: String, default: null},
+                  expiring: {type: Date, default: null}
+              },
+              droneTypes: [{type: String, default: null}]
+          },
+          missions: {
+              supervisor:  {
+                  completed: [{type: ObjectId, default: [], ref: 'mission'}],
+                  pending: [{type: ObjectId, default: [], ref: 'mission'}]
+              },
+              pilot: {
+                  completed: [{type: ObjectId, default: [], ref: 'mission'}],
+                  waitingForLogbook: [{type: ObjectId, default: [], ref: 'mission'}]
+              },
+              crew:  {
+                  completed: [{type: ObjectId, default: [], ref: 'mission'}],
+              },
+              maintainers:  {
+                  completed: [{type: ObjectId, default: [], ref: 'mission'}],
+              },
+          },
+          locPermission: {type: Boolean, default: false}
+        }).save();
+      });
+    });
+  },
+  
+  insert_OLD: (aIdTelegram, aName, aSurname, aCf, aCountry, aCity, aAddress, aAirOperatorName, aBaseName, aRoles = [], aMissions = [], aLocPermission = false, aLicenseId = undefined, aLicenseType = undefined, aLicenseExpireDate = undefined, aDroneTypes = undefined) => {
     AirOperator.findByName(aAirOperatorName, '_id', (aAirOperator) => {
       Base.findByName(aBaseName, '_id', (aBase) => {
         new models.Personnel({
@@ -245,7 +233,7 @@ exports.Personnel = Personnel = {
     });
   },
   
-  insert2: (aIdTelegram, aName, aSurname, aCf, aCountry, aCity, aAddress, aAirOperatorName, aBaseName, aRoles = [], aMissions = [], aLocPermission = false,
+  insert2_OLD: (aIdTelegram, aName, aSurname, aCf, aCountry, aCity, aAddress, aAirOperatorName, aBaseName, aRoles = [], aMissions = [], aLocPermission = false,
 				aLicenseId = undefined, aLicenseType = undefined, aLicenseExpireDate = undefined, aDroneTypes = undefined) => {
 	new models.Personnel({
 	  _id: mongoose.Types.ObjectId(),
@@ -378,7 +366,7 @@ exports.Drone = Drone = {
 };
 
 exports.Mission = Mission = {
-  insert: (aDate, aType, aBase, aDescription, aFlightPlan) => {
+  insert: (aDate, aType, aBase, aSupervisor, aDescription, aFlightPlan) => {
     new models.Mission({
       _id: mongoose.Types.ObjectId(),
       date: aDate,
@@ -394,18 +382,18 @@ exports.Mission = Mission = {
           effectiveDuration: aEffectiveDuration
       },
       description: aDescription,
-      flightPlan: aFlightPlan
-      /*drones: Inseriti successivamente */
-      /*pilots: Inseriti successivamente */
-      /*equip: Inseriti successivamente */
-      /*mainteiners: Inseriti successivamente se la missione ha durata maggiore di 3h */
+      flightPlan: aFlightPlan,
+      drones: [], /*Inseriti successivamente */
+      pilots: [], /* Inseriti successivamente */
+      equip: [], /* Inseriti successivamente */
+      mainteiners: [] /*Inseriti successivamente se la missione ha durata maggiore di 3h */
     }).save((err, mission) => {
       if (err)
         return console.log(err);
       
       // Inserisco una pendingMission al supervisore della base che l'ha richiesta, 
       // in questo modo potrà selezionare in un momento successivo personale e droni
-      Personnel.updateById(mission.supervisor, {$push: {pendingMissions: mission._id}});
+      
       // Dovrebbe essere reso comprensibile se una pendingMission in Personnel sia 
       // di un supervisore che deve finire di definire squadra e droni o
       // di un pilota che ancora non ha inserito il Logbook
@@ -416,7 +404,7 @@ exports.Mission = Mission = {
   addPilot: (aMissionId, aPilotId) => {
     Mission.updateById(aMissionId, {$push: {pilots: aPilotId}});
     // Aggiungo la missione alle pendingMissions del pilota
-    Personnel.updateById(aPilotId, {$push: {pendingMissions: aMissionId}});
+    Personnel.updateById(aPilotId, {$push: {'pilot.missions.pending.waitingForLogbook': aMissionId}});
   },
 
   addEquipMember: (aMissionId, aEquipId) => {
