@@ -36,10 +36,10 @@ exports.personnelSchema = new mongoose.Schema({
     base: {type: ObjectId, ref: 'base'},
     roles: {
         command: {
-            airOperator: String, // AM, CQM, SM
-            base: String // ViceAM, Supervisor
+            airOperator: {type: String, default: []}, // AM, CQM, SM
+            base: [{type: String, default: []}] // ViceAM, Supervisor
         },
-        occupation: String // Pilota, equipaggio, manutentore
+        occupation: [String] // pilot, crew, maintainer
     },
     pilot: {
         license: {
