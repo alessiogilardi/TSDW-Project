@@ -29,7 +29,7 @@ exports.AirOperator = AirOperator = {
     models.AirOperator.updateOne({name: aName}, newValues, err => {
       if (err)
         return console.log(err);
-        console.log('Updated AirOperator with name: ' + aName);
+      console.log('Updated AirOperator with name: ' + aName);
     });
   },
 
@@ -66,34 +66,34 @@ exports.AirOperator = AirOperator = {
 
 exports.Base = Base = {
 
-  insert: (oName, oAirOperator, oCountry, oCity, oAddress, oLatitude = undefined, oLongitude = undefined, oViceAM = undefined, oBaseSupervisor = undefined, oPilots = undefined, oEquip = undefined, oMainteiners = undefined, oDrones = []) => {
-    AirOperator.findByName(oAirOperator, '_id', (err, doc) => {
+  insert: (aName, aAirOperatorName, aCountry, aCity, aAddress, aLatitude = undefined, aLongitude = undefined, aViceAM = undefined, aBaseSupervisor = undefined, aPilots = undefined, cCrew = undefined, aMainteiners = undefined, aDrones = []) => {
+    AirOperator.findByName(aAirOperatorName, '_id', (err, aAirOperator) => {
       if (err)
         return console.log(err);
         
       new models.Base({
         _id: new mongoose.Types.ObjectId(),
-        name: oName,
-        airOperator: doc._id,
+        name: aName,
+        airOperator: aAirOperator._id,
         location: {
-          country: oCountry,
-          city: oCity,
-          address: oAddress,
+          country: aCountry,
+          city: aCity,
+          address: aAddress,
           coordinates: {
-            latitude: oLatitude,
-            longitude: oLongitude
+            latitude: aLatitude,
+            longitude: aLongitude
           }
         },
         roles: {
-          ViceAM: oViceAM,
-          BaseSupervisor: oBaseSupervisor
+          ViceAM: aViceAM,
+          BaseSupervisor: aBaseSupervisor
         },
         staff: {
-          pilots: oPilots,
-          equip: oEquip,
-          mainteiners: oMainteiners
+          pilots: aPilots,
+          crew: aCrew,
+          mainteiners: aMainteiners
         },
-        drones: oDrones
+        drones: aDrones
       }).save((err, base) => {
           if (err)
             return console.log(err);
@@ -144,65 +144,11 @@ exports.Base = Base = {
 
 exports.Personnel = Personnel = {
   
-  insert: (aIdTelegram, aName, aSurname, aCf, aCountry, aCity, aAddress, aAirOperatorName, aBaseName, aOccupation, aAirOperatorRole = undefined, aBaseRole = undefined, aLocPermission = false, aLicenseId = undefined, aLicenseType = undefined, aLicenseExpireDate = undefined, aDroneTypes = undefined) => {
+  insert: (aIdTelegram, aName, aSurname, aCf, aCountry, aCity, aAddress, aAirOperatorName, aBaseName, aOccupation, aAirOperatorRole = undefined, aBaseRole = undefined, aLocPermission = false, aLicenseId = undefined, aLicenseType = undefined, aLicenseMaxMissionRank = undefined, aLicenseExpireDate = undefined, aDroneTypes = undefined) => {
     AirOperator.findByName(aAirOperatorName, '_id', (err, aAirOperator) => {
       Base.findByName(aBaseName, '_id', (err, aBase) => {
         new models.Personnel({
           _id: ObjectId,
-          idTelegram: String,
-          name: String,
-          surname: String,
-          cf: {type: String, unique: true},
-          location: {
-              country: String,
-              city: String,
-              address: String
-          },
-          airOperator: {type: ObjectId, ref: 'air_operator'},
-          base: {type: ObjectId, ref: 'base'},
-          roles: {
-              command: {
-                  airOperator: String, // AM, CQM, SM
-                  base: String // ViceAM, Supervisor
-              },
-              occupation: String // Pilota, equipaggio, manutentore
-          },
-          pilot: {
-              license: {
-                  id: {type: String, default: null},
-                  type: {type: String, default: null},
-                  maxMissionRank: {type: String, default: null},
-                  expiring: {type: Date, default: null}
-              },
-              droneTypes: [{type: String, default: null}]
-          },
-          missions: {
-              supervisor:  {
-                  completed: [{type: ObjectId, default: [], ref: 'mission'}],
-                  pending: [{type: ObjectId, default: [], ref: 'mission'}]
-              },
-              pilot: {
-                  completed: [{type: ObjectId, default: [], ref: 'mission'}],
-                  waitingForLogbook: [{type: ObjectId, default: [], ref: 'mission'}]
-              },
-              crew:  {
-                  completed: [{type: ObjectId, default: [], ref: 'mission'}],
-              },
-              maintainers:  {
-                  completed: [{type: ObjectId, default: [], ref: 'mission'}],
-              },
-          },
-          locPermission: {type: Boolean, default: false}
-        }).save();
-      });
-    });
-  },
-  
-  insert_OLD: (aIdTelegram, aName, aSurname, aCf, aCountry, aCity, aAddress, aAirOperatorName, aBaseName, aRoles = [], aMissions = [], aLocPermission = false, aLicenseId = undefined, aLicenseType = undefined, aLicenseExpireDate = undefined, aDroneTypes = undefined) => {
-    AirOperator.findByName(aAirOperatorName, '_id', (aAirOperator) => {
-      Base.findByName(aBaseName, '_id', (aBase) => {
-        new models.Personnel({
-          _id: mongoose.Types.ObjectId(),
           idTelegram: aIdTelegram,
           name: aName,
           surname: aSurname,
@@ -214,73 +160,67 @@ exports.Personnel = Personnel = {
           },
           airOperator: aAirOperator._id,
           base: aBase._id,
-          roles: aRoles,
-          missions: aMissions,
-          locPermission: aLocPermission,
-          pilotInfo: {
+          roles: {
+              command: {
+                  airOperator: aAirOperatorRole, // AM, CQM, SM 
+                  base: aBaseRole // ViceAM, Supervisor // Array di ruoli base
+              },
+              occupation: aOccupation // pilot, crew, maintainer // Array di occupazioni
+          },
+          pilot: {
               license: {
                   id: aLicenseId,
                   type: aLicenseType,
+                  maxMissionRank: aLicenseMaxMissionRank,
                   expiring: aLicenseExpireDate
               },
               droneTypes: aDroneTypes
-          }
+          },
+          missions: {
+              supervisor:  {
+                  completed: [],
+                  pending: []
+              },
+              pilot: {
+                  completed: [],
+                  waitingForLogbook: []
+              },
+              crew:  {
+                  completed: [],
+              },
+              maintainers:  {
+                  completed: [],
+              },
+          },
+          locPermission: aLocPermission
         }).save((err, personnel) => {
           if (err)
             return console.log(err);
+          
+          // Inserisco i vincoli di integrità
+
+          // Aggiorno le occupazioni in base
+          if (personnel.roles.occupation.includes('pilot'))
+            Base.updateById(personnel.base, {$push: {'staff.pilots': personnel._id}});
+          if (personnel.roles.occupation.includes('crew'))
+            Base.updateById(personnel.base, {$push: {'staff.crew': personnel._id}});
+          if (personnel.roles.occupation.includes('maintainer'))
+            Base.updateById(personnel.base, {$push: {'staff.maintainers': personnel._id}});
+
+          // Aggiorno i ruoli di comando
+          if (personnel.roles.command.airOperator.includes('AM'))
+            AirOperator.updateById(personnel.airOperator, {'roles.AM': personnel._id});
+          if (personnel.roles.command.airOperator.includes('CQM'))
+            AirOperator.updateById(personnel.airOperator, {'roles.CQM': personnel._id});
+          if (personnel.roles.command.airOperator.includes('SM'))
+            AirOperator.updateById(personnel.airOperator, {'roles.SM': personnel._id});
+          if (personnel.roles.command.base.includes('ViceAM'))
+            Base.updateById(personnel.base, {'roles.ViceAM': personnel._id});
+          if (personnel.roles.command.base.includes('BaseSupervisor'))
+            Base.updateById(personnel.base, {'roles.BaseSupervisor': personnel._id});
         });
       });
     });
-  },
-  
-  insert2_OLD: (aIdTelegram, aName, aSurname, aCf, aCountry, aCity, aAddress, aAirOperatorName, aBaseName, aRoles = [], aMissions = [], aLocPermission = false,
-				aLicenseId = undefined, aLicenseType = undefined, aLicenseExpireDate = undefined, aDroneTypes = undefined) => {
-	new models.Personnel({
-	  _id: mongoose.Types.ObjectId(),
-	  idTelegram: aIdTelegram,
-	  name: aName,
-	  surname: aSurname,
-	  cf: aCf,
-	  location: {
-		  country: aCountry,
-		  city: aCity,
-		  address: aAddress
-	  },
-	  airOperator: AirOperator.findByNameSync(aAirOperatorName, '_id')._id,
-	  base: Base.findByNameSync(aBaseName, '_id')._id,
-	  roles: aRoles,
-	  missions: aMissions,
-	  locPermission: aLocPermission,
-	  pilotInfo: {
-		  license: {
-			  id: aLicenseId,
-			  type: aLicenseType,
-			  expiring: aLicenseExpireDate
-		  },
-		  droneTypes: aDroneTypes
-	  }
-	}).save((err, personnel) => {
-	  if (err)
-		return console.log(err);
-	  // Se la persona inserita ha un ruolo pilota, manutentore o equipaggio devo aggiornare la base in cui lavora
-	  if (personnel.roles.includes('pilot'))
-		Base.updateById(personnel.base, {$push: {'staff.pilots': personnel._id}});
-	  if (personnel.roles.includes('equip'))
-		Base.updateById(personnel.base, {$push: {'staff.equip': personnel._id}});
-	  if (personnel.roles.includes('mainteiner'))
-		Base.updateById(personnel.base, {$push: {'staff.mainteiners': personnel._id}});
-	  // Se la persona inserita ha un ruolo di comando devo aggiornare la base e/o l'operatore aereo corrispondente
-	  if (personnel.roles.includes('AM'))
-		AirOperator.updateById(personnel.airOperator, {'roles.AM': personnel._id});
-	  if (personnel.roles.includes('CQM'))
-		AirOperator.updateById(personnel.airOperator, {'roles.CQM': personnel._id});
-	  if (personnel.roles.includes('SM'))
-		AirOperator.updateById(personnel.airOperator, {'roles.SM': personnel._id});
-	  if (personnel.roles.includes('ViceAM'))
-		Base.updateById(personnel.base, {'roles.ViceAM': personnel._id});
-	  if (personnel.roles.includes('BaseSupervisor'))
-		Base.updateById(personnel.base, {'roles.BaseSupervisor': personnel._id});
-	});
   },
   
   updateByCf: (aCf, newValues) => {
