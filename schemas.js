@@ -89,7 +89,7 @@ exports.basesSchema = new mongoose.Schema({
     staff: {
         pilots: [{type: ObjectId, default: [], ref: 'personnel'}],
         crew: [{type: ObjectId, default: [], ref: 'personnel'}],
-        mainteiners: [{type: ObjectId, default: [], ref: 'personnel'}]
+        maintainers: [{type: ObjectId, default: [], ref: 'personnel'}]
     },
     drones: [{type: ObjectId, default: [], ref: 'drone'}]
 });
