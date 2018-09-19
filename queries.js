@@ -4,24 +4,25 @@ const deasync   = require('deasync');
 
 exports.AirOperator = AirOperator = {
 
-  insert: (oName, oCountry, oCity, oAddress, oAM = undefined, oCQM = undefined, oSM = undefined, oBases = []) => {
+  insert: (aName, aCountry, aCity, aAddress, aAM = undefined, aCQM = undefined, aSM = undefined, aBases = []) => {
     new models.AirOperator({
       _id: new mongoose.Types.ObjectId(),
-      name: oName,
+      name: aName,
       location: {
-        country: oCountry,
-        city: oCity,
-        address: oAddress
+        country: aCountry,
+        city: aCity,
+        address: aAddress
       },
       roles: {
-        AM: oAM,
-        CQM: oCQM,
-        SM: oSM
+        AM: aAM,
+        CQM: aCQM,
+        SM: aSM
       },
-      bases: oBases
-    }).save((err) => {
+      bases: aBases
+    }).save((err, airOperator) => {
         if (err)
           return console.log(err);
+        console.log('Inserted new AirOperator with id: ' + airOperator._id);
     });
   },
 
@@ -109,6 +110,7 @@ exports.Base = Base = {
     models.Base.updateOne({name: aName}, newValues, (err) => {
       if (err)
         console.log(err);
+      console.log('Updated Base with name: ' + aName);
     });
   },
 
@@ -116,6 +118,7 @@ exports.Base = Base = {
     models.Base.updateOne({_id: aId}, newValues, (err) => {
       if (err)
         console.log(err);
+      console.log('Updated Base with id: ' + aId);
     });
   },
 
@@ -148,7 +151,7 @@ exports.Personnel = Personnel = {
     AirOperator.findByName(aAirOperatorName, '_id', (err, aAirOperator) => {
       Base.findByName(aBaseName, '_id', (err, aBase) => {
         new models.Personnel({
-          _id: ObjectId,
+          _id: mongoose.Types.ObjectId(),
           idTelegram: aIdTelegram,
           name: aName,
           surname: aSurname,
@@ -196,6 +199,7 @@ exports.Personnel = Personnel = {
         }).save((err, personnel) => {
           if (err)
             return console.log(err);
+          console.log('Inserted new Personnel with id: ' + personnel._id);
           
           // Inserisco i vincoli di integrità
 
@@ -224,11 +228,19 @@ exports.Personnel = Personnel = {
   },
   
   updateByCf: (aCf, newValues) => {
-    models.Personnel.updateOne({cf: aCf}, newValues, (err) => {});
+    models.Personnel.updateOne({cf: aCf}, newValues, (err) => {
+      if (err)
+        return console.log(err);
+      console.log('Updated Personnel with CF: ' + aCf);
+    });
   },
 
   updateById: (aId, newValues) => {
-    models.Personnel.updateOne({_id: id}, newValues, (err) => {});
+    models.Personnel.updateOne({_id: id}, newValues, (err) => {
+      if (err)
+        return console.log(err);
+      console.log('Updated Personnel with id: ' + aId);
+    });
   },
 
   findByCf: (aCf, projection, callback) => {
