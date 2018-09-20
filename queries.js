@@ -268,25 +268,36 @@ exports.Personnel = Personnel = {
 };
 
 exports.Drone = Drone = {
-  insert: (aNumber, aType, aAirOperatorName, aBaseName, aState, aLastMaint = undefined, aNotes = undefined, aMissions = []) => {
-	new models.Drone({
-	  _id: mongoose.Types.ObjectId(),
-	  number: aNumber,
-	  type: aType,
-	  airOperator: AirOperator.findByNameSync(aAirOperatorName, '_id')._id,
-	  base: Base.findByNameSync(aBaseName, '_id')._id,
-	  state: {
-	    generalState: aState,
-		lastMaintenance: aLastMaint,
-		notes: aNotes
-	  },
-	  missions: aMissions
-	}).save((err, drone) => {
-	  if (err)
-	    return console.log(err);
-	  // Il drone deve essere aggiunto alla lista di droni della base corrispondente
-	  Base.updateById(drone.base, {$push: {drones: drone._id}});
-	});
+  insert: (aNumber, aType, aAirOperatorName, aBaseName, aAvailability = 0, aGeneralState = 'OK', aLastMaintenance = undefined, aFligthTimeSinceLastMaintenance = undefined, aNotes = undefined, aNotes = undefined, aMissionsCompleted = [], aMissionsWaitingForQtb = []) => {
+    AirOperator.findByName(aAirOperatorName, '_id', (err, aAirOperator) => {
+      Base.findByName(aBaseName, '_id', (err, aBase) => {
+        new models.Drone({
+          _id: mongoose.Types.ObjectId(),
+          number: aNumber,
+          type: aType,
+          airOperator: aAirOperator._id,
+          base: aBase._id,
+          state: {
+              availability: aAvailability, /* 0 -> Disponibile, 1 -> In Uso, 2 -> In manutenzione */
+              generalState: aGeneralState, /* Potrebbe non servire */
+              lastMaintenance: aLastMaintenance,
+              flightTimeSinceLastMaintenance: aFligthTimeSinceLastMaintenance, /* Aggiornato ogni qual volta viene inserito un QTB, campo utilizzato per verificare lo stato di usura */
+              notes: aNotes
+          },
+          missions: {
+              completed: aMissionsCompleted,
+              waitingForQtb: aMissionsWaitingForQtb /* Missioni per cui non è ancora stato inserito un QTB */
+          }
+        }).save((err, drone) => {
+          if (err)
+            return console.log(err);
+          // Il drone deve essere aggiunto alla lista di droni della base corrispondente
+          Base.updateById(drone.base, {$push: {drones: drone._id}});
+        });
+
+      });
+    });
+    
   },
 
   updateByNumber: (aNumber, newValues) => {
