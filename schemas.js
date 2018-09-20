@@ -21,6 +21,30 @@ exports.airOperatorSchema = new mongoose.Schema({
   bases: [{type: ObjectId, default: [], ref: 'base'}]
 });
 
+/* 
+ * Nuova proposta di modifica per Personnel
+ * 
+ * roles: {
+ *  command: {
+ *      airOperator: {
+ *          AM: {type: Boolean, defaulf: false},
+ *          SM: {type: Boolean, default: false},
+ *          CQM: {type: Boolean, default: false}
+ *      },
+ *      base: {
+ *          viceAM: {type: Boolean, default: false},
+ *          supervisor: {type: Boolean, default: false}
+ *      },
+ *  },
+ *  occupation: {
+ *      pilot: {type: Boolean, default: false},
+ *      crew: {type: Boolean, default: false},
+ *      maintainer: {type: Boolean, default: false}
+ *  }
+ * }
+ * 
+ */
+
 exports.personnelSchema = new mongoose.Schema({
     _id: ObjectId,
     idTelegram: String,
@@ -100,6 +124,9 @@ exports.dronesSchema = new mongoose.Schema({
     type: String,
     airOperator: {type: ObjectId, ref: 'air_operator'},
     base: {type: ObjectId, ref: 'base'},
+    /* Inserire campo batteryTypes se si vuole tenere traccia dei tipi di batterie usabili */
+    /* oppure aggiungere campo batteryCodes se si vuole tenere traccia delle specifiche batterie */
+    /* oppure ignorare il problema */
     state: {
         availability: Number, /* 0 -> Disponibile, 1 -> In Uso, 2 -> In manutenzione */
         generalState: String, /* Potrebbe non servire */
@@ -111,6 +138,12 @@ exports.dronesSchema = new mongoose.Schema({
         completed: [{type: ObjectId, default: [], ref: 'mission'}],
         waitingForQtb: [{type: ObjectId, default: [], ref: 'mission'}] /* Missioni per cui non è ancora stato inserito un QTB */
     }
+});
+
+exports.batterySchema = new mongoose.Schema({
+    _id: ObjectId,
+    code: {type: String, unique: true},
+    type: String
 });
 
 exports.missionsSchema = new mongoose.Schema({
