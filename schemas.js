@@ -72,7 +72,7 @@ exports.personnelSchema = new mongoose.Schema({
             maxMissionRank: {type: String, default: null},
             expiring: {type: Date, default: null}
         },
-        droneTypes: [{type: String, default: null}]
+        droneTypes: [{type: String, default: []}]
     },
     missions: {
         supervisor:  {
@@ -128,11 +128,11 @@ exports.dronesSchema = new mongoose.Schema({
     /* oppure aggiungere campo batteryCodes se si vuole tenere traccia delle specifiche batterie */
     /* oppure ignorare il problema */
     state: {
-        availability: Number, /* 0 -> Disponibile, 1 -> In Uso, 2 -> In manutenzione */
+        availability: {type: Number, default: 0}, /* 0 -> Disponibile, 1 -> In Uso, 2 -> In manutenzione */
         generalState: String, /* Potrebbe non servire */
         lastMaintenance: Date,
-        flightTimeSinceLastMaintenance: Number, /* Aggiornato ogni qual volta viene inserito un QTB, campo utilizzato per verificare lo stato di usura */
-        notes: String
+        flightTimeSinceLastMaintenance: Number, /* Aggiornato ogni qual volta viene inserito un QTB e azzerato ad ogni manutenzione, campo utilizzato per verificare lo stato di usura */
+        notes: String                           /* Il campo sopra potrebbe essere azzerato nel momento in cui viene modificato il campo lastMaintenance */
     },
     missions: {
         completed: [{type: ObjectId, default: [], ref: 'mission'}],
@@ -149,24 +149,24 @@ exports.batterySchema = new mongoose.Schema({
 exports.missionsSchema = new mongoose.Schema({
     id: ObjectId,
     date: Date,
-    type: String,
+    type: String, /* Potrebbe essere cancellato in quanto esiste il campo rank più preciso */
     base: {type: ObjectId, ref: 'base'},
     supervisor: {type: ObjectId, ref: 'personnel'},
-    status: Number, /* 0 -> Instantiated, 1 -> Pending, 2 -> Running, 3 -> Completed */
+    status: {type: Number, default: 0}, /* 0 -> Instantiated, 1 -> Pending, 2 -> Running, 3 -> Completed */
     pilots: {
-        notified: [{type: ObjectId, ref: 'personnel'}],
-        accepted: [{type: ObjectId, ref: 'personnel'}], /* Nome del campo da rivedere */
-        chosen: [{type: ObjectId, ref: 'personnel'}] /* Nome del campo da rivedere */
+        notified: [{type: ObjectId, ref: 'personnel', default: []}],
+        accepted: [{type: ObjectId, ref: 'personnel', default: []}], /* Nome del campo da rivedere */
+        chosen: [{type: ObjectId, ref: 'personnel', default: []}] /* Nome del campo da rivedere */
     },
     crew: {
-        notified: [{type: ObjectId, ref: 'personnel'}],
-        accepted: [{type: ObjectId, ref: 'personnel'}], /* Nome del campo da rivedere */
-        chosen: [{type: ObjectId, ref: 'personnel'}] /* Nome del campo da rivedere */
+        notified: [{type: ObjectId, ref: 'personnel', default: []}],
+        accepted: [{type: ObjectId, ref: 'personnel', default: []}], /* Nome del campo da rivedere */
+        chosen: [{type: ObjectId, ref: 'personnel', default: []}] /* Nome del campo da rivedere */
     },
     mainteiners: {
-        notified: [{type: ObjectId, ref: 'personnel'}],
-        accepted: [{type: ObjectId, ref: 'personnel'}], /* Nome del campo da rivedere */
-        chosen: [{type: ObjectId, ref: 'personnel'}] /* Nome del campo da rivedere */
+        notified: [{type: ObjectId, ref: 'personnel', default: []}],
+        accepted: [{type: ObjectId, ref: 'personnel', default: []}], /* Nome del campo da rivedere */
+        chosen: [{type: ObjectId, ref: 'personnel', default: []}] /* Nome del campo da rivedere */
     },
     description: {
         duration: { /* Durata della missione, può differire dai tempi di volo */
@@ -174,17 +174,17 @@ exports.missionsSchema = new mongoose.Schema({
             effectiveDuration: Number
         },
         rank: Number, /* Difficoltà della missione (0 -> 5) */
-        flightPlan: String,
+        flightPlan: String, /* Presumibilemente sarà un riferimento ad un documento come il Logbook */
         notes: String
     },
-    drones: [{type: ObjectId, ref: 'drone'}],
+    drones: [{type: ObjectId, ref: 'drone', default: []}],
     teams: [{
         pilots: {
-            chief: {type: ObjectId, ref: 'personnel'},
-            co: {type: ObjectId, ref: 'personnel'}
+            chief: {type: ObjectId, ref: 'personnel', default: []},
+            co: {type: ObjectId, ref: 'personnel', default: []}
         },
-        crew: [{type: ObjectId, ref: 'personnel'}],
-        maintainers: [{type: ObjectId, ref: 'personnel'}]
+        crew: [{type: ObjectId, ref: 'personnel', default: []}],
+        maintainers: [{type: ObjectId, ref: 'personnel', default: []}]
     }],
     logbooks: [{type: ObjectId, default: [], ref: 'logbook'}],
     qtb: [{type: ObjectId, default: [], ref: 'qtb'}]
