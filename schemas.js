@@ -22,7 +22,10 @@ exports.airOperatorSchema = new mongoose.Schema({
 });
 
 /* 
- * Nuova proposta di modifica per Personnel
+ * * Nuova proposta di modifica per Personnel *
+ * 
+ * Lo scopo è di ridurre l'utilizzo di stringhe per identificare i ruoli 
+ * onde evitare errori di battitura
  * 
  * roles: {
  *  command: {
@@ -107,8 +110,8 @@ exports.basesSchema = new mongoose.Schema({
         }
     },
     roles: {
-        ViceAM: {type: ObjectId, default: null, ref: 'personnel'},
-        BaseSupervisor: {type: ObjectId, default: null, ref: 'personnel'}
+        viceAM: {type: ObjectId, default: null, ref: 'personnel'},
+        baseSupervisor: {type: ObjectId, default: null, ref: 'personnel'}
     },
     staff: {
         pilots: [{type: ObjectId, default: [], ref: 'personnel'}],
@@ -118,6 +121,7 @@ exports.basesSchema = new mongoose.Schema({
     drones: [{type: ObjectId, default: [], ref: 'drone'}]
 });
 
+/* * Proposta di modifica per lo schema Droni riguardo a gestione batterie * */
 exports.dronesSchema = new mongoose.Schema({
     _id: ObjectId,
     number: {type: String, unique: true}, /* Non sapendo se sia numerico o alfanumerico */
@@ -140,6 +144,7 @@ exports.dronesSchema = new mongoose.Schema({
     }
 });
 
+/* * Aggiunto schema Battery, leggere sopra * */
 exports.batterySchema = new mongoose.Schema({
     _id: ObjectId,
     code: {type: String, unique: true},
