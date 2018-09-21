@@ -3,14 +3,14 @@
 ## Creazione
 1. Viene generata una missione da un BaseSupervisor
     La missione deve avere:
-    a. Una base
-    b. Un supervisore
-    c. Una data
-    d. Un tipo
-    e. Un rango
-    f. Un piano di volo
-    g. Una durata prevista
-    h. Una lista di droni
+    1. Una base
+    2. Un supervisore
+    3. Una data
+    4. Un tipo
+    5. Un rango
+    6. Un piano di volo
+    7. Una durata prevista
+    8. Una lista di droni
 2. La *missione* ha, a questo puntoto, sato __Instantiated__ ed è aggiunta alle Pending Missions del Supervisore di base
 
 ## Notifica equipaggio
