@@ -86,8 +86,8 @@ exports.Base = Base = {
           }
         },
         roles: {
-          ViceAM: aViceAM,
-          BaseSupervisor: aBaseSupervisor
+          viceAM: aViceAM,
+          baseSupervisor: aBaseSupervisor
         },
         staff: {
           pilots: aPilots,
@@ -218,10 +218,11 @@ exports.Personnel = Personnel = {
             AirOperator.updateById(personnel.airOperator, {'roles.CQM': personnel._id});
           if (personnel.roles.command.airOperator.includes('SM'))
             AirOperator.updateById(personnel.airOperator, {'roles.SM': personnel._id});
-          if (personnel.roles.command.base.includes('ViceAM'))
-            Base.updateById(personnel.base, {'roles.ViceAM': personnel._id});
-          if (personnel.roles.command.base.includes('BaseSupervisor'))
-            Base.updateById(personnel.base, {'roles.BaseSupervisor': personnel._id});
+
+          if (personnel.roles.command.base.includes('viceAM'))
+            Base.updateById(personnel.base, {'roles.viceAM': personnel._id});
+          if (personnel.roles.command.base.includes('baseSupervisor'))
+            Base.updateById(personnel.base, {'roles.baseSupervisor': personnel._id});
         });
       });
     });
