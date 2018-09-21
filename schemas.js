@@ -152,7 +152,7 @@ exports.missionsSchema = new mongoose.Schema({
     type: String, /* Potrebbe essere cancellato in quanto esiste il campo rank più preciso */
     base: {type: ObjectId, ref: 'base'},
     supervisor: {type: ObjectId, ref: 'personnel'},
-    status: {type: Number, default: 0}, /* 0 -> Instantiated, 1 -> Pending, 2 -> Running, 3 -> Completed */
+    status: {type: Number, default: 0}, /* 0 -> Instantiated, 1 -> Pending, 2 -> Running, 3 -> Completed, 4 -> Completed and documented */
     pilots: {
         notified: [{type: ObjectId, ref: 'personnel', default: []}],
         accepted: [{type: ObjectId, ref: 'personnel', default: []}], /* Nome del campo da rivedere */
