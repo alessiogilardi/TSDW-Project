@@ -361,8 +361,8 @@ exports.Mission = Mission = {
                             },
                             description: {
                                 duration: { /* Durata della missione, può differire dai tempi di volo */
-                                    expectedDuration: aExpectedDuration,
-                                    effectiveDuration: null
+                                    expected: aExpectedDuration,
+                                    effective: null
                                 },
                                 rank: aRank, /* Difficoltà della missione (0 -> 5) */
                                 flightPlan: aFlightPlan, /* Presumibilemente sarà un riferimento ad un documento come il Logbook */

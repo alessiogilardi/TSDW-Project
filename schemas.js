@@ -175,8 +175,8 @@ exports.missionsSchema = new mongoose.Schema({
     },
     description: {
         duration: { /* Durata della missione, può differire dai tempi di volo */
-            expectedDuration: Number,
-            effectiveDuration: Number
+            expected: Number,
+            effective: Number
         },
         rank: Number, /* Difficoltà della missione (0 -> 5) */
         flightPlan: String, /* Presumibilemente sarà un riferimento ad un documento come il Logbook */
