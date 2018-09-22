@@ -330,71 +330,70 @@ exports.Drone = Drone = {
 };
 
 exports.Mission = Mission = {
-    insert: (aDate, aType, aBaseName, aSupervisorCf, aExpectedDuration, aRank, aFlightPlan, aNotes, aDrones) => {
-        Personnel.findByCf(aSupervisorCf, '_id, roles', (err, aSupervisor) => {
-                Base.findByName(aBaseName, '_id', (err, aBase) => {
+  insert: (aDate, aType, aBaseName, aSupervisorCf, aExpectedDuration, aRank, aFlightPlan, aNotes, aDrones) => {
+    Personnel.findByCf(aSupervisorCf, '_id, roles', (err, aSupervisor) => {
+      Base.findByName(aBaseName, '_id', (err, aBase) => {
                     
-                    /* Controllo che chi inserisce la missione sia supervisore nella base specificata */
-                    if (aSupervisor.roles.command.base.includes('supervisor') && 
-                        aSupervisor._id === aBase.roles.BaseSupervisor) {
-                        new models.Mission({
-                            id: mongoose.Types.ObjectId(),
-                            date: aDate,
-                            type: aType, /* Potrebbe essere cancellato in quanto esiste il campo rank più preciso */
-                            base: aBase._id,
-                            supervisor: aSupervisor._id,
-                            status: 0, /* 0 -> Instantiated, 1 -> Pending, 2 -> Running, 3 -> Completed */
-                            pilots: {
-                                notified: [],
-                                accepted: [], 
-                                chosen: []
-                            },
-                            crew: {
-                                notified: [],
-                                accepted: [],
-                                chosen: []
-                            },
-                            mainteiners: {
-                                notified: [],
-                                accepted: [],
-                                chosen: []
-                            },
-                            description: {
-                                duration: { /* Durata della missione, può differire dai tempi di volo */
-                                    expected: aExpectedDuration,
-                                    effective: null
-                                },
-                                rank: aRank, /* Difficoltà della missione (0 -> 5) */
-                                flightPlan: aFlightPlan, /* Presumibilemente sarà un riferimento ad un documento come il Logbook */
-                                notes: aNotes
-                            },
-                            drones: aDrones,
-                            teams: [{
-                                pilots: {
-                                    chief: null,
-                                    co: null
-                                },
-                                crew: [],
-                                maintainers: [] /* Necessari se la missione ha expectedDuration superiore alle 3h */
-                            }],
-                            logbooks: [],
-                            qtb: []
-                        }).save((err, mission) => {
-                            if (err)
-                                return console.log(err);
+        /* Controllo che chi inserisce la missione sia supervisore nella base specificata */
+        if (aSupervisor.roles.command.base.includes('supervisor') && 
+            aSupervisor._id === aBase.roles.BaseSupervisor) {
+          new models.Mission({
+            id: mongoose.Types.ObjectId(),
+            date: aDate,
+            type: aType, /* Potrebbe essere cancellato in quanto esiste il campo rank più preciso */
+            base: aBase._id,
+            supervisor: aSupervisor._id,
+            status: 0, /* 0 -> Instantiated, 1 -> Pending, 2 -> Running, 3 -> Completed */
+            pilots: {
+              notified: [],
+              accepted: [], 
+              chosen: []
+            },
+            crew: {
+              notified: [],
+              accepted: [],
+              chosen: []
+            },
+            mainteiners: {
+              notified: [],
+              accepted: [],
+              chosen: []
+            },
+            description: {
+              duration: { /* Durata della missione, può differire dai tempi di volo */
+                expected: aExpectedDuration,
+                effective: null
+              },
+              rank: aRank, /* Difficoltà della missione (0 -> 5) */
+              flightPlan: aFlightPlan, /* Presumibilemente sarà un riferimento ad un documento come il Logbook */
+              notes: aNotes
+            },
+            drones: aDrones,
+            teams: [{
+              pilots: {
+                chief: null,
+                co: null
+              },
+              crew: [],
+              maintainers: [] /* Necessari se la missione ha expectedDuration superiore alle 3h */
+            }],
+            logbooks: [],
+            qtb: []
+          }).save((err, mission) => {
+            if (err)
+              return console.log(err);
                         
-                        // Inserisco una pendingMission al supervisore della base che l'ha richiesta, 
-                        // in questo modo potrà selezionare in un momento successivo personale e droni
-                            Personnel.updateById(mission.supervisor, {$push: {'missions.supervisor.pending': mission._id}});
-                        
-                        // Dovrebbe essere reso comprensibile se una pendingMission in Personnel sia 
-                        // di un supervisore che deve finire di definire squadra e droni o
-                        // di un pilota che ancora non ha inserito il Logbook
-                    
-                        });
-                    }
-                });
-        });
+            // Inserisco una pendingMission al supervisore della base che l'ha richiesta, 
+            // in questo modo potrà selezionare in un momento successivo personale e droni
+                Personnel.updateById(mission.supervisor, {$push: {'missions.supervisor.pending': mission._id}});
+            
+            // Dovrebbe essere reso comprensibile se una pendingMission in Personnel sia 
+            // di un supervisore che deve finire di definire squadra e droni o
+            // di un pilota che ancora non ha inserito il Logbook
+          });
+        }
+      });
+    });
     
   },
 
