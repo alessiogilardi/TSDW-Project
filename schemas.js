@@ -21,36 +21,9 @@ exports.airOperatorSchema = new mongoose.Schema({
   bases: [{type: ObjectId, default: [], ref: 'base'}]
 });
 
-/* 
- * * Nuova proposta di modifica per Personnel *
- * 
- * Lo scopo è di ridurre l'utilizzo di stringhe per identificare i ruoli 
- * onde evitare errori di battitura
- * 
- * roles: {
- *  command: {
- *      airOperator: {
- *          AM: {type: Boolean, defaulf: false},
- *          SM: {type: Boolean, default: false},
- *          CQM: {type: Boolean, default: false}
- *      },
- *      base: {
- *          viceAM: {type: Boolean, default: false},
- *          supervisor: {type: Boolean, default: false}
- *      },
- *  },
- *  occupation: {
- *      pilot: {type: Boolean, default: false},
- *      crew: {type: Boolean, default: false},
- *      maintainer: {type: Boolean, default: false}
- *  }
- * }
- * 
- */
-
 exports.personnelSchema = new mongoose.Schema({
     _id: ObjectId,
-    idTelegram: String,
+    idTelegram: {type: Number, unique: true},
     name: String,
     surname: String,
     cf: {type: String, unique: true},
@@ -63,16 +36,27 @@ exports.personnelSchema = new mongoose.Schema({
     base: {type: ObjectId, ref: 'base'},
     roles: {
         command: {
-            airOperator: {type: String, default: []}, // AM, CQM, SM
-            base: [{type: String, default: []}] // ViceAM, Supervisor
+            airOperator: {
+                AM: {type: Boolean, defaulf: false},
+                SM: {type: Boolean, default: false},
+                CQM: {type: Boolean, default: false}
+            },
+            base: {
+                viceAM: {type: Boolean, default: false},
+                supervisor: {type: Boolean, default: false}
+            },
         },
-        occupation: [String] // pilot, crew, maintainer
+        occupation: {
+            pilot: {type: Boolean, default: false},
+            crew: {type: Boolean, default: false},
+            maintainer: {type: Boolean, default: false}
+        }
     },
     pilot: {
         license: {
             id: {type: String, default: null},
             type: {type: String, default: null},
-            maxMissionRank: {type: String, default: null},
+            maxMissionRank: {type: Number, default: null},
             expiring: {type: Date, default: null}
         },
         droneTypes: [{type: String, default: []}]
@@ -111,7 +95,7 @@ exports.basesSchema = new mongoose.Schema({
     },
     roles: {
         viceAM: {type: ObjectId, default: null, ref: 'personnel'},
-        baseSupervisor: {type: ObjectId, default: null, ref: 'personnel'}
+        supervisor: {type: ObjectId, default: null, ref: 'personnel'}
     },
     staff: {
         pilots: [{type: ObjectId, default: [], ref: 'personnel'}],
@@ -128,9 +112,7 @@ exports.dronesSchema = new mongoose.Schema({
     type: String,
     airOperator: {type: ObjectId, ref: 'air_operator'},
     base: {type: ObjectId, ref: 'base'},
-    /* Inserire campo batteryTypes se si vuole tenere traccia dei tipi di batterie usabili */
-    /* oppure aggiungere campo batteryCodes se si vuole tenere traccia delle specifiche batterie */
-    /* oppure ignorare il problema */
+    batteryTypes: [{type: String, ref: 'battery'}],
     state: {
         availability: {type: Number, default: 0}, /* 0 -> Disponibile, 1 -> In Uso, 2 -> In manutenzione */
         generalState: String, /* Potrebbe non servire */
@@ -148,7 +130,7 @@ exports.dronesSchema = new mongoose.Schema({
 exports.batterySchema = new mongoose.Schema({
     _id: ObjectId,
     code: {type: String, unique: true},
-    type: String
+    type: {type: String, ref: 'drone'}
 });
 
 exports.missionsSchema = new mongoose.Schema({
