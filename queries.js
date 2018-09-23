@@ -276,8 +276,8 @@ exports.Drone = Drone = {
 
 exports.Battery = Battery = {
     insert: aBattery => {
-        new models.Battery(aBattery)
         aBattery._id = mongoose.Types.ObjectId();
+        new models.Battery(aBattery)
         .save((err, battery) => {
 
         });
