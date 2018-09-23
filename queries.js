@@ -266,40 +266,90 @@ exports.Drone = Drone = {
 };
 
 exports.Mission = Mission = {
-    /**
-     * L'inseriemento di una Missione è demandato ad un Supervisore di base mediante Telegram.
-     * Quindi presumibilmente posso trovare Supervisor._id e Base._id dal id Telegram
-     * 
-     * Questi dati vanno trovati prima di inseire la Missione
-     */
     insert: aMission => {
+        new models.Mission(aMission)
+        .save((err, mission) => {
+            if (err)
+                return console.log(err);
+            // Viene aggiunta la missione alle pending missions del Supervisor
+            Personnel.updateById(mission.supervisor, {$push: {'missions.supervisor.pending': mission._id}});   
+        });
 
     },
 
-    insert_OLD: (aMission) => {
-        Personnel.findByCf(aMission.supervisor, '_id, roles', aSupervisor => {
-            Base.findByName(aMission.base, '_id, roles', aBase => {
-                /* Controllo che chi inserisce la missione sia supervisore nella base specificata */
-                if (aSupervisor.roles.command.base.supervisor && 
-                        aSupervisor._id === aBase.roles.supervisor) {
-                    aMission._id = mongoose.Types.ObjectId();
-                    aMission.supervisor = aSupervisor._id;
-                    aMission.base = aBase._id;
-                    new models.Mission(aMission)
-                    .save((err, mission) => {
-                        if (err)
-                            return console.log(err);
-
-                        // Inserisco una pendingMission al supervisore della base che l'ha richiesta, 
-                        // in questo modo potrà selezionare in un momento successivo personale e droni
-                        Personnel.updateById(mission.supervisor, {$push: {'missions.supervisor.pending': mission._id}});
-
-                        // Dovrebbe essere reso comprensibile se una pendingMission in Personnel sia 
-                        // di un supervisore che deve finire di definire squadra e droni o
-                        // di un pilota che ancora non ha inserito il Logbook
-                    });
-                }
-            });
+    updateById: (aId, newValues) => {
+        models.Mission.updateOne({_id: aId}, newValues, err => {
+            if (err)
+                return console.log(err);
         });
+    },
+
+    findById: (aId, projection, callback) => {
+        models.Mission.findOne()
+        .where('_id').equals(aId)
+        .select(projection)
+        .exec((err, mission) => {
+            callback(mission);
+        });
+    },
+
+    /* Funzioni per aggiungere personale ai Notificati */
+    setPilotNotified: (aMissionId, aPilotId) => {
+        // Assicurarsi prima che aPilotId corrisponda effettivamente a un pilota
+        Mission.updateById(aMissionId, {$push: {'pilots.notified': aPilotId}});
+    },
+
+    setCrewNotified: (aMissionId, aCrewId) => {
+        Mission.updateById(aMissionId, {$push: {'crew.notified': aCrewId}});
+    },
+
+    setMaintainerNotified: (aMissionId, aMaintainerId) => {
+        Mission.updateById(aMissionId, {$push: {'maintainer.notified': aMaintainerId}});
+    },
+
+    /* Funzioni per aggiungere personale agli Accepted */
+    setPilotAccepted: (aMissionId, aPilotId) => {
+        Mission.updateById(aMissionId, {$pull: {'pilots.notified': aPilotId}});
+        Mission.updateById(aMissionId, {$push: {'pilots.accepted': aPilotId}});
+    },
+
+    setCrewAccepted: (aMissionId, aCrewId) => {
+        Mission.updateById(aMissionId, {$pull: {'crew.notified': aCrewId}});
+        Mission.updateById(aMissionId, {$push: {'crew.accepted': aCrewId}});
+    },
+    
+    setMaintainerAccepted: (aMissionId, aMaintainerId) => {
+        Mission.updateById(aMissionId, {$pull: {'maintainers.notified': aMaintainerId}});
+        Mission.updateById(aMissionId, {$push: {'maintainers.accepted': aMaintainerId}});
+    },
+
+    /* Funzioni per aggiungere personale ai Chosen */
+    setPilotChosen: (aMissionId, aPilotId) => {
+        Mission.updateById(aMissionId, {$pull: {'pilots.accepted': aPilotId}});
+        Mission.updateById(aMissionId, {$push: {'pilots.chosen': aPilotId}});
+    },
+
+    setCrewChosen: (aMissionId, aCrewId) => {
+        Mission.updateById(aMissionId, {$pull: {'crew.accepted': aCrewId}});
+        Mission.updateById(aMissionId, {$push: {'crew.chosen': aCrewId}});
+    },
+    
+    setMaintainerChosen: (aMissionId, aMaintainerId) => {
+        Mission.updateById(aMissionId, {$pull: {'maintainers.accepted': aMaintainerId}});
+        Mission.updateById(aMissionId, {$push: {'maintainers.chosen': aMaintainerId}});
+    },
+
+    findByIdSync: (aId, projection) => {
+        var ret = null;
+        models.Mission.findOne()
+        .where('_id').equals(aId)
+        .select(projection)
+        .exec((err, doc) => {
+            ret = doc;
+        });
+
+        while (ret == null)
+            deasync.runLoopOnce();
+        return ret;
     }
 };
