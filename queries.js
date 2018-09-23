@@ -209,7 +209,7 @@ exports.Personnel = Personnel = {
 
 exports.Drone = Drone = {
     insert: aDrone => {
-        AirOperator.findByName(aDone.airOperator, '_id', aAirOperator => {
+        AirOperator.findByName(aDrone.airOperator, '_id', aAirOperator => {
             Base.findByName(aDrone.base, '_id', aBase => {
                 aDrone._id = mongoose.Types.ObjectId();
                 aDrone.airOperator = aAirOperator._id;
@@ -388,7 +388,7 @@ exports.Logbook = Logbook = {
     },
 
     updateById: (aId, newValues) => {
-        models.Logbook.updateOne({_id: aId}, newValues);
+        models.Logbook.updateOne({_id: aId}, newValues, err => {});
     },
 
     findById: (aId, projection, callback) => {
@@ -427,7 +427,7 @@ exports.Qtb = Qtb = {
     },
 
     updateById: (aId, newValues) => {
-        models.Qtb.updateOne({_id: aId}, newValues);
+        models.Qtb.updateOne({_id: aId}, newValues, err => {});
     },
 
     findById: (aId, projection, callback) => {
