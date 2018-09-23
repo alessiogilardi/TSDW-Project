@@ -120,13 +120,13 @@ exports.Personnel = [{
 },
 {
     _id: null,
-    idTelegram: 9874,
-    name: 'Tizio',
-    surname: 'DUE',
+    idTelegram: 350400256,
+    name: 'Alessio',
+    surname: 'Bollea',
     cf: '5698',
     location: {
         country: 'Italy',
-        city: 'Imperia',
+        city: 'Genoa',
         address: '12353'
     },
     airOperator: 'eurodrone',
