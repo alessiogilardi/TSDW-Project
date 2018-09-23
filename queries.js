@@ -313,6 +313,10 @@ exports.Mission = Mission = {
         });
     },
 
+    setStatus: (aId, aStatus) => {
+        Mission.updateById(aId, {status: aStatus});
+    },
+
     /* Funzioni per aggiungere personale ai Notificati */
     setPilotNotified: (aMissionId, aPilotId) => {
         // Assicurarsi prima che aPilotId corrisponda effettivamente a un pilota
