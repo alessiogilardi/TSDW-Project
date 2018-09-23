@@ -5,7 +5,7 @@ const queries = require('./queries.js');
 const deasync = require('deasync');
 
 const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN);
-
+bot.context.prova = 0;
 // Dizionario che contiene per ogni ruolo la lista di operazioni (uniche) che può fare (probabilmente inutile, ma memorizza tutti i comandi esistenti e chi li può eseguire)
 var role_to_operation = {
 	AM: ['/requestMission'],
@@ -17,8 +17,8 @@ var role_to_operation = {
 bot.start((ctx) => ctx.reply('Telegram bot started!'));
 bot.help((ctx) => ctx.reply('Command list: '+findPermissions(ctx)));
 bot.hears('Hi', (ctx) => {
-    ctx.reply('Hey there');
-    ctx.telegram.sendMessage(ctx.message.from.id, 'Ciao '+ctx.message.from.id);
+	ctx.reply(ctx.prova);
+	bot.context.prova = bot.context.prova + 1;
 });
 
 bot.startPolling();
