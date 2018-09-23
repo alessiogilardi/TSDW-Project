@@ -3,9 +3,11 @@ const Telegraf = require('telegraf');
 require('./db-connect.js').connect();
 const queries = require('./queries.js');
 const deasync = require('deasync');
+const session = require('telegraf/session')
 
 const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN);
 bot.context.prova = 0;
+bot.use(session());
 // Dizionario che contiene per ogni ruolo la lista di operazioni (uniche) che può fare (probabilmente inutile, ma memorizza tutti i comandi esistenti e chi li può eseguire)
 var role_to_operation = {
 	AM: ['/requestMission'],
@@ -17,8 +19,9 @@ var role_to_operation = {
 bot.start((ctx) => ctx.reply('Telegram bot started!'));
 bot.help((ctx) => ctx.reply('Command list: '+findPermissions(ctx)));
 bot.hears('Hi', (ctx) => {
-	ctx.reply(ctx.prova);
-	bot.context.prova = bot.context.prova + 1;
+	ctx.session.pippo = ctx.session.pippo || 0;
+  	ctx.session.pippo++;
+  	return ctx.reply('Message counter: ' + ctx.session.pippo);
 });
 
 bot.startPolling();
