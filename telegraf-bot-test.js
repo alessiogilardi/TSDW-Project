@@ -1,6 +1,8 @@
 require('dotenv').config();
 const Telegraf = require('telegraf');
+require('./db-connect.js').connect();
 const queries = require('./queries.js');
+const deasync = require('deasync');
 
 const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN);
 
@@ -26,8 +28,6 @@ findPermissions = (ctx) => {
 	// Recupero il documento della persona a partire dal suo id telegram
 	projection = 'roles.command.airOperator.AM roles.command.base.supervisor roles.occupation.pilot roles.occupation.crew';
 	queries.Personnel.findByIdTelegram(ctx.message.from.id, projection, aPerson => {
-		console.log(aPerson);
-		console.log('entrato');
 		if (aPerson.roles.command.airOperator.AM)
 			Array.prototype.push.apply(commandList, role_to_operation.AM)
 		if (aPerson.roles.command.base.supervisor)
@@ -37,6 +37,8 @@ findPermissions = (ctx) => {
 		if (aPerson.roles.occupation.pilot || aPerson.roles.occupation.crew)
 			Array.prototype.push.apply(commandList, role_to_operation.crew)
 	});
-	//console.log(commandList);
+	while (commandList.length === 0)
+		deasync.runLoopOnce();
+	console.log(commandList);
 	return commandList;																			// non può funzionare per il solito motivo
 };
