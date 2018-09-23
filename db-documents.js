@@ -214,7 +214,19 @@ exports.Drones = [{
     base: 'Base2',
     batteryTypes: ['AA'],
     state: {
-        generalState: 'OK', /* Potrebbe non servire */
+        lastMaintenance: new Date(),
+        flightTimeSinceLastMaintenance: 0, /* Aggiornato ogni qual volta viene inserito un QTB e azzerato ad ogni manutenzione, campo utilizzato per verificare lo stato di usura */
+        notes: null                           /* Il campo sopra potrebbe essere azzerato nel momento in cui viene modificato il campo lastMaintenance */
+    }
+},
+{
+    _id: null,
+    number: 'bbb111',
+    type: 'type',
+    airOperator: 'eurodrone',
+    base: 'Base2',
+    batteryTypes: ['AA'],
+    state: {
         lastMaintenance: new Date(),
         flightTimeSinceLastMaintenance: 0, /* Aggiornato ogni qual volta viene inserito un QTB e azzerato ad ogni manutenzione, campo utilizzato per verificare lo stato di usura */
         notes: null                           /* Il campo sopra potrebbe essere azzerato nel momento in cui viene modificato il campo lastMaintenance */
@@ -224,7 +236,6 @@ exports.Drones = [{
 exports.Missions = [{
     id: null,
     date: new Date(),
-    type: 'String', /* Potrebbe essere cancellato in quanto esiste il campo rank più preciso */
     base: 'Base1',
     supervisor: '12345', /* Il CF */
     description: {
