@@ -115,7 +115,7 @@ exports.dronesSchema = new mongoose.Schema({
     batteryTypes: [{type: String, ref: 'battery'}],
     state: {
         availability: {type: Number, default: 0}, /* 0 -> Disponibile, 1 -> In Uso, 2 -> In manutenzione */
-        generalState: String, /* Potrebbe non servire */
+        /* generalState: String, /* Potrebbe non servire */
         lastMaintenance: Date,
         flightTimeSinceLastMaintenance: Number, /* Aggiornato ogni qual volta viene inserito un QTB e azzerato ad ogni manutenzione, campo utilizzato per verificare lo stato di usura */
         notes: String                           /* Il campo sopra potrebbe essere azzerato nel momento in cui viene modificato il campo lastMaintenance */
@@ -136,7 +136,7 @@ exports.batterySchema = new mongoose.Schema({
 exports.missionsSchema = new mongoose.Schema({
     id: ObjectId,
     date: Date,
-    type: String, /* Potrebbe essere cancellato in quanto esiste il campo rank più preciso */
+    /* type: String, /* Potrebbe essere cancellato in quanto esiste il campo rank più preciso */
     base: {type: ObjectId, ref: 'base'},
     supervisor: {type: ObjectId, ref: 'personnel'},
     status: {type: Number, default: 0}, /* 0 -> Instantiated, 1 -> Pending, 2 -> Running, 3 -> Completed, 4 -> Completed and documented */
