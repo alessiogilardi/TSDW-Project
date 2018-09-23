@@ -182,6 +182,15 @@ exports.Personnel = Personnel = {
             callback(personnel);
         });
     },
+	
+	findByIdTelegram: (aIdTlg, projection, callback) => {
+        models.Personnel.findOne()
+        .where('idTelegram').equals(aIdTlg)
+        .select(projection)
+        .exec((err, personnel) => {
+            callback(personnel);
+        });
+    },
 
     findByCfSync: (aCf, projection) => {
         var ret = null;
