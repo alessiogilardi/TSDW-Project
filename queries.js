@@ -239,7 +239,16 @@ exports.Drone = Drone = {
         if (err)
             return console.log(err);
         console.log('Updated Drone with id: ' + aId);
-    });
+        });
+    },
+
+    findByType: (aType, projection, callback) => {
+        models.Drone.findOne()
+        .where('type').equals(aType)
+        .select(projection)
+        .exec((err, doc) => {
+            callback(doc);
+        });
     },
 
     findByNumber: (aNumber, projection, callback) => {
@@ -267,6 +276,7 @@ exports.Drone = Drone = {
 
 exports.Mission = Mission = {
     insert: aMission => {
+        aMission._id = mongoose.Types.ObjectId();
         new models.Mission(aMission)
         .save((err, mission) => {
             if (err)
@@ -342,6 +352,86 @@ exports.Mission = Mission = {
     findByIdSync: (aId, projection) => {
         var ret = null;
         models.Mission.findOne()
+        .where('_id').equals(aId)
+        .select(projection)
+        .exec((err, doc) => {
+            ret = doc;
+        });
+
+        while (ret == null)
+            deasync.runLoopOnce();
+        return ret;
+    }
+};
+
+exports.Logbook = Logbook = {
+    insert: aLogbook => {
+        aLogbook._id = mongoose.Types.ObjectId();
+        new models.Logbook(aLogbook)
+        .save((err, logbook) => {
+            // Aggiungo il logbook alla missione
+            Mission.updateById(logbook.mission, {$push: {logbooks: logbook._id}});
+            // Aggiungo la missione di cui è stato inserito il logbook tra le missioni completate del pilota che lo ha inserito
+            Personnel.updateById(logbook.pilot, {$pull: {'missions.pilot.waitingForLogbook': logbook.mission}});
+            Personnel.updateById(logbook.pilot, {$push: {'missions.pilot.completed': logbook.mission}});
+        });
+    },
+
+    updateById: (aId, newValues) => {
+        models.Logbook.updateOne({_id: aId}, newValues);
+    },
+
+    findById: (aId, projection, callback) => {
+        models.Logbook.findOne()
+        .where('_id').equals(aId)
+        .select(projection)
+        .exec((err, logbook) => {
+            callback(logbook);
+        });
+    },
+
+    findByIdSync: (aId, projection) => {
+        var ret = null;
+        models.Logbook.findOne()
+        .where('_id').equals(aId)
+        .select(projection)
+        .exec((err, doc) => {
+            ret = doc;
+        });
+
+        while (ret == null)
+            deasync.runLoopOnce();
+        return ret;
+    }
+};
+
+exports.Qtb = Qtb = {
+    insert: aQtb => {
+        aQtb._id = mongoose.Types.ObjectId();
+        new models.Qtb(aQtb)
+        .save((err, qtb) => {
+            Mission.updateById(qtb.mission, {$push: {qtb: qtb._id}});
+            Drone.updateById(qtb.drone, {$pull: {'missions.waitingForQtb': qtb.mission}});
+            Drone.updateById(qtb.drone, {$push: {'missions.completed': qtb.mission}});
+        });
+    },
+
+    updateById: (aId, newValues) => {
+        models.Qtb.updateOne({_id: aId}, newValues);
+    },
+
+    findById: (aId, projection, callback) => {
+        models.Qtb.findOne()
+        .where('_id').equals(aId)
+        .select(projection)
+        .exec((err, qtb) => {
+            callback(qtb);
+        });
+    },
+
+    findByIdSync: (aId, projection) => {
+        var ret = null;
+        models.Qtb.findOne()
         .where('_id').equals(aId)
         .select(projection)
         .exec((err, doc) => {
