@@ -274,6 +274,16 @@ exports.Drone = Drone = {
     }
 };
 
+exports.Battery = Battery = {
+    insert: aBattery => {
+        new models.Battery(aBattery)
+        aBattery._id = mongoose.Types.ObjectId();
+        .save((err, battery) => {
+
+        });
+    }
+};
+
 exports.Mission = Mission = {
     insert: aMission => {
         aMission._id = mongoose.Types.ObjectId();
