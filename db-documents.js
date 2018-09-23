@@ -160,6 +160,50 @@ exports.Personnel = [{
             completed: []
         },
     }
+},
+
+{
+    _id: null,
+    idTelegram: 33017299,
+    name: 'Alessio',
+    surname: 'Gilardi',
+    cf: 'GLRLSS91S13E463N',
+    location: {
+        country: 'Italy',
+        city: 'Genoa',
+        address: '12353'
+    },
+    airOperator: 'eurodrone',
+    base: 'Base2',
+    roles: {
+        command: {
+            airOperator: {
+                SM: true
+            }
+        },
+        occupation: {
+            pilot: true,
+            maintainer: true
+        }
+    },
+    pilot: {
+        license: {
+            id: 'lic-id-02',
+            type: 'type',
+            maxMissionRank: 4,
+            expiring: new Date()
+        },
+        droneTypes: ['AAA', 'bbb', 'CCC']
+    },
+    missions: {
+        supervisor:  {
+            completed: [],
+            pending: []
+        },
+        maintainers:  {
+            completed: []
+        },
+    }
 }];
 
 exports.Drones = [{
