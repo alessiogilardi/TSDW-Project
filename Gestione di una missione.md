@@ -11,7 +11,7 @@
     6. Un piano di volo
     7. Una durata prevista
     8. Una lista di droni
-2. La *missione* ha, a questo puntoto, sato __Instantiated__ ed è aggiunta alle Pending Missions del Supervisore di base
+2. La *missione* ha, a questo punto, sato __Instantiated__ ed è aggiunta alle Pending Missions del Supervisore di base
 
 ## Notifica equipaggio
 3. I *piloti* idonei, i *membri dell'equipaggio* e, nel caso, i *manutentori* vengono __notificati__
