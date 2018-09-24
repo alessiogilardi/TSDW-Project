@@ -5,15 +5,18 @@ const docs      = require('./db-documents.js');
 
 var mongoose = db.connect();
 
-//queries.AirOperator.insert('eurodrone', 'Italy', 'Genoa', 'Corso Europa 22');
+
 //queries.AirOperator.insert(docs.AirOperators[0]);
-//queries.Base.insert(docs.Bases[1]);
-//queries.Personnel.insert(docs.Personnel[0]);
-queries.Personnel.insert(docs.Personnel[1]);
+/*
+docs.Bases.forEach(base => {
+    queries.Base.insert(base);
+});
+*/
+docs.Personnel.forEach(person => {
+    queries.Personnel.insert(person);
+});
+//queries.Base.insert(docs.Bases[1])
 
-//queries.Base.insert2("Base 4", 'eurodrone' , "Italy", "La Speza", "22", "22");
-
-//queries.Personnel.insert('42', 'Alessio', 'Bollea', 'ilmiocf', 'Italy', 'Genoa', 'nonvelodico', 'eurodrone', 'Base 4', ['pilot','maintainer'], 'AM', ['ViceAM'], false, 'licId123', 'SuperLicenseType', 5, new Date(), 'LM');
-//aIdTelegram, aName, aSurname, aCf, aCountry, aCity, aAddress, aAirOperatorName, aBaseName, aOccupation, aAirOperatorRole = undefined, aBaseRole = undefined, aLocPermission = false, aLicenseId = undefined, aLicenseType = undefined, aLicenseMaxMissionRank = undefined, aLicenseExpireDate = undefined, aDroneTypes = undefined
-//queries.Drone.insert('1lm10dr0n3', 'Heavy', 'eurodrone', 'Base 4', 'Ready');
+//queries.Personnel.insert(docs.Personnel[1]);
+//queries.Personnel.findByIdTelegram(33017299, {}, aPerson => console.log(aPerson))
 
