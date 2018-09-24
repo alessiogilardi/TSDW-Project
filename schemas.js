@@ -33,7 +33,10 @@ exports.airOperatorSchema = new mongoose.Schema({
 
 exports.personnelSchema = new mongoose.Schema({
     _id: ObjectId,
-    idTelegram: {type: Number, unique: true},
+    telegramData: {
+        idTelegram: {type: Number, unique: true},
+        botStarted: {type: Boolean, default: false}
+    },
     name: String,
     surname: String,
     cf: {type: String, unique: true},
@@ -115,7 +118,6 @@ exports.basesSchema = new mongoose.Schema({
     drones: [{type: ObjectId, default: [], ref: 'drone'}]
 });
 
-/* * Proposta di modifica per lo schema Droni riguardo a gestione batterie * */
 exports.dronesSchema = new mongoose.Schema({
     _id: ObjectId,
     number: {type: String, unique: true}, /* Non sapendo se sia numerico o alfanumerico */
@@ -136,7 +138,6 @@ exports.dronesSchema = new mongoose.Schema({
     }
 });
 
-/* * Aggiunto schema Battery, leggere sopra * */
 exports.batterySchema = new mongoose.Schema({
     _id: ObjectId,
     code: {type: String, unique: true},
