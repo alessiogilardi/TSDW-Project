@@ -174,6 +174,14 @@ exports.Personnel = Personnel = {
         });
     },
 
+    updateByIdTelegram: (aIdTelegram, newValues) => {
+        models.Personnel.updateOne({'telegramData.idTelegram': aIdTelegram}, newValues, err => {
+            if (err)
+                return console.log(err);
+            console.log('Updated Personnel with idTelegram: ' + aIdTelegram);
+        });
+    },
+
     findByCf: (aCf, projection, callback) => {
         models.Personnel.findOne()
         .where('cf').equals(aCf)
@@ -183,9 +191,9 @@ exports.Personnel = Personnel = {
         });
     },
 	
-	findByIdTelegram: (aIdTlg, projection, callback) => {
+	findByIdTelegram: (aIdTelegram, projection, callback) => {
         models.Personnel.findOne()
-        .where('idTelegram').equals(aIdTlg)
+        .where('telegramData.idTelegram').equals(aIdTelegram)
         .select(projection)
         .exec((err, personnel) => {
             callback(personnel);
