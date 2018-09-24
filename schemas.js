@@ -2,6 +2,16 @@
  * Modulo che conserva i vari Schema della struttura del DB
 **/
 
+/**
+ * Proposta:
+ * Segnare su personnel dati sugli eventi di telegram
+ * Ad esempio il comando /start va registrato in modo che se rimandato venga ignorato
+ * 
+ * Altra cosa, quando inizia una chat con un utente caricherei in sessione dati utili all'utente
+ * ad esempio i permessi
+ * 
+ */
+
 const mongoose = require('mongoose');
 const ObjectId = mongoose.Schema.Types.ObjectId;
 
