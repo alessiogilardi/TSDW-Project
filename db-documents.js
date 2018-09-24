@@ -67,7 +67,9 @@ exports.Bases = [{
 
 exports.Personnel = [{
     _id: null,
-    idTelegram: 1234,
+    telegramData: {
+        idTelegram: 1234
+    },
     name: 'Tizio',
     surname: 'uno',
     cf: '12345',
@@ -120,7 +122,9 @@ exports.Personnel = [{
 },
 {
     _id: null,
-    idTelegram: 350400256,
+    telegramData: {
+        idTelegram: 350400256
+    },
     name: 'Alessio',
     surname: 'Bollea',
     cf: '5698',
@@ -164,7 +168,9 @@ exports.Personnel = [{
 
 {
     _id: null,
-    idTelegram: 33017299,
+    telegramData: {
+        idTelegram: 33017299
+    },
     name: 'Alessio',
     surname: 'Gilardi',
     cf: 'GLRLSS91S13E463N',
