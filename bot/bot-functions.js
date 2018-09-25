@@ -1,4 +1,4 @@
-const queries = require('./queries.js');
+const queries = require('../db/queries.js');
 
 const roleToOperation = {
 	AM:     ['/requestMission'],

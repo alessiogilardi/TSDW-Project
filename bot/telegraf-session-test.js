@@ -1,7 +1,7 @@
 require('dotenv').config();
 const Telegraf = require('telegraf');
-require('./db-connect.js').connect();
-const queries = require('./queries.js');
+require('./db/db-connect.js').connect();
+const queries = require('./db/queries.js');
 const deasync = require('deasync');
 const session = require('telegraf/session')
 const middleware = require('./telegraf-middleware');
