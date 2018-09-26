@@ -19,7 +19,7 @@ bot.use(middleware());
 const backtick = '\`';
 
 bot.start(ctx => {
-	if (!ctx.session.userData.telegramData.botstarted)
+	if (ctx.session.userData.telegramData.botStarted !== true)
 		ctx.reply(`Ciao ${ctx.message.from.first_name}!`)
 		.then(() => ctx.reply(`Command list:\n ${ctx.session.userData.commands.join('\n')}`))
 		.then(() => bf.setBotStarted(ctx.message.from.id))
@@ -38,19 +38,23 @@ bot.use(stage.middleware());
 // Definisco la scena per il comando
 const createMission = new Scene('createMission');
 createMission.enter(ctx => {
-	console.log(ctx.session);
-	ctx.session.command.name = 'createMission';
-	ctx.session.command.stage = 1;
-	ctx.session.command.params = {
-		baseId: undefined,
-		baseSupervisor: undefined,
-		date: undefined,
-		expectedDuration: undefined,
-		rank: undefined,
-		droneTypes: undefined,
-		drones: []
-	}
-	ctx.reply('Ok, inserisci la data della missione');
+	//console.log(ctx.session);
+	ctx.session.command = {
+		name: 'createMission',
+		stage: 1,
+		params: {
+			baseId: undefined,
+			baseSupervisor: undefined,
+			date: undefined,
+			expectedDuration: undefined,
+			rank: undefined,
+			droneTypes: undefined,
+			drones: []
+		}
+	};
+	ctx.reply('OK, inziamo la creazione di una nuova missione.\nTi verrà chiesto di iserire alcuni parametri')
+	.then(() => ctx.reply('Inserisci la data in cui verrà effettuata la missione:'))
+	.catch(err => console.log(err));
 });
 createMission.leave(ctx => {
 	ctx.session.command.name = undefined;
@@ -97,7 +101,7 @@ createMission.on('text', ctx => {
 });
 
 // Quando viene lanciato il comando /createMission registro la scena corrispondente e ci entro
-bot.command('createMission', ctx => {
+bot.command(['createMission', 'createmission'], ctx => {
 	stage.register(createMission);
 	ctx.scene.enter('createMission');
 });
