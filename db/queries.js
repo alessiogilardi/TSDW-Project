@@ -1,6 +1,8 @@
 const mongoose  = require('mongoose');
 const models    = require('./models.js');
 const deasync   = require('deasync');
+var events      = require('events');
+
 
 /**
  * Ho seri dubbi sugli inserimenti:
@@ -257,6 +259,19 @@ exports.Drone = Drone = {
         .exec((err, doc) => {
             callback(doc);
         });
+    },
+
+    findByTypeSync: (aType, projection = null) => {
+        var ret = null;
+        models.Drone.find()
+        .where('type').equals(aType)
+        .select(projection)
+        .exec((err, doc) => {
+            ret = doc;
+        });
+        while (ret == null)
+            deasync.runLoopOnce();
+        return ret;
     },
 
     findByNumber: (aNumber, projection, callback) => {
