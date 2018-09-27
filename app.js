@@ -8,12 +8,12 @@ const middleware = require('./bot/telegraf-middleware');
 const bf = require('./bot/bot-functions.js');
 const Stage = require('telegraf/stage')
 const Scene = require('telegraf/scenes/base')
-const WizardScene = require('telegraf/scenes/wizard/index')
+const createMission = require('./bot/commands/create-mission');
 const { enter, leave } = Stage
 
 const backtick = '\`';
 
-
+/*
 const createMission = new WizardScene('createMission',
     ctx => {
         ctx.reply('Bene, iniziamo la creazione della missione!\nTi ricordo che puoi annullare in qualsiasi momento usando il comando /cancel')
@@ -80,9 +80,9 @@ createMission.leave(ctx => {
     else
         ctx.reply('Creazione annullata');
 });
-
+*/
 const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN);
-const stage = new Stage([createMission]);
+const stage = new Stage([createMission])
 stage.command('cancel', leave())
 
 
@@ -101,19 +101,6 @@ bot.start(ctx => {
 });
 bot.help(ctx => ctx.reply(`Command list:\n ${ctx.session.userData.commands.join('\n')}`));
 bot.command(['createMission', 'createmission'], ctx => {
-    ctx.session.command = {
-		name: 'createMission',
-		stage: 1,
-		params: {
-			baseId: undefined,
-			baseSupervisor: undefined,
-			date: undefined,
-			expectedDuration: undefined,
-			rank: undefined,
-			droneTypes: undefined,
-			drones: []
-		}
-	};
 	ctx.scene.enter('createMission');
 });
 
