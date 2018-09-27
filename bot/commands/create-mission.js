@@ -1,4 +1,6 @@
 const WizardScene = require('telegraf/scenes/wizard/index')
+const Composer = require('telegraf/composer')
+
 
 const maxStages = 6
 const dataStructure = {
@@ -12,47 +14,110 @@ const dataStructure = {
         expectedDuration: undefined,
         rank: undefined,
         droneTypes: undefined,
-        drones: []
+        drones: {
+            loaded: [],
+            chosen: []
+        }
     }
 }
 
-// Ricreo la scena in modo più semplice
+// Quando cercherò i droni l'evento on text potrebbe scattare se si manda testo, 
+// prima di mettermi a cercare i droni potrei settare una variabile che faccia scartare l'eventuale input
+/*
+const stepOneHandler = new Composer()
+stepOneHandler.on('text', ctx => {
+    // Valore valido
+    if (ctx.message.text === 'data'){
+        ctx.session.command.params.date = ctx.message.text
+        ctx.reply('Inserisci la durata')
+        return ctx.wizard.next()
+    } else 
+        ctx.reply('Errore data, ripeti')
+})
 
+const stepTwoHandler = new Composer()
+stepTwoHandler.on('text', ctx => {
+    // Valore valido
+    if (ctx.message.text === 'durata'){
+        ctx.session.command.params.expectedDuration = ctx.message.text
+        ctx.reply('Inserisci il rank')
+        return ctx.wizard.next()
+    } else 
+        ctx.reply('Errore durata, ripeti')
+})
+
+const stepThreeHandler = new Composer()
+stepThreeHandler.on('text', ctx => {
+    // Valore valido
+    if (ctx.message.text === 'rank'){
+        ctx.session.command.params.rank = ctx.message.text
+        ctx.reply('Fine ha funzionato!!!')
+        return ctx.scene.leave()
+    } else 
+        ctx.reply('Errore rank, ripeti')
+})
+*/
+
+const stepHandlers = [
+    new Composer()
+    .on('text', ctx => {
+        if (!isDate(ctx.message.text)) {
+            ctx.reply('Reinserisci la data')
+            return
+        }
+        ctx.session.command.params.date = new Date(ctx.message.text)
+        ctx.reply('Inserisci la durata')
+        return ctx.wizard.next()
+    }),
+    new Composer()
+    .on('text', ctx => {
+        if (!isValidExpectedDuration(ctx.message.text)) {
+            ctx.reply('Reinserisci la durata')
+            return
+        }
+        ctx.session.command.params.expectedDuration = ctx.message.text
+        ctx.reply('Inserisci il Rank')
+        return ctx.wizard.next()
+    }),
+    new Composer()
+    .on('text', ctx => {
+        if (!isValidRank(ctx.message.text)) {
+            ctx.reply('Reinserisci il rank')
+            return
+        }
+        ctx.session.command.params.rank = ctx.message.text
+        /*********************** */
+        ctx.reply('Fine') // Da completare
+        return ctx.wizard.next()
+    })
+]
 const createMission = new WizardScene('createMission',
+    // Step 1: Data
     ctx => {
         ctx.session.command = dataStructure
-        console.log(ctx.session.command)
-        if (!ctx.session.command.error)
-            ctx.reply('Inserisci la data della missione')
-            .then(() => ctx.wizard.next())
-        else {
-            ctx.session.command.error = false
-            ctx.reply('Errore, reinserisci la data')
-            .then(() => ctx.wizard.next())
-            .catch(err => console.log(err))
-        }
+        ctx.reply('Si inizia, inserisci la data:')
+        // dalla sessione nel frattempo mi leggo i dati idSupervisore e idBase
+        return ctx.wizard.next()
     },
-    ctx => {
-        if (ctx.message.text == 'data'){
-            if (!ctx.session.command.error)
-                ctx.reply('Inserisci la durata della missione')
-                .then(() => ctx.wizard.next())
-            else {
-                ctx.session.command.error = false
-                ctx.reply('Errore, reinserisci la durata')
-                .then(() => ctx.wizard.next())
-                .catch(err => console.log(err))
-            }
-        } else {
-            ctx.session.command.error = true
-            ctx.wizard.back();
-            return ctx.wizard.steps[ctx.wizard.cursor](ctx); 
-        }
-    },
-    ctx => {
-        ctx.scene.leave();
-    }
+    stepOneHandler,
+    stepTwoHandler,
+    stepThreeHandler
 )
+
+
+createMission.leave(ctx => {
+    // Controllo il numero di stage e in base a quello capisco se l'inserimento è andato a buon fine
+    // o se è stato annullato
+    if (ctx.session.command.stage == maxStages)  // possibile sostituire con ctx.wizard.steps o qualcosa di simile
+        ctx.reply('Missione creata! Sarai riconattato')
+        .then(ctx.reply(JSON.stringify(ctx.session.command)))
+        .catch(err => console.log(err))
+    else
+        ctx.reply('Creazione annullata!');
+});
+
+
+module.exports = createMission
 
 
 
@@ -136,16 +201,3 @@ const createMission = new WizardScene('createMission',
     }
 )
 */
-createMission.leave(ctx => {
-    // Controllo il numero di stage e in base a quello capisco se l'inserimento è andato a buon fine
-    // o se è stato annullato
-    if (ctx.session.command.stage == maxStages)
-        ctx.reply('Missione creata!')
-        .then(ctx.reply(JSON.stringify(ctx.session.command)))
-        .catch(err => console.log(err))
-    else
-        ctx.reply('Creazione annullata!');
-});
-
-
-module.exports = createMission
