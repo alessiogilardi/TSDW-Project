@@ -1,12 +1,11 @@
 const WizardScene = require('telegraf/scenes/wizard/index')
 const Composer = require('telegraf/composer')
+const queries = require('../../db/queries')
 
-
-const maxStages = 6
 const dataStructure = {
     name: 'createMission',
-    stage: 1,
     error: false,
+    searching: false,
     params: {
         baseId: undefined,
         baseSupervisor: undefined,
@@ -59,19 +58,31 @@ stepThreeHandler.on('text', ctx => {
 */
 
 const stepHandlers = [
+    /*
+    // Uno
+    new Composer()
+    .use(ctx => {
+        console.log('Ciao')
+        ctx.session.command = dataStructure
+        return ctx.wizard.next()
+    }),*/
+    // Due
     new Composer()
     .on('text', ctx => {
-        if (!isDate(ctx.message.text)) {
+        ctx.session.command.params.date = Date.parse(ctx.message.text)
+        if (isNaN(ctx.session.command.params.date)) {
             ctx.reply('Reinserisci la data')
             return
         }
-        ctx.session.command.params.date = new Date(ctx.message.text)
+        //ctx.session.command.params.date = new Date(ctx.message.text)
         ctx.reply('Inserisci la durata')
         return ctx.wizard.next()
     }),
+    // Tre
     new Composer()
     .on('text', ctx => {
-        if (!isValidExpectedDuration(ctx.message.text)) {
+        //if (!isValidExpectedDuration(ctx.message.text)) {
+        if (ctx.message.text < 0 || ctx.message.text > 20) { // Check Numeric
             ctx.reply('Reinserisci la durata')
             return
         }
@@ -79,16 +90,53 @@ const stepHandlers = [
         ctx.reply('Inserisci il Rank')
         return ctx.wizard.next()
     }),
+    // Quattro
     new Composer()
     .on('text', ctx => {
-        if (!isValidRank(ctx.message.text)) {
+        //if (!isValidRank(ctx.message.text)) {
+        if (ctx.message.text < 1 || ctx.message.text > 5) { // Check Numeric
             ctx.reply('Reinserisci il rank')
             return
         }
-        ctx.session.command.params.rank = ctx.message.text
-        /*********************** */
-        ctx.reply('Fine') // Da completare
+        ctx.session.command.params.rank = ctx.message.text // Parso il numero
+        ctx.reply('Inserisci il tipo di droni da usare')
         return ctx.wizard.next()
+    }),
+    // Cinque
+    new Composer()
+    .on('text', ctx => {
+        if (ctx.session.command.searching)
+            return
+        //if (!isValidDroneType(ctx.message.text)) {
+        if (!['type1', 'type2', 'type3', 'type'].includes(ctx.message.text)) { // controllo che il tipo di drone sia un tipo esistente
+            ctx.reply('Tipo non valido, reinserisci il tipo di drone')
+            return
+        }
+        ctx.session.command.params.droneTypes = ctx.message.text
+        ctx.session.command.searching = true
+        ctx.reply('Ok, sto cercando i droni aspetta...')
+        queries.Drone.findByType(ctx.session.command.params.droneTypes, {}, drones => {
+            ctx.session.command.params.drones.loaded = drones
+            ctx.session.command.searching = false
+            if (ctx.session.command.params.drones.loaded.length === 0) {
+                ctx.reply('Nessun drone trovato, inserisci un altro tipo di drone')
+                return
+            }
+            ctx.reply(ctx.session.command.params.drones.loaded.join('\n'))
+            .then('Inserisci i droni separati da virgola')
+            .catch(err => console.log(err))
+            return ctx.wizard.next()
+        })
+    }),
+    // Sei
+    new Composer()
+    .on('text', ctx => {
+        if (!ctx.session.command.params.drones.loaded.includes(ctx.message.text)) { // Controllo che i droni inseriti siano nell'elenco di quelli caricati
+            ctx.reply('Droni scelti non validi, riprova')
+            return
+        }
+        ctx.session.command.params.drones.chosen.push(ctx.message.text)
+        return ctx.scene.leave()
     })
 ]
 const createMission = new WizardScene('createMission',
@@ -99,21 +147,20 @@ const createMission = new WizardScene('createMission',
         // dalla sessione nel frattempo mi leggo i dati idSupervisore e idBase
         return ctx.wizard.next()
     },
-    stepOneHandler,
-    stepTwoHandler,
-    stepThreeHandler
+    stepHandlers[0],stepHandlers[1],stepHandlers[2],stepHandlers[3],stepHandlers[4]
 )
 
 
 createMission.leave(ctx => {
     // Controllo il numero di stage e in base a quello capisco se l'inserimento è andato a buon fine
     // o se è stato annullato
-    if (ctx.session.command.stage == maxStages)  // possibile sostituire con ctx.wizard.steps o qualcosa di simile
-        ctx.reply('Missione creata! Sarai riconattato')
-        .then(ctx.reply(JSON.stringify(ctx.session.command)))
-        .catch(err => console.log(err))
-    else
-        ctx.reply('Creazione annullata!');
+    if (ctx.session.command.params.drones.chosen.length === 0) {
+        ctx.reply('Creazione annullata')
+        return
+    }  
+    ctx.reply('Missione creata! Sarai riconattato')
+    .then(ctx.reply(JSON.stringify(ctx.session.command)))
+    .catch(err => console.log(err))
 });
 
 
