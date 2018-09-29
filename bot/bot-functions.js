@@ -11,7 +11,7 @@ exports.loadData = (idTelegram, callback) => {
     queries.Personnel.findByIdTelegram(idTelegram, {}, aPerson => {
         callback({
             commands: getPermissions(aPerson),
-            telegramData: aPerson.telegramData
+            person: aPerson
         });
     });
 };
@@ -34,3 +34,7 @@ exports.setBotStarted = idTelegram => {
     // console.log('FakeFunction doing nothing!');
     queries.Personnel.updateByIdTelegram(idTelegram, {'telegramData.botStarted': true});
 };
+
+exports.resetBotStarted = idTelegram => {
+    queries.Personnel.updateByIdTelegram(idTelegram, {'telegramData.botStarted': false});
+}
