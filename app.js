@@ -4,7 +4,7 @@ const Telegraf = require('telegraf');
 const queries = require('./db/queries.js');
 const deasync = require('deasync');
 const session = require('telegraf/session')
-const middleware = require('./bot/telegraf-middleware');
+const dataLoader = require('./bot/data-loader-middleware');
 const bf = require('./bot/bot-functions.js');
 const Stage = require('telegraf/stage')
 const Scene = require('telegraf/scenes/base')
@@ -21,20 +21,26 @@ stage.command('cancel', leave())
 
 // session({ ttl: 10 })
 bot.use(session());
-bot.use(middleware());
+bot.use(dataLoader());
 bot.use(stage.middleware())
 
 
 bot.start(ctx => {
-	if (!ctx.session.userData.telegramData.botStarted)
+	if (!ctx.session.userData.person.telegramData.botStarted) {
 		ctx.reply(`Ciao ${ctx.message.from.first_name}!`)
 		.then(() => ctx.reply(`Command list:\n ${ctx.session.userData.commands.join('\n')}`))
-		.then(() => bf.setBotStarted(ctx.message.from.id))
 		.catch(err => console.log(err));
+		bf.setBotStarted(ctx.message.from.id)
+	}
 });
 bot.help(ctx => ctx.reply(`Command list:\n ${ctx.session.userData.commands.join('\n')}`));
+// Da verificare il tipo di action
+bot.action('delete', ctx => bf.resetBotStarted(ctx.message.from.id))
 bot.command(['createMission', 'createmission'], ctx => {
-	ctx.scene.enter('createMission');
+	//if (ctx.session.userData.commands.includes(ctx.message.text))
+		ctx.scene.enter('createMission');
+	//else
+		//ctx.reply('Mi spiace ma non hai i diritti per eseguire questo comando')
 });
 
 bot.startPolling();
