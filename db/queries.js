@@ -169,7 +169,7 @@ exports.Personnel = Personnel = {
     },
 
     updateById: (aId, newValues) => {
-        models.Personnel.updateOne({_id: id}, newValues, err => {
+        models.Personnel.updateOne({_id: aId}, newValues, err => {
             if (err)
                 return console.log(err);
             console.log('Updated Personnel with id: ' + aId);
@@ -183,6 +183,9 @@ exports.Personnel = Personnel = {
             console.log('Updated Personnel with idTelegram: ' + aIdTelegram);
         });
     },
+
+    // Bisogna migliorare la possibilità di ricerca per poter fltrare le persone adatte alla missione
+
 
     findByCf: (aCf, projection, callback) => {
         models.Personnel.findOne()
@@ -252,6 +255,7 @@ exports.Drone = Drone = {
         });
     },
 
+    // TODO: trovare i droni per tipo e per disponibilità, quindi bisogna ampliare la query
     findByType: (aType, projection, callback) => {
         models.Drone.find()
         .where('type').equals(aType)
@@ -316,6 +320,7 @@ exports.Mission = Mission = {
                 return console.log(err);
             // Viene aggiunta la missione alle pending missions del Supervisor
             Personnel.updateById(mission.supervisor, {$push: {'missions.supervisor.pending': mission._id}});   
+            // A questo punto devo notificare il personale e modificare lo status dei droni come non disponibili
         });
 
     },
