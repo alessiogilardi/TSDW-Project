@@ -21,13 +21,21 @@ const dataStructure = {
 }
 
 const droneTypes = ['type1', 'type2', 'type3', 'type'] // Questo sarà meglio implementato più avanti
+const arrayContainsArray = (superset, subset) => {
+    if (0 === subset.length || superset.length < subset.length) return false
+    subset.forEach(subVal => {
+        if (!superset.includes(subVal)) return false
+    })
+    return true
+}
 
 const stepHandlers = [
+    // Provare ad usare new Composer().use()
     ctx => {
         ctx.session.command = dataStructure
         ctx.reply('Bene, iniziamo la creazione di una nuova missione!\nTi verrà chiesto di inserire alcuni parametri.')
-        .then(() => 'Ti ricordo che puoi annullare l\'operazione  in qualsiasi momento usando il comando /cancel.')
-        .then(() => 'Inserisci la data della missione:')
+        .then(() => ctx.reply('Ti ricordo che puoi annullare l\'operazione  in qualsiasi momento usando il comando /cancel.'))
+        .then(() => ctx.reply('Inserisci la data della missione:'))
         .catch(err => console.log(err))
         ctx.wizard.next()
     },
@@ -65,7 +73,7 @@ const stepHandlers = [
         }
         ctx.session.command.params.rank = ctx.message.text // Parso il numero
         ctx.reply('Ultima cosa, i droni per la missione.Inserisci il tipo di drone più adatto.')
-        .then(() => ctx.reply(`Inserisci il tipo di drone più adatto. Ti elencherò quelli disponibili.\nI tipo di drone sono:\n${droneTypes.join(',')}`))
+        .then(() => ctx.reply(`Inserisci il tipo di drone più adatto. Ti elencherò quelli disponibili.\nI tipi di drone sono:\n${droneTypes.join(', ')}`))
         .catch(err => console.log(err))
         return ctx.wizard.next()
     }),
@@ -81,7 +89,7 @@ const stepHandlers = [
         }
         ctx.session.command.params.droneTypes = ctx.message.text
         ctx.session.command.searching = true
-        ctx.reply('Va bene, sto cercando i droni aspetta...')
+        ctx.reply('Va bene, sto cercando i droni, aspetta...')
         queries.Drone.findByType(ctx.session.command.params.droneTypes, {}, drones => {
             ctx.session.command.params.drones.loaded = drones
             ctx.session.command.searching = false
@@ -90,39 +98,66 @@ const stepHandlers = [
                 ctx.reply('Non ho trovato nessun drone disponibile, prova ad inserire un tipo differente.')
                 return
             }
-            ctx.reply(`Ecco i droni che ho trovato:\n${ctx.session.command.params.drones.loaded.join('\n')}`)
-            .then('Scrivi i numeri di targa de droni che vuoiinserire separati da virgola')
+            ctx.reply('Ecco i droni che ho trovato:')
+            .then(() => ctx.session.command.params.drones.loaded.forEach(drone => ctx.reply(drone))) // Formattare output per i droni
+            .then(() => ctx.reply('Scrivi i numeri di targa dei droni che vuoi inserire separati da virgola'))
             .catch(err => console.log(err))
             return ctx.wizard.next()
         })
     }),
     new Composer()
     .on('text', ctx => {
-        var drones = ctx.message.text // Va preso il testo e generato un array di droni
+        var drones = ctx.message.text.split(',').map(s => s.trim()) // Droni che voglioinserire nella missione
+        var loadedNumbers = []
+        var chosenNumbers = []
+        ctx.session.command.params.drones.loaded.forEach(drone => loadedNumbers.push(drone.number))
+        drones.forEach(drone => chosenNumbers.push(drone.number))
+        //console.log(drones)
         // Va generato un array con le targhe dei droni caricati 
         // in modo da verificare che quelli scelti siano tra quelli caricati
-        if (!ctx.session.command.params.drones.loaded.includes(drones)) {
-            ctx.reply('Droni scelti non validi, riprova')
+        if (!arrayContainsArray(loadedNumbers, chosenNumbers)) {
+            ctx.reply('I droni che hi inserito non sono validi, per favore riprova.')
             return
         }
-        ctx.session.command.params.drones.chosen.push(drones)
+        ctx.session.command.params.drones.chosen = drones
         return ctx.scene.leave()
     })
 ]
-const createMission = new WizardScene('createMission', stepHandlers)
+const createMission = new WizardScene('createMission', stepHandlers[0],stepHandlers[1],stepHandlers[2],stepHandlers[3],stepHandlers[4],stepHandlers[5])
 
 
 createMission.leave(ctx => {
-    // Controllo il numero di stage e in base a quello capisco se l'inserimento è andato a buon fine
-    // o se è stato annullato
-    if (ctx.session.command.params.drones.chosen.length === null ||
+    if (ctx.session.command.params.drones.chosen === null ||
         ctx.session.command.params.drones.chosen.length === 0) {
         ctx.reply('Creazione missione annullata.')
         return
     }  
     ctx.reply('La missione è stata creata con successo!\nTi ricontterò appena una squadra sarà disponibile.')
-    .then(ctx.reply(`Ecco instanto un riepilogo sui dati della missione\n${JSON.stringify(ctx.session.command)}`))
+    .then(ctx.reply(`Ecco intanto un riepilogo sui dati della missione\n\n${JSON.stringify(ctx.session.command)}`))
     .catch(err => console.log(err))
+/*
+    var dronesId = []
+    ctx.session.command.params.drones.chosen.forEach(drone => dronesId.push(drone._id))
+    console.log(ctx.session.command.params.drones.chosen)
+    console.log(dronesId)
+*/
+
+// TODO: Valutare se consentire l'inserimento tramite numero di targa del drone e non _id
+
+    queries.Mission.insert({
+        id: null,
+        date: ctx.session.command.params.date,
+        base: ctx.session.userData.person.base,
+        supervisor: ctx.session.userData.person._id,
+        description: {
+            duration: { 
+                expected: ctx.session.command.params.expectedDuration
+            },
+            rank: ctx.session.command.params.rank,
+        },
+        drones: ctx.session.command.params.drones.chosen
+    })
+
 });
 
 
