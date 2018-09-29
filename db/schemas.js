@@ -151,7 +151,7 @@ exports.missionsSchema = new mongoose.Schema({
         accepted: [{type: ObjectId, ref: 'personnel', default: []}], /* Nome del campo da rivedere */
         chosen: [{type: ObjectId, ref: 'personnel', default: []}] /* Nome del campo da rivedere */
     },
-    mainteiners: {
+    maintainers: {
         notified: [{type: ObjectId, ref: 'personnel', default: []}],
         accepted: [{type: ObjectId, ref: 'personnel', default: []}], /* Nome del campo da rivedere */
         chosen: [{type: ObjectId, ref: 'personnel', default: []}] /* Nome del campo da rivedere */
