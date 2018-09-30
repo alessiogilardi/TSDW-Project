@@ -7,15 +7,6 @@ const roleToOperation = {
 	crew:   ['/accept', '/refuse'] // Usabili anche dai piloti e manutentori
 };
 
-exports.loadData = (idTelegram, callback) => {
-    queries.Personnel.findByIdTelegram(idTelegram, {}, aPerson => {
-        callback({
-            commands: getPermissions(aPerson),
-            person: aPerson
-        });
-    });
-};
-
 const getPermissions = aPerson => {
     var commands = [];
     if (aPerson.roles.command.airOperator.AM)
@@ -28,6 +19,16 @@ const getPermissions = aPerson => {
         commands = commands.concat(roleToOperation.crew);
     
     return commands;
+};
+
+
+exports.loadData = (idTelegram, callback) => {
+    queries.Personnel.findByIdTelegram(idTelegram, {}, aPerson => {
+        callback({
+            commands: getPermissions(aPerson),
+            person: aPerson
+        });
+    });
 };
 
 exports.setBotStarted = idTelegram => {
