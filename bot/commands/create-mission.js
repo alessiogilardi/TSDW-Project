@@ -29,7 +29,7 @@ const arrayContainsArray = (superset, subset) => {
     return true
 }
 
-const stepHandlers = [
+const createMission = new WizardScene('createMission',
     // Provare ad usare new Composer().use()
     ctx => {
         ctx.session.command = dataStructure
@@ -41,13 +41,14 @@ const stepHandlers = [
     },
     new Composer()
     .on('text', ctx => {
-        // Recupero iltesto e verifico che sia una data
+        // Recupero il testo e verifico che sia una data
+        // TODO: la data deve essere inseribile in un formato più elastico oppure deve essere spiagto il formato in cui inserirla
+        // TODO: la data deve essere successiva ad oggi
         ctx.session.command.params.date = Date.parse(ctx.message.text)
         if (isNaN(ctx.session.command.params.date)) {
             ctx.reply('La data inserita è in un formato non valido, per favore reinseriscila')
             return
         }
-        //ctx.session.command.params.date = new Date(ctx.message.text)
         ctx.reply('Quanto durerà la missione? Inserisci la durata prevista in ore')
         return ctx.wizard.next()
     }),
@@ -121,12 +122,8 @@ const stepHandlers = [
         }
         ctx.session.command.params.drones.chosen = drones
         return ctx.scene.leave()
-    })
-]
-const createMission = new WizardScene('createMission', stepHandlers[0],stepHandlers[1],stepHandlers[2],stepHandlers[3],stepHandlers[4],stepHandlers[5])
-
-
-createMission.leave(ctx => {
+    }))
+    .leave(ctx => {
     if (ctx.session.command.params.drones.chosen === null ||
         ctx.session.command.params.drones.chosen.length === 0) {
         ctx.reply('Creazione missione annullata.')
@@ -135,14 +132,14 @@ createMission.leave(ctx => {
     ctx.reply('La missione è stata creata con successo!\nTi ricontterò appena una squadra sarà disponibile.')
     .then(ctx.reply(`Ecco intanto un riepilogo sui dati della missione\n\n${JSON.stringify(ctx.session.command)}`))
     .catch(err => console.log(err))
-/*
-    var dronesId = []
-    ctx.session.command.params.drones.chosen.forEach(drone => dronesId.push(drone._id))
-    console.log(ctx.session.command.params.drones.chosen)
-    console.log(dronesId)
-*/
 
-// TODO: Valutare se consentire l'inserimento tramite numero di targa del drone e non _id
+    var dronesId = []
+    ctx.session.command.params.drones.chosen.forEach(chosenDrone => {
+        ctx.session.command.params.drones.loaded.forEach(loadedDrone => {
+            if (loadedDrone.number === chosenDrone)
+                dronesId.push(loadedDrone._id)
+        })
+    })
 
     queries.Mission.insert({
         id: null,
@@ -155,7 +152,7 @@ createMission.leave(ctx => {
             },
             rank: ctx.session.command.params.rank,
         },
-        drones: ctx.session.command.params.drones.chosen
+        drones: dronesId
     })
 
 });
