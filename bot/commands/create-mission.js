@@ -30,7 +30,6 @@ const arrayContainsArray = (superset, subset) => {
 }
 
 const createMission = new WizardScene('createMission',
-    // Provare ad usare new Composer().use()
     ctx => {
         ctx.session.command = dataStructure
         ctx.reply('Bene, iniziamo la creazione di una nuova missione!\nTi verrà chiesto di inserire alcuni parametri.')
