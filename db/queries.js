@@ -226,7 +226,12 @@ exports.Personnel = Personnel = {
 */
 
     // TODO: Bisogna migliorare la possibilità di ricerca per poter filtrare le persone adatte alla missione
-
+    find: (selection, projection, callback) => {
+        models.Personnel.find(selection)
+        .select(projection)
+        .exec(callback)
+        //.exec((err, personnel) => callback(personnel))
+    },
 
     findByCf: (aCf, projection, callback) => {
         models.Personnel.findOne()
@@ -313,6 +318,15 @@ exports.Drone = Drone = {
     },
 */
     // TODO: trovare i droni per tipo e per disponibilità, quindi bisogna ampliare la query
+
+    findById: (aId, projection, callback) => {
+        models.Drone.findOne()
+        .where('_id').equals(aId)
+        .select(projection)
+        .exec((err, doc) => callback(doc))
+    },
+
+
     findByType: (aType, projection, callback) => {
         models.Drone.find()
         .where('type').equals(aType)
@@ -422,72 +436,46 @@ exports.Mission = Mission = {
         Mission.updateById(aId, {status: aStatus});
     },
 
-    /**
-     * TODO:
-     * Modificare struttura in questo modo:
-     * {
-     *      Pilot: {
-     *          setNotified(),
-     *          setAccepted(),
-     *          setChosen()
-     *      }
-     * }
-     * 
-     *  oppure 
-     * 
-     * {
-     *      Notified: {
-     *          setPilot(),
-     *          setCrew(),
-     *          setMaintainer()
-     *      }
-     * }
-     */
-
-    /* Funzioni per aggiungere personale ai Notificati */
-    setPilotAsNotified: (aMissionId, aPilotId) => {
-        // Assicurarsi prima che aPilotId corrisponda effettivamente a un pilota ????
-        Mission.updateById(aMissionId, {$push: {'pilots.notified': aPilotId}});
+    Pilot: {
+        setAsNotified: (aMissionId, aPilotId) => {
+            Mission.updateById(aMissionId, {$push: {'pilots.notified': aPilotId}});
+        },
+        setAsAccepted: (aMissionId, aPilotId) => {
+            Mission.updateById(aMissionId, {$pull: {'pilots.notified': aPilotId}});
+            Mission.updateById(aMissionId, {$push: {'pilots.accepted': aPilotId}});
+        },
+        setPilotAsChosen: (aMissionId, aPilotId) => {
+            Mission.updateById(aMissionId, {$pull: {'pilots.accepted': aPilotId}});
+            Mission.updateById(aMissionId, {$push: {'pilots.chosen': aPilotId}});
+        }
     },
 
-    setCrewAsNotified: (aMissionId, aCrewId) => {
-        Mission.updateById(aMissionId, {$push: {'crew.notified': aCrewId}});
+    Crew: {
+        setAsNotified: (aMissionId, aCrewId) => {
+            Mission.updateById(aMissionId, {$push: {'crew.notified': aCrewId}});
+        },
+        setAsAccepted: (aMissionId, aCrewId) => {
+            Mission.updateById(aMissionId, {$pull: {'crew.notified': aCrewId}});
+            Mission.updateById(aMissionId, {$push: {'crew.accepted': aCrewId}});
+        },
+        setAsChosen: (aMissionId, aCrewId) => {
+            Mission.updateById(aMissionId, {$pull: {'crew.accepted': aCrewId}});
+            Mission.updateById(aMissionId, {$push: {'crew.chosen': aCrewId}});
+        }
     },
 
-    setMaintainerAsNotified: (aMissionId, aMaintainerId) => {
-        Mission.updateById(aMissionId, {$push: {'maintainer.notified': aMaintainerId}});
-    },
-
-    /* Funzioni per aggiungere personale agli Accepted */
-    setPilotAsAccepted: (aMissionId, aPilotId) => {
-        Mission.updateById(aMissionId, {$pull: {'pilots.notified': aPilotId}});
-        Mission.updateById(aMissionId, {$push: {'pilots.accepted': aPilotId}});
-    },
-
-    setCrewAsAccepted: (aMissionId, aCrewId) => {
-        Mission.updateById(aMissionId, {$pull: {'crew.notified': aCrewId}});
-        Mission.updateById(aMissionId, {$push: {'crew.accepted': aCrewId}});
-    },
-    
-    setMaintainerAsAccepted: (aMissionId, aMaintainerId) => {
-        Mission.updateById(aMissionId, {$pull: {'maintainers.notified': aMaintainerId}});
-        Mission.updateById(aMissionId, {$push: {'maintainers.accepted': aMaintainerId}});
-    },
-
-    /* Funzioni per aggiungere personale ai Chosen */
-    setPilotAsChosen: (aMissionId, aPilotId) => {
-        Mission.updateById(aMissionId, {$pull: {'pilots.accepted': aPilotId}});
-        Mission.updateById(aMissionId, {$push: {'pilots.chosen': aPilotId}});
-    },
-
-    setCrewAsChosen: (aMissionId, aCrewId) => {
-        Mission.updateById(aMissionId, {$pull: {'crew.accepted': aCrewId}});
-        Mission.updateById(aMissionId, {$push: {'crew.chosen': aCrewId}});
-    },
-    
-    setMaintainerAsChosen: (aMissionId, aMaintainerId) => {
-        Mission.updateById(aMissionId, {$pull: {'maintainers.accepted': aMaintainerId}});
-        Mission.updateById(aMissionId, {$push: {'maintainers.chosen': aMaintainerId}});
+    Maintainer: {
+        setAsNotified: (aMissionId, aMaintainerId) => {
+            Mission.updateById(aMissionId, {$push: {'maintainer.notified': aMaintainerId}});
+        },
+        setAsAccepted: (aMissionId, aMaintainerId) => {
+            Mission.updateById(aMissionId, {$pull: {'maintainers.notified': aMaintainerId}});
+            Mission.updateById(aMissionId, {$push: {'maintainers.accepted': aMaintainerId}});
+        },
+        setAsChosen: (aMissionId, aMaintainerId) => {
+            Mission.updateById(aMissionId, {$pull: {'maintainers.accepted': aMaintainerId}});
+            Mission.updateById(aMissionId, {$push: {'maintainers.chosen': aMaintainerId}});
+        }
     },
 
     findByIdSync: (aId, projection) => {
