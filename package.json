@@ -5,8 +5,8 @@
     "deasync": "^0.1.13",
     "dotenv": "^6.0.0",
     "mongodb": "^3.1.4",
-    "mongoose": "^5.3.0",
+    "mongoose": "^5.2.13",
     "npm": "^6.4.1",
-    "telegraf": "^3.24.0"
+    "telegraf": "^3.23.1"
   }
 }
