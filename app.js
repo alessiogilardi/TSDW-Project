@@ -9,10 +9,18 @@ const bf = require('./bot/bot-functions.js');
 const Stage = require('telegraf/stage')
 const Scene = require('telegraf/scenes/base')
 const createMission = require('./bot/commands/create-mission');
+const eventEmitters = require('./event-emitters')
 const { enter, leave } = Stage
 
 const backtick = '\`';
 
+eventEmitters.Mission.on('insert', () => {
+	console.log('Missione inserita')
+})
+
+
+// TODO: potrebbe essere possibile creare un middleware che controlla l'input,
+// se è un comando allora verifica che l'utente sia autorizzato a lanciarlo altrimeni restituisce errore
 
 const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN);
 const stage = new Stage([createMission])
@@ -36,11 +44,14 @@ bot.start(ctx => {
 bot.help(ctx => ctx.reply(`Command list:\n ${ctx.session.userData.commands.join('\n')}`));
 // Da verificare il tipo di action
 bot.action('delete', ctx => bf.resetBotStarted(ctx.message.from.id))
+
+
 bot.command(['createMission', 'createmission'], ctx => {
-	//if (ctx.session.userData.commands.includes(ctx.message.text))
-		ctx.scene.enter('createMission');
-	//else
-		//ctx.reply('Mi spiace ma non hai i diritti per eseguire questo comando')
+	if (!ctx.session.userData.commands.includes('/createMission')) {
+		ctx.reply('Mi spiace, non hai i diritti per eseguire questo comando.')
+		return
+	}
+	ctx.scene.enter('createMission');
 });
 
 bot.startPolling();
