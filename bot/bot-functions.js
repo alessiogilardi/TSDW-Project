@@ -31,6 +31,11 @@ exports.loadData = (idTelegram, callback) => {
     });
 };
 
-exports.setBotStarted = idTelegram => queries.Personnel.updateByIdTelegram(idTelegram, {'telegramData.botStarted': true})
+exports.setBotStarted = idTelegram => {
+    // console.log('FakeFunction doing nothing!');
+    queries.Personnel.updateByIdTelegram(idTelegram, {'telegramData.botStarted': true});
+};
 
-exports.resetBotStarted = idTelegram => queries.Personnel.updateByIdTelegram(idTelegram, {'telegramData.botStarted': false})
+exports.resetBotStarted = idTelegram => {
+    queries.Personnel.updateByIdTelegram(idTelegram, {'telegramData.botStarted': false});
+}
