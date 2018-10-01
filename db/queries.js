@@ -327,8 +327,8 @@ exports.Drone = Drone = {
     },
 
 
-    findByType: (aType, projection, callback) => {
-        models.Drone.find()
+    findByType: (aType, selection, projection, callback) => {
+        models.Drone.find(selection)
         .where('type').equals(aType)
         .select(projection)
         .exec((err, doc) => {
