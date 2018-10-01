@@ -2,8 +2,13 @@
  * Modulo che conserva i vari Schema della struttura del DB
 **/
 
+// TODO: aggiungere ai dati della missione anche il tipo di drone aggiunto
+// in modo da sempleificare le query di ricerca quando si inserisce una nuova missione
+
 const mongoose = require('mongoose');
 const ObjectId = mongoose.Schema.Types.ObjectId;
+
+const droneTypes = ['S', 'M', 'L', 'XL'] // TODO: Da cambiare con i valori veri
 
 exports.airOperatorSchema = new mongoose.Schema({
   _id: ObjectId,
@@ -29,7 +34,7 @@ exports.personnelSchema = new mongoose.Schema({
     },
     name: String,
     surname: String,
-    cf: {type: String, unique: true},
+    cf: {type: String, unique: true, minlength: 16, maxlength: 16},
     location: {
         country: String,
         city: String,
@@ -59,10 +64,10 @@ exports.personnelSchema = new mongoose.Schema({
         license: {
             id: {type: String, default: null},
             type: {type: String, default: null},
-            maxMissionRank: {type: Number, default: null},
+            maxMissionRank: {type: Number, default: null, min: 1, max: 5},
             expiring: {type: Date, default: null}
         },
-        droneTypes: [{type: String, default: []}]
+        droneTypes: [{type: String, default: [], enum: droneTypes}]
     },
     missions: {
         supervisor:  {
@@ -111,7 +116,7 @@ exports.basesSchema = new mongoose.Schema({
 exports.dronesSchema = new mongoose.Schema({
     _id: ObjectId,
     number: {type: String, unique: true}, /* Non sapendo se sia numerico o alfanumerico */
-    type: String,
+    type: {type: String, enum: droneTypes},
     airOperator: {type: ObjectId, ref: 'air_operator'},
     base: {type: ObjectId, ref: 'base'},
     batteryTypes: [{type: String, ref: 'battery'}],
@@ -140,7 +145,7 @@ exports.missionsSchema = new mongoose.Schema({
     /* type: String, /* Potrebbe essere cancellato in quanto esiste il campo rank più preciso */
     base: {type: ObjectId, ref: 'base'},
     supervisor: {type: ObjectId, ref: 'personnel'},
-    status: {type: Number, default: 0}, /* 0 -> Instantiated, 1 -> Pending, 2 -> Running, 3 -> Completed, 4 -> Completed and documented */
+    status: {type: Number, default: 0, min: 0, max: 4}, /* 0 -> Instantiated, 1 -> Pending, 2 -> Running, 3 -> Completed, 4 -> Completed and documented */
     pilots: {
         notified: [{type: ObjectId, ref: 'personnel', default: []}],
         accepted: [{type: ObjectId, ref: 'personnel', default: []}], /* Nome del campo da rivedere */
@@ -161,10 +166,15 @@ exports.missionsSchema = new mongoose.Schema({
             expected: Number,
             effective: Number
         },
-        rank: Number, /* Difficoltà della missione (0 -> 5) */
+        rank: {type: Number, min: 1, max: 5}, /* Difficoltà della missione (0 -> 5) */
         flightPlan: String, /* Presumibilemente sarà un riferimento ad un documento come il Logbook */
         notes: String
     },
+    // Modificare così: 
+    // drones:[{
+    //      id: {type: ObjectId, ref: 'drone'},
+    //      type: {type: String, enum: droneTypes} // deve essere un tipo valido
+    // }]
     drones: [{type: ObjectId, ref: 'drone', default: []}],
     teams: [{
         pilots: {
