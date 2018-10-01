@@ -90,7 +90,7 @@ const createMission = new WizardScene('createMission',
         ctx.session.command.params.droneTypes = ctx.message.text
         ctx.session.command.searching = true
         ctx.reply('Va bene, sto cercando i droni, aspetta...')
-        queries.Drone.findByType(ctx.session.command.params.droneTypes, {}, drones => {
+        queries.Drone.findByType(ctx.session.command.params.droneTypes, {'state.availability': {$eq: 0}}, {}, drones => {
             ctx.session.command.params.drones.loaded = drones
             ctx.session.command.searching = false
             if (ctx.session.command.params.drones.loaded === null || 
