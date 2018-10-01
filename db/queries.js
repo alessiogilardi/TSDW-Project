@@ -1,27 +1,37 @@
-const mongoose  = require('mongoose');
-const models    = require('./models.js');
-const deasync   = require('deasync');
-var events      = require('events');
-
-
-/**
- * Ho seri dubbi sugli inserimenti:
- * non sarebbe meglio che le funzioni insert ricevano informazioni complete da inserire
- * e che eventuali ricerch di dati mancanti vengano fatte all'esterno della funzione?
- */
+const mongoose      = require('mongoose');
+const models        = require('./models.js');
+const deasync       = require('deasync');
+var eventEmitters   = require('../event-emitters');
 
 exports.AirOperator = AirOperator = {
-    insert: (aAirOperator) => {
+    insert: aAirOperator => {
         aAirOperator._id = mongoose.Types.ObjectId();
         new models.AirOperator(aAirOperator)
         .save((err, airOperator) => {
             if (err)
                 return console.log(err);
             console.log('Inserted new AirOperator with id: ' + airOperator._id);
+
+            // Emetto l'evento insert
+            eventEmitters.AirOperator.emit('insert', airOperator)
         });
 
     },
 
+    update: (selection, newValues) => {
+        models.AirOperator.updateOne(selection, newValues, err => {
+            if (err) return console.log(err)
+            // Emetto l'evento update
+            eventEmitters.AirOperator.emit('update')
+            console.log(`Updated AirOperator selected by: ${selection}`);
+        })
+    },
+
+    updateByName: (aName, newValues) => AirOperator.update({name: aName}, newValues),
+
+    updateById: (aId, newValues) => AirOperator.update({_id: aId}, newValues),
+
+/*
     updateByName: (aName, newValues) => {
         models.AirOperator.updateOne({name: aName}, newValues, err => {
             if (err)
@@ -37,7 +47,7 @@ exports.AirOperator = AirOperator = {
             console.log('Updated AirOperator with _id: ' + aId);
     });
     },
-
+*/
     findByName: (aName, projection, callback) => {
         models.AirOperator.findOne()
         .where('name').equals(aName)
@@ -65,7 +75,7 @@ exports.AirOperator = AirOperator = {
 };
 
 exports.Base = Base = {
-    insert: (aBase) => {
+    insert: aBase => {
         AirOperator.findByName(aBase.airOperator, '_id', aAirOperator => {
             aBase._id = mongoose.Types.ObjectId();
             aBase.airOperator = aAirOperator._id
@@ -74,12 +84,25 @@ exports.Base = Base = {
                 if (err)
                     return console.log(err);
                 console.log('Inserted new base with _id: ' + base._id);
+                // Emetto l'evento insert
+                eventEmitters.Base.emit('insert', base)
                 // Quando la query viene eseguita, devo aggiungere l'id della base appena creata alla lista di basi dell'operatore aereo corrispondente
                 AirOperator.updateById(base.airOperator, {$push: {'bases': base._id}});
             });
         });
     },
 
+    update: (selection, newValues) => {
+        models.Base.updateOne(selection, newValues, err => {
+            if (err) return console.log(err)
+            eventEmitters.Base.emit('update')
+            console.log(`Updated Base selected by: ${selection}`)
+        })
+    },
+
+    updateByName: (aName, newValues) => Base.update({name: aName}, newValues),
+    updateById: (aId, newValues) => Base.update({_id: aId}, newValues),
+/*
     updateByName: (aName, newValues) => {
         models.Base.updateOne({name: aName}, newValues, err => {
             if (err)
@@ -95,7 +118,7 @@ exports.Base = Base = {
             console.log('Updated Base with id: ' + aId);
         });
     },
-
+*/
     findByName: (name, projection, callback) => {
         models.Base.findOne()
         .where('name').equals(name)
@@ -120,7 +143,7 @@ exports.Base = Base = {
 };
 
 exports.Personnel = Personnel = {
-    insert: (aPersonnel) => {
+    insert: aPersonnel => {
         AirOperator.findByName(aPersonnel.airOperator, '_id', aAirOperator => {
             Base.findByName(aPersonnel.base, '_id', aBase => {
                 aPersonnel._id          = mongoose.Types.ObjectId();
@@ -132,6 +155,8 @@ exports.Personnel = Personnel = {
                     if (err)
                         return console.log(err);
                     console.log('Inserted new Personnel with id: ' + personnel._id);
+                    // Emetto evento insert
+                    eventEmitters.emit('insert', personnel)
 
                     // Inserisco i vincoli di integrità
 
@@ -160,6 +185,21 @@ exports.Personnel = Personnel = {
         });
     },
 
+    update: (selection, newValues) => {
+        models.Personnel.updateOne(selection, newValues, err => {
+            if (err) return console.log(err)
+            // Emetto evento update
+            eventEmitters.Personnel.emit('update')
+            console.log(`Updated Personnel selected by: ${selection}`)
+        })
+    },
+
+    updateByCf: (aCf, newValues) => Personnel.update({cf: aCf}, newValues),
+    updateById: (aId, newValues) => Personnel.update({_id: aId}, newValues),
+    updateByIdTelegram: (aIdTelegram, newValues) => Personnel.update({'telegramData.idTelegram': aIdTelegram}, newValues),
+
+    /*
+
     updateByCf: (aCf, newValues) => {
         models.Personnel.updateOne({cf: aCf}, newValues, (err) => {
             if (err)
@@ -169,7 +209,7 @@ exports.Personnel = Personnel = {
     },
 
     updateById: (aId, newValues) => {
-        models.Personnel.updateOne({_id: id}, newValues, err => {
+        models.Personnel.updateOne({_id: aId}, newValues, err => {
             if (err)
                 return console.log(err);
             console.log('Updated Personnel with id: ' + aId);
@@ -182,6 +222,15 @@ exports.Personnel = Personnel = {
                 return console.log(err);
             console.log('Updated Personnel with idTelegram: ' + aIdTelegram);
         });
+    },
+*/
+
+    // TODO: Bisogna migliorare la possibilità di ricerca per poter filtrare le persone adatte alla missione
+    find: (selection, projection, callback) => {
+        models.Personnel.find(selection)
+        .select(projection)
+        .exec(callback)
+        //.exec((err, personnel) => callback(personnel))
     },
 
     findByCf: (aCf, projection, callback) => {
@@ -229,6 +278,8 @@ exports.Drone = Drone = {
                     if (err)
                         return console.log(err);
                     console.log('Inserted new Drone with id: ' + drone._id);
+                    // Emetto evento insert
+                    eventEmitters.Drone.emit('insert')
                     // Il drone deve essere aggiunto alla lista di droni della base corrispondente
                     Base.updateById(drone.base, {$push: {drones: drone._id}});
                 });
@@ -236,6 +287,20 @@ exports.Drone = Drone = {
         });
     },
 
+    update: (selection, newValues) => {
+        models.Drone.updateOne(selection, newValues, err => {
+            if (err) return console.log(err)
+            // Emetto l'evento update
+            eventEmitters.Drone.emit('update')
+            console.log(`Updated Drone selected by: ${selection}`)
+        })
+    },
+
+    updateByNumber: (aNumber, newValues) => Drone.update({number: aNumber}, newValues),
+    updateById: (aId, newValues) => Drone.update({_id: aId}, newValues),
+    
+
+    /*
     updateByNumber: (aNumber, newValues) => {
         models.Drone.updateOne({number: aNumber}, newValues, (err) => {
             if (err)
@@ -251,6 +316,16 @@ exports.Drone = Drone = {
         console.log('Updated Drone with id: ' + aId);
         });
     },
+*/
+    // TODO: trovare i droni per tipo e per disponibilità, quindi bisogna ampliare la query
+
+    findById: (aId, projection, callback) => {
+        models.Drone.findOne()
+        .where('_id').equals(aId)
+        .select(projection)
+        .exec((err, doc) => callback(doc))
+    },
+
 
     findByType: (aType, projection, callback) => {
         models.Drone.find()
@@ -299,34 +374,55 @@ exports.Drone = Drone = {
 
 exports.Battery = Battery = {
     insert: aBattery => {
-        aBattery._id = mongoose.Types.ObjectId();
+        aBattery._id = mongoose.Types.ObjectId()
         new models.Battery(aBattery)
         .save((err, battery) => {
+            if (err) return console.log(err)
 
-        });
+            // Emetto evento insert
+            eventEmitters.Battery.emit('insert', battery)
+            console.log(`Iserted Battery with id: ${battery._id}`)
+        })
     }
-};
+}
 
 exports.Mission = Mission = {
     insert: aMission => {
-        aMission._id = mongoose.Types.ObjectId();
+        aMission._id = mongoose.Types.ObjectId()
         new models.Mission(aMission)
         .save((err, mission) => {
-            if (err)
-                return console.log(err);
+            if (err) return console.log(err)
             // Viene aggiunta la missione alle pending missions del Supervisor
-            Personnel.updateById(mission.supervisor, {$push: {'missions.supervisor.pending': mission._id}});   
-        });
+            Personnel.updateById(mission.supervisor, {$push: {'missions.supervisor.pending': mission._id}})
+
+            // Emetto l'evento missione inserita
+            eventEmitters.Mission.emit('insert', mission)
+
+            console.log(`Inserted Mission with id: ${mission._id}`)
+        })
 
     },
 
+    update: (selection, newValues) => {
+        models.Mission.updateOne(selection, newValues, err => {
+            if (err) return console.log(err)
+            // Emetto l'evento update
+            eventEmitters.Mission.emit('update')
+            console.log(`Updated Mission selected by: ${selection}`)
+        })
+    },
+
+    updateById: (aId, newValues) => Mission.update({_id: aId}, newValues),
+
+
+/*
     updateById: (aId, newValues) => {
         models.Mission.updateOne({_id: aId}, newValues, err => {
             if (err)
                 return console.log(err);
         });
     },
-
+*/
     findById: (aId, projection, callback) => {
         models.Mission.findOne()
         .where('_id').equals(aId)
@@ -340,50 +436,46 @@ exports.Mission = Mission = {
         Mission.updateById(aId, {status: aStatus});
     },
 
-    /* Funzioni per aggiungere personale ai Notificati */
-    setPilotAsNotified: (aMissionId, aPilotId) => {
-        // Assicurarsi prima che aPilotId corrisponda effettivamente a un pilota
-        Mission.updateById(aMissionId, {$push: {'pilots.notified': aPilotId}});
+    Pilot: {
+        setAsNotified: (aMissionId, aPilotId) => {
+            Mission.updateById(aMissionId, {$push: {'pilots.notified': aPilotId}});
+        },
+        setAsAccepted: (aMissionId, aPilotId) => {
+            Mission.updateById(aMissionId, {$pull: {'pilots.notified': aPilotId}});
+            Mission.updateById(aMissionId, {$push: {'pilots.accepted': aPilotId}});
+        },
+        setPilotAsChosen: (aMissionId, aPilotId) => {
+            Mission.updateById(aMissionId, {$pull: {'pilots.accepted': aPilotId}});
+            Mission.updateById(aMissionId, {$push: {'pilots.chosen': aPilotId}});
+        }
     },
 
-    setCrewAsNotified: (aMissionId, aCrewId) => {
-        Mission.updateById(aMissionId, {$push: {'crew.notified': aCrewId}});
+    Crew: {
+        setAsNotified: (aMissionId, aCrewId) => {
+            Mission.updateById(aMissionId, {$push: {'crew.notified': aCrewId}});
+        },
+        setAsAccepted: (aMissionId, aCrewId) => {
+            Mission.updateById(aMissionId, {$pull: {'crew.notified': aCrewId}});
+            Mission.updateById(aMissionId, {$push: {'crew.accepted': aCrewId}});
+        },
+        setAsChosen: (aMissionId, aCrewId) => {
+            Mission.updateById(aMissionId, {$pull: {'crew.accepted': aCrewId}});
+            Mission.updateById(aMissionId, {$push: {'crew.chosen': aCrewId}});
+        }
     },
 
-    setMaintainerAsNotified: (aMissionId, aMaintainerId) => {
-        Mission.updateById(aMissionId, {$push: {'maintainer.notified': aMaintainerId}});
-    },
-
-    /* Funzioni per aggiungere personale agli Accepted */
-    setPilotAsAccepted: (aMissionId, aPilotId) => {
-        Mission.updateById(aMissionId, {$pull: {'pilots.notified': aPilotId}});
-        Mission.updateById(aMissionId, {$push: {'pilots.accepted': aPilotId}});
-    },
-
-    setCrewAsAccepted: (aMissionId, aCrewId) => {
-        Mission.updateById(aMissionId, {$pull: {'crew.notified': aCrewId}});
-        Mission.updateById(aMissionId, {$push: {'crew.accepted': aCrewId}});
-    },
-    
-    setMaintainerAsAccepted: (aMissionId, aMaintainerId) => {
-        Mission.updateById(aMissionId, {$pull: {'maintainers.notified': aMaintainerId}});
-        Mission.updateById(aMissionId, {$push: {'maintainers.accepted': aMaintainerId}});
-    },
-
-    /* Funzioni per aggiungere personale ai Chosen */
-    setPilotAsChosen: (aMissionId, aPilotId) => {
-        Mission.updateById(aMissionId, {$pull: {'pilots.accepted': aPilotId}});
-        Mission.updateById(aMissionId, {$push: {'pilots.chosen': aPilotId}});
-    },
-
-    setCrewAsChosen: (aMissionId, aCrewId) => {
-        Mission.updateById(aMissionId, {$pull: {'crew.accepted': aCrewId}});
-        Mission.updateById(aMissionId, {$push: {'crew.chosen': aCrewId}});
-    },
-    
-    setMaintainerAsChosen: (aMissionId, aMaintainerId) => {
-        Mission.updateById(aMissionId, {$pull: {'maintainers.accepted': aMaintainerId}});
-        Mission.updateById(aMissionId, {$push: {'maintainers.chosen': aMaintainerId}});
+    Maintainer: {
+        setAsNotified: (aMissionId, aMaintainerId) => {
+            Mission.updateById(aMissionId, {$push: {'maintainer.notified': aMaintainerId}});
+        },
+        setAsAccepted: (aMissionId, aMaintainerId) => {
+            Mission.updateById(aMissionId, {$pull: {'maintainers.notified': aMaintainerId}});
+            Mission.updateById(aMissionId, {$push: {'maintainers.accepted': aMaintainerId}});
+        },
+        setAsChosen: (aMissionId, aMaintainerId) => {
+            Mission.updateById(aMissionId, {$pull: {'maintainers.accepted': aMaintainerId}});
+            Mission.updateById(aMissionId, {$push: {'maintainers.chosen': aMaintainerId}});
+        }
     },
 
     findByIdSync: (aId, projection) => {
@@ -406,17 +498,28 @@ exports.Logbook = Logbook = {
         aLogbook._id = mongoose.Types.ObjectId();
         new models.Logbook(aLogbook)
         .save((err, logbook) => {
+            if (err) return console.log(err)
             // Aggiungo il logbook alla missione
             Mission.updateById(logbook.mission, {$push: {logbooks: logbook._id}});
             // Aggiungo la missione di cui è stato inserito il logbook tra le missioni completate del pilota che lo ha inserito
             Personnel.updateById(logbook.pilot, {$pull: {'missions.pilot.waitingForLogbook': logbook.mission}});
             Personnel.updateById(logbook.pilot, {$push: {'missions.pilot.completed': logbook.mission}});
+            
+            eventEmitters.Logbook.emit('insert', logbook)
+            console.log(`Inserted Logbook with id: ${logbook._id}`)
         });
     },
 
-    updateById: (aId, newValues) => {
-        models.Logbook.updateOne({_id: aId}, newValues, err => {});
+    update: (selection, newValues) => {
+        models.Logbook.updateOne(selection, newValues, err => {
+            if (err) return console.log(err)
+
+            eventEmitters.Logbook.emit('update')
+            console.log(`Updated Logbook selected by: ${selection}`)
+        });
     },
+
+    updateById: (aId, newValues) => Logbook.update({_id: aId}, newValues),
 
     findById: (aId, projection, callback) => {
         models.Logbook.findOne()
@@ -447,16 +550,31 @@ exports.Qtb = Qtb = {
         aQtb._id = mongoose.Types.ObjectId();
         new models.Qtb(aQtb)
         .save((err, qtb) => {
+            if (err) return console.log(err)
+
             Mission.updateById(qtb.mission, {$push: {qtb: qtb._id}});
             Drone.updateById(qtb.drone, {$pull: {'missions.waitingForQtb': qtb.mission}});
             Drone.updateById(qtb.drone, {$push: {'missions.completed': qtb.mission}});
+
+            eventEmitters.Qtb.emit('insert', qtb)
+            console.log(`Inserted Qtb with id: ${qtb._id}`)
         });
     },
 
+    update: (selection, newValues) => {
+        models.Qtb.updateOne(selection, newValues, err => {
+            if (err) return console.log(err)
+            eventEmitters.Qtb.emit('update')
+            console.log(`Updated Qtb selected by: ${selection}`)
+        });
+    },
+
+    updateById: (aId, newValues) => Qtb.update({_id: aId}, newValues),
+/*
     updateById: (aId, newValues) => {
         models.Qtb.updateOne({_id: aId}, newValues, err => {});
     },
-
+*/
     findById: (aId, projection, callback) => {
         models.Qtb.findOne()
         .where('_id').equals(aId)

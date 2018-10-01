@@ -185,6 +185,9 @@ exports.Personnel = [{
         command: {
             airOperator: {
                 SM: true
+            },
+            base: {
+                supervisor: true
             }
         },
         occupation: {
@@ -242,8 +245,8 @@ exports.Drones = [{
 exports.Missions = [{
     id: null,
     date: new Date(),
-    base: 'Base1',
-    supervisor: '12345', /* Il CF */
+    base: 'Base1', /* Id della base non il nome */
+    supervisor: '12345', /* Deve essere un id */
     description: {
         duration: { /* Durata della missione, può differire dai tempi di volo */
             expected: 5

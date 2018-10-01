@@ -7,15 +7,6 @@ const roleToOperation = {
 	crew:   ['/accept', '/refuse'] // Usabili anche dai piloti e manutentori
 };
 
-exports.loadData = (idTelegram, callback) => {
-    queries.Personnel.findByIdTelegram(idTelegram, {}, aPerson => {
-        callback({
-            commands: getPermissions(aPerson),
-            telegramData: aPerson.telegramData
-        });
-    });
-};
-
 const getPermissions = aPerson => {
     var commands = [];
     if (aPerson.roles.command.airOperator.AM)
@@ -30,7 +21,16 @@ const getPermissions = aPerson => {
     return commands;
 };
 
-exports.setBotStarted = idTelegram => {
-    // console.log('FakeFunction doing nothing!');
-    queries.Personnel.updateByIdTelegram(idTelegram, {'telegramData.botStarted': true});
+
+exports.loadData = (idTelegram, callback) => {
+    queries.Personnel.findByIdTelegram(idTelegram, {}, aPerson => {
+        callback({
+            commands: getPermissions(aPerson),
+            person: aPerson
+        });
+    });
 };
+
+exports.setBotStarted = idTelegram => queries.Personnel.updateByIdTelegram(idTelegram, {'telegramData.botStarted': true})
+
+exports.resetBotStarted = idTelegram => queries.Personnel.updateByIdTelegram(idTelegram, {'telegramData.botStarted': false})
