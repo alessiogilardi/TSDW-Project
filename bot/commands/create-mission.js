@@ -1,6 +1,7 @@
 const WizardScene   = require('telegraf/scenes/wizard/index')
 const Composer      = require('telegraf/composer')
 const queries       = require('../../db/queries')
+const schemas       = require('../../db/schemas')
 
 const dataStructure = {
     name: 'createMission',
@@ -20,7 +21,6 @@ const dataStructure = {
     }
 }
 
-const droneTypes = ['type1', 'type2', 'type3', 'type'] // Questo sarà meglio implementato più avanti
 const arrayContainsArray = (superset, subset) => {
     if (0 === subset.length || superset.length < subset.length) return false
     subset.forEach(subVal => {
@@ -73,7 +73,7 @@ const createMission = new WizardScene('createMission',
         }
         ctx.session.command.params.rank = ctx.message.text // Parso il numero
         ctx.reply('Ultima cosa, i droni per la missione.Inserisci il tipo di drone più adatto.')
-        .then(() => ctx.reply(`Inserisci il tipo di drone più adatto. Ti elencherò quelli disponibili.\nI tipi di drone sono:\n${droneTypes.join(', ')}`))
+        .then(() => ctx.reply(`Inserisci il tipo di drone più adatto. Ti elencherò quelli disponibili.\nI tipi di drone sono:\n${schemas.droneTypes.join(', ')}`))
         .catch(err => console.log(err))
         return ctx.wizard.next()
     }),
@@ -83,7 +83,7 @@ const createMission = new WizardScene('createMission',
         if (ctx.session.command.searching)
             return
         //if (!isValidDroneType(ctx.message.text)) {
-        if (!droneTypes.includes(ctx.message.text)) { // controllo che il tipo di drone sia un tipo esistente
+        if (!schemas.droneTypes.includes(ctx.message.text)) { // controllo che il tipo di drone sia un tipo esistente
             ctx.reply('Mi spiace, ma il tipo di drone che hai inserito non è valido, controlla meglio i tipi disponibili e inseriscine uno diverso')
             return
         }
