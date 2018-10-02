@@ -6,14 +6,12 @@ const dataLoader = require('./bot/data-loader-middleware');
 const bf = require('./bot/bot-functions.js');
 const Stage = require('telegraf/stage')
 const createMission = require('./bot/commands/create-mission');
-const eventEmitters = require('./event-emitters')
+const notification = require('./bot/notifications')
 const { enter, leave } = Stage
 
 const backtick = '\`';
 
-eventEmitters.Mission.on('insert', () => {
-	console.log('Missione inserita')
-})
+
 
 
 // TODO: potrebbe essere possibile creare un middleware che controlla l'input,
@@ -31,6 +29,7 @@ const stage = new Stage([createMission])
 stage.command('cancel', leave())
 
 const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN);
+notification(bot)
 
 // session({ ttl: 10 })
 bot.use(session());
