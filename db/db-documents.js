@@ -1,4 +1,4 @@
-
+const schemas = require('./schemas')
 exports.AirOperators = [{
     _id: null,
     name: 'eurodrone',
@@ -68,7 +68,7 @@ exports.Bases = [{
 exports.Personnel = [{
     _id: null,
     telegramData: {
-        idTelegram: 1234
+        idTelegram: 12345678910
     },
     name: 'Tizio',
     surname: 'uno',
@@ -101,7 +101,7 @@ exports.Personnel = [{
             maxMissionRank: 3,
             expiring: new Date()
         },
-        droneTypes: ['AAA', 'bbb', 'CCC']
+        droneTypes: schemas.droneTypes
     },
     missions: {
         supervisor:  {
@@ -156,7 +156,7 @@ exports.Personnel = [{
             maxMissionRank: 4,
             expiring: new Date()
         },
-        droneTypes: ['AAA', 'bbb', 'CCC']
+        droneTypes: schemas.droneTypes
     },
     missions: {
         supervisor:  {
@@ -205,7 +205,7 @@ exports.Personnel = [{
             maxMissionRank: 4,
             expiring: new Date()
         },
-        droneTypes: ['AAA', 'bbb', 'CCC']
+        droneTypes: schemas.droneTypes
     },
     missions: {
         supervisor:  {
@@ -221,7 +221,7 @@ exports.Personnel = [{
 exports.Drones = [{
     _id: null,
     number: 'aaa123', /* Non sapendo se sia numerico o alfanumerico */
-    type: 'type',
+    type: schemas.droneTypes[0],
     airOperator: 'eurodrone',
     base: 'Base2',
     batteryTypes: ['AA'],
@@ -234,7 +234,7 @@ exports.Drones = [{
 {
     _id: null,
     number: 'bbb111',
-    type: 'type',
+    type: schemas.droneTypes[0],
     airOperator: 'eurodrone',
     base: 'Base2',
     batteryTypes: ['AA'],
