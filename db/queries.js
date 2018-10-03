@@ -23,7 +23,7 @@ exports.AirOperator = AirOperator = {
             if (err) return console.log(err)
             // Emetto l'evento update
             eventEmitters.AirOperator.emit('update')
-            console.log(`Updated AirOperator selected by: ${selection}`);
+            console.log(`Updated AirOperator selected by: ${JSON.stringify(selection)}`);
         })
     },
 
@@ -96,7 +96,7 @@ exports.Base = Base = {
         models.Base.updateOne(selection, newValues, err => {
             if (err) return console.log(err)
             eventEmitters.Base.emit('update')
-            console.log(`Updated Base selected by: ${selection}`)
+            console.log(`Updated Base selected by: ${JSON.stringify(selection)}`)
         })
     },
 
@@ -156,7 +156,7 @@ exports.Personnel = Personnel = {
                         return console.log(err);
                     console.log('Inserted new Personnel with id: ' + personnel._id);
                     // Emetto evento insert
-                    eventEmitters.emit('insert', personnel)
+                    eventEmitters.Personnel.emit('insert', personnel)
 
                     // Inserisco i vincoli di integrità
 
@@ -190,7 +190,7 @@ exports.Personnel = Personnel = {
             if (err) return console.log(err)
             // Emetto evento update
             eventEmitters.Personnel.emit('update')
-            console.log(`Updated Personnel selected by: ${selection}`)
+            console.log(`Updated Personnel selected by: ${JSON.stringify(selection)}`)
         })
     },
 
@@ -292,7 +292,7 @@ exports.Drone = Drone = {
             if (err) return console.log(err)
             // Emetto l'evento update
             eventEmitters.Drone.emit('update')
-            console.log(`Updated Drone selected by: ${selection}`)
+            console.log(`Updated Drone selected by: ${JSON.stringify(selection)}`)
         })
     },
 
@@ -408,7 +408,7 @@ exports.Mission = Mission = {
             if (err) return console.log(err)
             // Emetto l'evento update
             eventEmitters.Mission.emit('update')
-            console.log(`Updated Mission selected by: ${selection}`)
+            console.log(`Updated Mission selected by: ${JSON.stringify(selection)}`)
         })
     },
 
@@ -515,7 +515,7 @@ exports.Logbook = Logbook = {
             if (err) return console.log(err)
 
             eventEmitters.Logbook.emit('update')
-            console.log(`Updated Logbook selected by: ${selection}`)
+            console.log(`Updated Logbook selected by: ${JSON.stringify(selection)}`)
         });
     },
 
@@ -565,7 +565,7 @@ exports.Qtb = Qtb = {
         models.Qtb.updateOne(selection, newValues, err => {
             if (err) return console.log(err)
             eventEmitters.Qtb.emit('update')
-            console.log(`Updated Qtb selected by: ${selection}`)
+            console.log(`Updated Qtb selected by: ${JSON.stringify(selection)}`)
         });
     },
 
