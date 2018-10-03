@@ -8,7 +8,7 @@
 const mongoose = require('mongoose');
 const ObjectId = mongoose.Schema.Types.ObjectId;
 
-const droneTypes = ['S', 'M', 'L', 'XL'] // TODO: Da cambiare con i valori veri
+exports.droneTypes = droneTypes = ['S', 'M', 'L', 'XL'] // TODO: Da cambiare con i valori veri
 
 exports.airOperatorSchema = new mongoose.Schema({
   _id: ObjectId,
