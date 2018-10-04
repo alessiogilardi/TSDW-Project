@@ -27,7 +27,7 @@ const arrayContainsArray = (superset, subset) => {
 const requestMission = new WizardScene('requestMission',
     ctx => {
         ctx.session.command = dataStructure
-        ctx.reply('Bene, iniziamo la proceduraper la richiesta di una missione!\nTi verrà chiesto di inserire alcuni parametri.')
+        ctx.reply('Bene, iniziamo la procedura per la richiesta di una missione!\nTi verrà chiesto di inserire alcuni parametri.')
         .then(() => ctx.reply('Ti ricordo che puoi annullare l\'operazione  in qualsiasi momento usando il comando /cancel.'))
         .then(() => ctx.reply('Inserisci la data della missione:'))
         .catch(err => console.log(err))
@@ -67,7 +67,7 @@ const requestMission = new WizardScene('requestMission',
     }))
     .leave(ctx => {
     if (ctx.message.text == '/cancel') {
-        ctx.reply('Creazione missione annullata.')
+        ctx.reply('Richiesta missione annullata.')
         return
     }  
     ctx.reply('La richiesta è stata inoltrata con successo. Verrai notificato nel caso le missione verrà accettata')
