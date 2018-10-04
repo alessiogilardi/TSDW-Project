@@ -70,6 +70,7 @@ exports.personnelSchema = new mongoose.Schema({
         droneTypes: [{type: String, default: [], enum: droneTypes}]
     },
     missions: {
+        available: {type: Boolean, dfault: true}, // Indica se un membro del personale è attualmente occupato in missione
         supervisor:  {
             completed: [{type: ObjectId, default: [], ref: 'mission'}],
             pending: [{type: ObjectId, default: [], ref: 'mission'}]
@@ -80,9 +81,11 @@ exports.personnelSchema = new mongoose.Schema({
         },
         crew:  {
             completed: [{type: ObjectId, default: [], ref: 'mission'}],
+            pending: {type: ObjectId, default: undefined, ref: 'mission'} // Indica la missione in cui è attualmente impegnato
         },
         maintainers:  {
             completed: [{type: ObjectId, default: [], ref: 'mission'}],
+            pending: {type: ObjectId, default: undefined, ref: 'mission'} // Indica la missione in cui è attualmente impegnato
         },
     },
     locPermission: {type: Boolean, default: false}
@@ -121,7 +124,7 @@ exports.dronesSchema = new mongoose.Schema({
     base: {type: ObjectId, ref: 'base'},
     batteryTypes: [{type: String, ref: 'battery'}],
     state: {
-        availability: {type: Number, default: 0}, /* 0 -> Disponibile, 1 -> In Uso, 2 -> In manutenzione */
+        availability: {type: Number, default: 0}, /* 0 -> Disponibile, 1 -> In Missione, 2 -> In manutenzione */
         /* generalState: String, /* Potrebbe non servire */
         lastMaintenance: Date,
         flightTimeSinceLastMaintenance: Number, /* Aggiornato ogni qual volta viene inserito un QTB e azzerato ad ogni manutenzione, campo utilizzato per verificare lo stato di usura */
