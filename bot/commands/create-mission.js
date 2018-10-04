@@ -3,6 +3,8 @@ const Composer      = require('telegraf/composer')
 const queries       = require('../../db/queries')
 const schemas       = require('../../db/schemas')
 
+// TODO: va formattato l'output quando mostro i droni disponibili (decidere cosa mostrare e come)
+
 const dataStructure = {
     name: 'createMission',
     error: false,
@@ -131,12 +133,15 @@ const createMission = new WizardScene('createMission',
     ctx.reply('La missione è stata creata con successo!\nTi ricontterò appena una squadra sarà disponibile.')
     .then(ctx.reply(`Ecco intanto un riepilogo sui dati della missione\n\n${JSON.stringify(ctx.session.command)}`))
     .catch(err => console.log(err))
-
+    
+    // var dronesData = [] // Se modifico la struttura di mission in modo da tenere anche il tipo di drone
+    
     var dronesId = []
     ctx.session.command.params.drones.chosen.forEach(chosenDrone => {
         ctx.session.command.params.drones.loaded.forEach(loadedDrone => {
             if (loadedDrone.number === chosenDrone)
                 dronesId.push(loadedDrone._id)
+                // dronesData.push({id: loadedDrone._id, type: loadedDrone.type}) // Se modifico la struttura di mission in modo da tenere anche il tipo di drone
         })
     })
 
