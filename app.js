@@ -26,10 +26,10 @@ const backtick = '\`';
 
 // TODO: definire la possibilità che sia droni che piloti siano occupati in un altra missione per cui è inutile notificarli
 
-const stage = new Stage([createMission])
-const stage2 = new Stage([requestMission])					//TODO: gestire meglio gli stage
+const stage = new Stage([createMission, requestMission])
+//const stage2 = new Stage([requestMission])					//TODO: gestire meglio gli stage
 stage.command('cancel', leave())
-stage2.command('cancel', leave())
+//stage2.command('cancel', leave())
 
 const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN);
 notification(bot)
@@ -38,7 +38,7 @@ notification(bot)
 bot.use(session());
 bot.use(dataLoader());
 bot.use(stage.middleware())
-bot.use(stage2.middleware())								//TODO: gestire meglio i middleware per stage
+//bot.use(stage2.middleware())								//TODO: gestire meglio i middleware per stage
 
 
 bot.start(ctx => {
