@@ -6,6 +6,7 @@ const dataLoader = require('./bot/data-loader-middleware');
 const bf = require('./bot/bot-functions.js');
 const Stage = require('telegraf/stage')
 const createMission = require('./bot/commands/create-mission');
+const requestMission = require('./bot/commands/request-mission')
 const notification = require('./bot/notifications')
 const { enter, leave } = Stage
 
@@ -26,7 +27,9 @@ const backtick = '\`';
 // TODO: definire la possibilità che sia droni che piloti siano occupati in un altra missione per cui è inutile notificarli
 
 const stage = new Stage([createMission])
+const stage2 = new Stage([requestMission])					//TODO: gestire meglio gli stage
 stage.command('cancel', leave())
+stage2.command('cancel', leave())
 
 const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN);
 notification(bot)
@@ -35,6 +38,7 @@ notification(bot)
 bot.use(session());
 bot.use(dataLoader());
 bot.use(stage.middleware())
+bot.use(stage2.middleware())								//TODO: gestire meglio i middleware per stage
 
 
 bot.start(ctx => {
@@ -49,13 +53,20 @@ bot.help(ctx => ctx.reply(`Command list:\n ${ctx.session.userData.commands.join(
 // Da verificare il tipo di action
 bot.action('delete', ctx => bf.resetBotStarted(ctx.message.from.id))
 
-
 bot.command(['createMission', 'createmission'], ctx => {
 	if (!ctx.session.userData.commands.includes('/createMission')) {
 		ctx.reply('Mi spiace, non hai i diritti per eseguire questo comando.')
 		return
 	}
 	ctx.scene.enter('createMission');
+});
+
+bot.command(['requestMission', 'requestmission'], ctx => {
+	if (!ctx.session.userData.commands.includes('/requestMission')) {
+		ctx.reply('Mi spiace, non hai i diritti per eseguire questo comando.')
+		return
+	}
+	ctx.scene.enter('requestMission');
 });
 
 bot.startPolling();

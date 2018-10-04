@@ -138,6 +138,7 @@ exports.Personnel = [{
     roles: {
         command: {
             airOperator: {
+                AM: true,
                 SM: true
             },
             base: {
