@@ -179,7 +179,7 @@ exports.Personnel = Personnel = {
                     if (personnel.roles.command.base.viceAM)
                         Base.updateById(personnel.base, {'roles.viceAM': personnel._id});
                     if (personnel.roles.command.base.supervisor)
-                        Base.updateById(personnel.base, {'roles.baseSupervisor': personnel._id});
+                        Base.updateById(personnel.base, {'roles.supervisor': personnel._id});
                 });
             });
         });
@@ -231,6 +231,16 @@ exports.Personnel = Personnel = {
         .select(projection)
         .exec(callback)
         //.exec((err, personnel) => callback(personnel))
+    },
+
+    // Scrivo una funzione temporanea specifica per la ricerca dell'id
+    findById: (aId, projection, callback) => {
+        models.Personnel.findOne()
+        .where('_id').equals(aId)
+        .select(projection)
+        .exec((err, personnel) => {
+            callback(personnel);
+        });
     },
 
     findByCf: (aCf, projection, callback) => {

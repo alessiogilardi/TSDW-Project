@@ -11,6 +11,7 @@ const dataStructure = {
     searching: false,
     params: {
         baseName: undefined,
+        baseSupervisor: undefined,
         date: undefined,
         description: undefined
     }
@@ -55,6 +56,7 @@ const requestMission = new WizardScene('requestMission',
                 return
             }
             ctx.session.command.params.baseName = aBase.name;
+            ctx.session.command.params.baseSupervisor = aBase.roles.supervisor;
             ctx.reply('Infine, scrivi una breve descrizione della missione, per far sapere di cosa si tratta.')
             .catch(err => console.log(err))
             return ctx.wizard.next()
@@ -73,6 +75,12 @@ const requestMission = new WizardScene('requestMission',
     ctx.reply('La richiesta è stata inoltrata con successo. Verrai notificato nel caso le missione verrà accettata')
     .then(ctx.reply(`Ecco intanto un riepilogo sui dati della missione\n\n${JSON.stringify(ctx.session.command)}`))
     .catch(err => console.log(err))
+    // Qua mando il messaggio al base supervisor che deve ricevere la notifica
+    // Estraggo il telegramId a partire dall'id del supervisore e mando il messaggio con i dati appena inseriti della missione richiesta
+    queries.Personnel.findById(ctx.session.command.params.baseSupervisor, {}, aPerson => {
+        ctx.sendMessage(aPerson.telegramData.idTelegram, `E' stata richiesta una missione con i seguenti dati:\n
+        ${JSON.stringify(ctx.session.command)}`) // NON ESISTE ctx.sendMessage(), bisogna trovare soluzione
+    });
 });
 
 
