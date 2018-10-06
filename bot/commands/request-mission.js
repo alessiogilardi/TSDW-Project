@@ -51,6 +51,7 @@ const requestMission = new WizardScene('requestMission',
     new Composer()
     .on('text', ctx => {
         // Cerco la base
+        // TODO: mentre cerco devo scartare l'input, altrimenti se vengono mandati più messaggi partono molteplici ricerche
         queries.Base.findByName(ctx.message.text, {}, aBase => {
             if (aBase == null) {
                 ctx.reply('Mi spiace hai inserito una base non valida, per favore inseriscine un\' altra.')
