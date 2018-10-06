@@ -45,8 +45,15 @@ const findAnNotify = aMission => {
 }
 
 const eventHandlers = {
-    Mission: {
-        insert: () => eventEmitters.Mission.on('insert', aMission => findAnNotify(aMission))
+    Db: {
+        Mission:  {
+            insert: () => eventEmitters.Db.Mission.on('insert', aMission => findAnNotify(aMission))
+        }
+    },
+    Bot: {
+        requestMission: () => eventEmitters.Bot.on('requestMission', (aPerson, message) => {
+            this.bot.sendMessage(aPerson.telegramData.idTelegram, message)
+        })
     }
 }
 
@@ -56,7 +63,8 @@ const notification = bot => {
     if (bot === null || bot === undefined) throw new Error('Missing Telegram Bot')
     this.bot = bot
 
-    eventHandlers.Mission.insert()
+    eventHandlers.Db.Mission.insert()
+    eventHandlers.Bot.requestMission()
 }
 
 
