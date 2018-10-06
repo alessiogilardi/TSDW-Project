@@ -13,7 +13,7 @@ exports.AirOperator = AirOperator = {
             console.log('Inserted new AirOperator with id: ' + airOperator._id);
 
             // Emetto l'evento insert
-            eventEmitters.AirOperator.emit('insert', airOperator)
+            eventEmitters.Db.AirOperator.emit('insert', airOperator)
         });
 
     },
@@ -22,7 +22,7 @@ exports.AirOperator = AirOperator = {
         models.AirOperator.updateOne(selection, newValues, err => {
             if (err) return console.log(err)
             // Emetto l'evento update
-            eventEmitters.AirOperator.emit('update')
+            eventEmitters.Db.AirOperator.emit('update')
             console.log(`Updated AirOperator selected by: ${JSON.stringify(selection)}`);
         })
     },
@@ -85,7 +85,7 @@ exports.Base = Base = {
                     return console.log(err);
                 console.log('Inserted new base with _id: ' + base._id);
                 // Emetto l'evento insert
-                eventEmitters.Base.emit('insert', base)
+                eventEmitters.Db.Base.emit('insert', base)
                 // Quando la query viene eseguita, devo aggiungere l'id della base appena creata alla lista di basi dell'operatore aereo corrispondente
                 AirOperator.updateById(base.airOperator, {$push: {'bases': base._id}});
             });
@@ -95,7 +95,7 @@ exports.Base = Base = {
     update: (selection, newValues) => {
         models.Base.updateOne(selection, newValues, err => {
             if (err) return console.log(err)
-            eventEmitters.Base.emit('update')
+            eventEmitters.Db.Base.emit('update')
             console.log(`Updated Base selected by: ${JSON.stringify(selection)}`)
         })
     },
@@ -156,7 +156,7 @@ exports.Personnel = Personnel = {
                         return console.log(err);
                     console.log('Inserted new Personnel with id: ' + personnel._id);
                     // Emetto evento insert
-                    eventEmitters.Personnel.emit('insert', personnel)
+                    eventEmitters.Db.Personnel.emit('insert', personnel)
 
                     // Inserisco i vincoli di integrità
 
@@ -189,7 +189,7 @@ exports.Personnel = Personnel = {
         models.Personnel.updateOne(selection, newValues, err => {
             if (err) return console.log(err)
             // Emetto evento update
-            eventEmitters.Personnel.emit('update')
+            eventEmitters.Db.Personnel.emit('update')
             console.log(`Updated Personnel selected by: ${JSON.stringify(selection)}`)
         })
     },
@@ -289,7 +289,7 @@ exports.Drone = Drone = {
                         return console.log(err);
                     console.log('Inserted new Drone with id: ' + drone._id);
                     // Emetto evento insert
-                    eventEmitters.Drone.emit('insert')
+                    eventEmitters.Db.Drone.emit('insert')
                     // Il drone deve essere aggiunto alla lista di droni della base corrispondente
                     Base.updateById(drone.base, {$push: {drones: drone._id}});
                 });
@@ -301,7 +301,7 @@ exports.Drone = Drone = {
         models.Drone.updateOne(selection, newValues, err => {
             if (err) return console.log(err)
             // Emetto l'evento update
-            eventEmitters.Drone.emit('update')
+            eventEmitters.Db.Drone.emit('update')
             console.log(`Updated Drone selected by: ${JSON.stringify(selection)}`)
         })
     },
@@ -390,7 +390,7 @@ exports.Battery = Battery = {
             if (err) return console.log(err)
 
             // Emetto evento insert
-            eventEmitters.Battery.emit('insert', battery)
+            eventEmitters.Battery.Db.emit('insert', battery)
             console.log(`Iserted Battery with id: ${battery._id}`)
         })
     }
@@ -406,7 +406,7 @@ exports.Mission = Mission = {
             Personnel.updateById(mission.supervisor, {$push: {'missions.supervisor.pending': mission._id}})
 
             // Emetto l'evento missione inserita
-            eventEmitters.Mission.emit('insert', mission)
+            eventEmitters.Db.Mission.emit('insert', mission)
 
             console.log(`Inserted Mission with id: ${mission._id}`)
         })
@@ -417,7 +417,7 @@ exports.Mission = Mission = {
         models.Mission.updateOne(selection, newValues, err => {
             if (err) return console.log(err)
             // Emetto l'evento update
-            eventEmitters.Mission.emit('update')
+            eventEmitters.Db.Mission.emit('update')
             console.log(`Updated Mission selected by: ${JSON.stringify(selection)}`)
         })
     },
@@ -515,7 +515,7 @@ exports.Logbook = Logbook = {
             Personnel.updateById(logbook.pilot, {$pull: {'missions.pilot.waitingForLogbook': logbook.mission}});
             Personnel.updateById(logbook.pilot, {$push: {'missions.pilot.completed': logbook.mission}});
             
-            eventEmitters.Logbook.emit('insert', logbook)
+            eventEmitters.Db.Logbook.emit('insert', logbook)
             console.log(`Inserted Logbook with id: ${logbook._id}`)
         });
     },
@@ -524,7 +524,7 @@ exports.Logbook = Logbook = {
         models.Logbook.updateOne(selection, newValues, err => {
             if (err) return console.log(err)
 
-            eventEmitters.Logbook.emit('update')
+            eventEmitters.Db.Logbook.emit('update')
             console.log(`Updated Logbook selected by: ${JSON.stringify(selection)}`)
         });
     },
@@ -566,7 +566,7 @@ exports.Qtb = Qtb = {
             Drone.updateById(qtb.drone, {$pull: {'missions.waitingForQtb': qtb.mission}});
             Drone.updateById(qtb.drone, {$push: {'missions.completed': qtb.mission}});
 
-            eventEmitters.Qtb.emit('insert', qtb)
+            eventEmitters.Db.Qtb.emit('insert', qtb)
             console.log(`Inserted Qtb with id: ${qtb._id}`)
         });
     },
@@ -574,7 +574,7 @@ exports.Qtb = Qtb = {
     update: (selection, newValues) => {
         models.Qtb.updateOne(selection, newValues, err => {
             if (err) return console.log(err)
-            eventEmitters.Qtb.emit('update')
+            eventEmitters.Db.Qtb.emit('update')
             console.log(`Updated Qtb selected by: ${JSON.stringify(selection)}`)
         });
     },
