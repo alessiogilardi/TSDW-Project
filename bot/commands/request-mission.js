@@ -2,6 +2,7 @@ const WizardScene   = require('telegraf/scenes/wizard/index')
 const Composer      = require('telegraf/composer')
 const queries       = require('../../db/queries')
 const schemas       = require('../../db/schemas')
+const eventEmitters = require('../../event-emitters')
 
 // TODO: va formattato l'output quando mostro i droni disponibili (decidere cosa mostrare e come)
 
@@ -68,19 +69,21 @@ const requestMission = new WizardScene('requestMission',
         return ctx.scene.leave()
     }))
     .leave(ctx => {
-    if (ctx.message.text == '/cancel') {
-        ctx.reply('Richiesta missione annullata.')
-        return
-    }  
-    ctx.reply('La richiesta è stata inoltrata con successo. Verrai notificato nel caso le missione verrà accettata')
-    .then(ctx.reply(`Ecco intanto un riepilogo sui dati della missione\n\n${JSON.stringify(ctx.session.command)}`))
-    .catch(err => console.log(err))
-    // Qua mando il messaggio al base supervisor che deve ricevere la notifica
-    // Estraggo il telegramId a partire dall'id del supervisore e mando il messaggio con i dati appena inseriti della missione richiesta
-    queries.Personnel.findById(ctx.session.command.params.baseSupervisor, {}, aPerson => {
-        ctx.sendMessage(aPerson.telegramData.idTelegram, `E' stata richiesta una missione con i seguenti dati:\n
-        ${JSON.stringify(ctx.session.command)}`) // NON ESISTE ctx.sendMessage(), bisogna trovare soluzione
-    });
+        if (ctx.message.text === '/cancel') {
+            ctx.reply('Richiesta missione annullata.')
+            return
+        }
+        // TODO: non sono sicuro sia il caso di renotificare chi l'ha richiesta visto che è un dato che non teniamo nel DB
+        ctx.reply('La richiesta è stata inoltrata con successo. Verrai notificato nel caso le missione verrà accettata')
+        .then(ctx.reply(`Ecco intanto un riepilogo sui dati della missione\n\n${JSON.stringify(ctx.session.command)}`))
+        .catch(err => console.log(err))
+        // Qua mando il messaggio al base supervisor che deve ricevere la notifica
+        // Estraggo il telegramId a partire dall'id del supervisore e mando il messaggio con i dati appena inseriti della missione richiesta
+        queries.Personnel.findById(ctx.session.command.params.baseSupervisor, {}, aPerson => {
+            //ctx.sendMessage(aPerson.telegramData.idTelegram, `E' stata richiesta una missione con i seguenti dati:\n
+            //${JSON.stringify(ctx.session.command)}`) // NON ESISTE ctx.sendMessage(), bisogna trovare soluzione
+            eventEmitters.Bot.emit('requestMission', aPerson, message)
+        });
 });
 
 
