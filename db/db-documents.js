@@ -83,10 +83,10 @@ exports.Personnel = [{
     roles: {
         command: {
             airOperator: {
-                AM: true
+                AM: false
             },
             base: {
-                supervisor: true
+                supervisor: false
             },
         },
         occupation: {
@@ -184,7 +184,7 @@ exports.Personnel = [{
         address: '12353'
     },
     airOperator: 'eurodrone',
-    base: 'Base2',
+    base: 'Base1',
     roles: {
         command: {
             airOperator: {
@@ -245,6 +245,32 @@ exports.Drones = [{
         flightTimeSinceLastMaintenance: 0, /* Aggiornato ogni qual volta viene inserito un QTB e azzerato ad ogni manutenzione, campo utilizzato per verificare lo stato di usura */
         notes: null                           /* Il campo sopra potrebbe essere azzerato nel momento in cui viene modificato il campo lastMaintenance */
     }
+},
+{
+    _id: null,
+    number: 'abc123',
+    type: schemas.droneTypes[0],
+    airOperator: 'eurodrone',
+    base: 'Base1',
+    batteryTypes: ['AA'],
+    state: {
+        lastMaintenance: new Date(),
+        flightTimeSinceLastMaintenance: 0, /* Aggiornato ogni qual volta viene inserito un QTB e azzerato ad ogni manutenzione, campo utilizzato per verificare lo stato di usura */
+        notes: null   
+    }    
+},
+{
+    _id: null,
+    number: 'abc456',
+    type: schemas.droneTypes[0],
+    airOperator: 'eurodrone',
+    base: 'Base1',
+    batteryTypes: ['AA'],
+    state: {
+        lastMaintenance: new Date(),
+        flightTimeSinceLastMaintenance: 0, /* Aggiornato ogni qual volta viene inserito un QTB e azzerato ad ogni manutenzione, campo utilizzato per verificare lo stato di usura */
+        notes: null   
+    }    
 }];
 
 exports.Missions = [{
