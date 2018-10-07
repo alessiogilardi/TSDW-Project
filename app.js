@@ -7,7 +7,7 @@ const bf = require('./bot/bot-functions.js');
 const Stage = require('telegraf/stage')
 const createMission = require('./bot/commands/create-mission');
 const requestMission = require('./bot/commands/request-mission')
-const notification = require('./bot/notifications')
+const notify = require('./bot/notifications/notify')
 const { enter, leave } = Stage
 
 const backtick = '\`';
@@ -18,27 +18,24 @@ const backtick = '\`';
 // TODO: potrebbe essere possibile creare un middleware che controlla l'input,
 // se è un comando allora verifica che l'utente sia autorizzato a lanciarlo altrimeni restituisce errore
 
-// Il personale notificato a seguito della creazione di una missione 
-// potrebbe non essere diviso per ruolo(pilota, crew, ...), in questo modo viene semplicemente mostrato al 
-// supervisore ed è lui a scegliere come distribuire il personale
-// Oppure scelgo tra i piloti quelli adatti alla missione e il personale, poi il supervisore può decidere di assegnare 
-// un pilota alla crew ma non uno della crew ai piloti
+// TODO: scelgo tra i piloti quelli adatti alla missione e scelgo il personale, poi il supervisore
+// deciderà se assegnare un pilota alla crew, ma non potrà assegnare membri della crew ai piloti
 
 // TODO: definire la possibilità che sia droni che piloti siano occupati in un altra missione per cui è inutile notificarli
 
+// TODO: gestire accept e decline come risposte a pulsanti 
+// in questo modo possono essere chiamati solo se si deve accettare una missione
+
 const stage = new Stage([createMission, requestMission])
-//const stage2 = new Stage([requestMission])					//TODO: gestire meglio gli stage
 stage.command('cancel', leave())
-//stage2.command('cancel', leave())
 
 const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN);
-notification(bot)
+notify(bot)
 
 // session({ ttl: 10 })
-bot.use(session());
+bot.use(session(/*{ ttl: 10 }*/));
 bot.use(dataLoader());
 bot.use(stage.middleware())
-//bot.use(stage2.middleware())								//TODO: gestire meglio i middleware per stage
 
 
 bot.start(ctx => {
@@ -50,7 +47,7 @@ bot.start(ctx => {
 	bf.setBotStarted(ctx.message.from.id)
 });
 bot.help(ctx => ctx.reply(`Command list:\n ${ctx.session.userData.commands.join('\n')}`));
-// Da verificare il tipo di action
+// TODO: action -> delete no funziona  Da verificare il tipo di action
 bot.action('delete', ctx => bf.resetBotStarted(ctx.message.from.id))
 
 bot.command(['createMission', 'createmission'], ctx => {
@@ -68,5 +65,50 @@ bot.command(['requestMission', 'requestmission'], ctx => {
 	}
 	ctx.scene.enter('requestMission');
 });
+
+
+/*
+bot.hears('prova', ctx => {
+	bot.telegram.sendMessage(ctx.message.from.id, 'Prova bottone', Telegraf.Extra
+	.markup(m => m.inlineKeyboard([
+		m.callbackButton('Test1 button', 'test1'),
+		m.callbackButton('Test2 button', 'test2')
+	])))
+})
+
+bot.action('test1', ctx => {
+	console.log('Test1')
+	ctx.answerCbQuery('Test1!')
+})
+
+bot.action('test2', ctx => {
+	console.log('Test2')
+	ctx.answerCbQuery('Test2!')
+})
+*/
+
+
+/*
+const testMenu = Telegraf.Extra
+  .markdown()
+  .markup((m) => m.inlineKeyboard([
+    m.callbackButton('Test button', 'test')
+  ]))
+
+  /*
+const aboutMenu = Telegraf.Extra
+  .markdown()
+  .markup((m) => m.keyboard([
+    m.callbackButton('⬅️ Back')
+  ]).resize())
+*/
+/*
+bot.hears('test', (ctx) => {
+  ctx.reply('test message', testMenu).then(() => {
+    ctx.reply('about', aboutMenu)
+  })
+})
+*/
+/*bot.action('test', (ctx) => ctx.answerCbQuery('Yay!'))*/
 
 bot.startPolling();
