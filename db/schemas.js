@@ -173,12 +173,11 @@ exports.missionsSchema = new mongoose.Schema({
         flightPlan: String, /* Presumibilemente sarà un riferimento ad un documento come il Logbook */
         notes: String
     },
-    // Modificare così: 
-    // drones:[{
-    //      id: {type: ObjectId, ref: 'drone'},
-    //      type: {type: String, enum: droneTypes} // deve essere un tipo valido
-    // }]
-    drones: [{type: ObjectId, ref: 'drone', default: []}],
+    drones:[{
+        id: {type: ObjectId, ref: 'drone'},
+        type: {type: String, enum: droneTypes} // deve essere un tipo valido
+    }],
+    //drones: [{type: ObjectId, ref: 'drone', default: []}],
     teams: [{
         pilots: {
             chief: {type: ObjectId, ref: 'personnel', default: []},
