@@ -229,8 +229,7 @@ exports.Personnel = Personnel = {
     find: (selection, projection, callback) => {
         models.Personnel.find(selection)
         .select(projection)
-        .exec(callback)
-        //.exec((err, personnel) => callback(personnel))
+        .exec((err, personnel) => callback(personnel))
     },
 
     // Scrivo una funzione temporanea specifica per la ricerca dell'id
@@ -327,7 +326,6 @@ exports.Drone = Drone = {
         });
     },
 */
-    // TODO: trovare i droni per tipo e per disponibilità, quindi bisogna ampliare la query
 
     findById: (aId, projection, callback) => {
         models.Drone.findOne()
