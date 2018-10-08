@@ -87,7 +87,7 @@ const find = {
             return new Promise((resolve, reject) => {
                 queries.Personnel.find(find.maintainers.query(), find.maintainers.projection, maintainers => {
                     if (maintainers !== undefined || maintainers.length !== 0) {
-                        maintainers.forEach(maintainer => this.toNotify.push({id: maintainer._id, idTelegram: maintainer.telegramData.idTelegram, role: 'pilot'}))
+                        maintainers.forEach(maintainer => this.toNotify.push({id: maintainer._id, idTelegram: maintainer.telegramData.idTelegram, role: 'maintainer'}))
                         resolve()
                     }
                     else
