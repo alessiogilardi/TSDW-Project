@@ -104,14 +104,20 @@ const createMission = new WizardScene('createMission',
     }),
     new Composer()
     .on('text', ctx => {
-        var drones = ctx.message.text.split(',').map(s => s.trim()) // Droni che voglio inserire nella missione
-        var loadedNumbers = []
-        var chosenNumbers = []
-        ctx.session.command.params.drones.loaded.forEach(drone => loadedNumbers.push(drone.number))
-        drones.forEach(drone => chosenNumbers.push(drone.number))
-        // Va generato un array con le targhe dei droni caricati 
-        // in modo da verificare che quelli scelti siano tra quelli caricati
-        if (!utils.arrayContainsArray(loadedNumbers, chosenNumbers)) {
+        // * Va generato un array con le targhe(number) dei droni caricati 
+        // * in modo da verificare che quelli scelti siano tra quelli caricati
+        var chosenNumbers = ctx.message.text.split(',').map(s => s.trim()) // Droni che voglio inserire nella missione
+        var loadedNumbers = Array.from(ctx.session.command.params.drones.loaded, drone => drone.number)
+        // var loadedNumbers = []
+        // var chosenNumbers = []
+        // ctx.session.command.params.drones.loaded.forEach(drone => loadedNumbers.push(drone.number))
+        // drones.forEach(drone => chosenNumbers.push(drone.number))
+        
+        // if (!utils.arrayContainsArray(loadedNumbers, chosenNumbers)) {
+        if (chosenNumbers === undefined ||
+            chosenNumbers === null ||
+            chosenNumbers.length === 0 ||
+            !utils.arrayContainsArray(loadedNumbers, chosenNumbers)) {
             ctx.reply('I droni che hai inserito non sono validi, per favore riprova.')
             return
         }
