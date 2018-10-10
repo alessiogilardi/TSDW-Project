@@ -1,7 +1,12 @@
 const mongoose      = require('mongoose');
-const models        = require('./models.js');
+const models        = require('./models');
 const deasync       = require('deasync');
 var eventEmitters   = require('../event-emitters');
+
+// TODO: quando creo la missione devo anche settare i droni scelti come non disponibili
+// e aggiungere la missione alle loro waitingForQtb missions
+
+// TODO: quando completo la missione devo rilasciare personale e droni e renderli nuovamante disponibili
 
 exports.AirOperator = AirOperator = {
     insert: aAirOperator => {
@@ -400,13 +405,13 @@ exports.Mission = Mission = {
         new models.Mission(aMission)
         .save((err, mission) => {
             if (err) return console.log(err)
+            console.log(`Inserted Mission with id: ${mission._id}`)
             // Viene aggiunta la missione alle pending missions del Supervisor
             Personnel.updateById(mission.supervisor, {$push: {'missions.supervisor.pending': mission._id}})
 
             // Emetto l'evento missione inserita
             eventEmitters.Db.Mission.emit('insert', mission)
 
-            console.log(`Inserted Mission with id: ${mission._id}`)
         })
 
     },
