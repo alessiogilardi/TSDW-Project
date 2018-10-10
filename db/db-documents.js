@@ -173,6 +173,48 @@ exports.Personnel = [{
 {
     _id: null,
     telegramData: {
+        idTelegram: 69921034
+    },
+    name: 'Luca',
+    surname: 'Defilippi',
+    cf: 'DFLLUC93S13E463N',
+    location: {
+        country: 'Italy',
+        city: 'Genoa',
+        address: '12353'
+    },
+    airOperator: 'eurodrone',
+    base: 'Base1',
+    roles: {
+        occupation: {
+            pilot: true,
+            crew: true,
+            maintainer: true
+        }
+    },
+    pilot: {
+        license: {
+            id: 'lic-id-02',
+            type: 'type',
+            maxMissionRank: 4,
+            expiring: new Date()
+        },
+        droneTypes: schemas.droneTypes
+    },
+    missions: {
+        supervisor:  {
+            completed: [],
+            pending: []
+        },
+        maintainers:  {
+            completed: []
+        },
+    }
+},
+
+{
+    _id: null,
+    telegramData: {
         idTelegram: 33017299
     },
     name: 'Alessio',
