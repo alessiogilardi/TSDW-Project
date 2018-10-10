@@ -70,7 +70,7 @@ exports.personnelSchema = new mongoose.Schema({
         droneTypes: [{type: String, default: [], enum: droneTypes}]
     },
     missions: {
-        available: {type: Boolean, dfault: true}, // Indica se un membro del personale è attualmente occupato in missione
+        available: {type: Boolean, default: true}, // Indica se un membro del personale è attualmente occupato in missione
         supervisor:  {
             completed: [{type: ObjectId, default: [], ref: 'mission'}],
             pending: [{type: ObjectId, default: [], ref: 'mission'}]
@@ -145,7 +145,6 @@ exports.batterySchema = new mongoose.Schema({
 exports.missionsSchema = new mongoose.Schema({
     id: ObjectId,
     date: Date,
-    /* type: String, /* Potrebbe essere cancellato in quanto esiste il campo rank più preciso */
     base: {type: ObjectId, ref: 'base'},
     supervisor: {type: ObjectId, ref: 'personnel'},
     status: {type: Number, default: 0, min: 0, max: 4}, /* 0 -> Instantiated, 1 -> Pending, 2 -> Running, 3 -> Completed, 4 -> Completed and documented */
@@ -174,10 +173,9 @@ exports.missionsSchema = new mongoose.Schema({
         notes: String
     },
     drones:[{
-        id: {type: ObjectId, ref: 'drone'},
+        _id: {type: ObjectId, ref: 'drone'},
         type: {type: String, enum: droneTypes} // deve essere un tipo valido
     }],
-    //drones: [{type: ObjectId, ref: 'drone', default: []}],
     teams: [{
         pilots: {
             chief: {type: ObjectId, ref: 'personnel', default: []},
