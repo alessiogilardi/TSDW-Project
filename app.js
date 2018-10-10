@@ -67,6 +67,8 @@ bot.command(['requestMission', 'requestmission'], ctx => {
 });
 
 
+
+bot.startPolling();
 /*
 bot.hears('prova', ctx => {
 	bot.telegram.sendMessage(ctx.message.from.id, 'Prova bottone', Telegraf.Extra
@@ -111,4 +113,3 @@ bot.hears('test', (ctx) => {
 */
 /*bot.action('test', (ctx) => ctx.answerCbQuery('Yay!'))*/
 
-bot.startPolling();
