@@ -5,8 +5,8 @@ const schemas       = require('../../db/schemas')
 const utils         = require('../../utils')
 
 // TODO: va formattato l'output quando mostro i droni disponibili (decidere cosa mostrare e come)
-
-// TODO: gestire il fromato della data
+// TODO: validare la data
+// TODO: gestire il formato della data
 
 const dataStructure = {
     name: 'createMission',
@@ -39,6 +39,7 @@ const createMission = new WizardScene('createMission',
     .on('text', ctx => {
         // Recupero il testo e verifico che sia una data
         // TODO: la data deve essere inseribile in un formato più elastico oppure deve essere spiagto il formato in cui inserirla
+        // TODO: fixare verifica della data successiva ad oggi
         ctx.session.command.params.date = Date.parse(ctx.message.text)
         if (isNaN(ctx.session.command.params.date ||
             ctx.session.command.params.date < new Date(new Date().setHours(0,0,0,0)))) {
@@ -87,7 +88,7 @@ const createMission = new WizardScene('createMission',
         ctx.session.command.params.droneTypes = ctx.message.text
         ctx.session.command.searching = true
         ctx.reply('Va bene, sto cercando i droni, aspetta...')
-        queries.Drone.findByType(ctx.session.command.params.droneTypes, {'state.availability': {$eq: 0}}, {}, drones => {
+        queries.Drone.findByType(ctx.session.command.params.droneTypes, {base: ctx.session.userData.person.base, 'state.availability': {$eq: 0}}, {}, drones => {
             ctx.session.command.params.drones.loaded = drones
             ctx.session.command.searching = false
             if (ctx.session.command.params.drones.loaded === null || 
@@ -108,12 +109,7 @@ const createMission = new WizardScene('createMission',
         // * in modo da verificare che quelli scelti siano tra quelli caricati
         var chosenNumbers = ctx.message.text.split(',').map(s => s.trim()) // Droni che voglio inserire nella missione
         var loadedNumbers = Array.from(ctx.session.command.params.drones.loaded, drone => drone.number)
-        // var loadedNumbers = []
-        // var chosenNumbers = []
-        // ctx.session.command.params.drones.loaded.forEach(drone => loadedNumbers.push(drone.number))
-        // drones.forEach(drone => chosenNumbers.push(drone.number))
-        
-        // if (!utils.arrayContainsArray(loadedNumbers, chosenNumbers)) {
+       
         if (chosenNumbers === undefined ||
             chosenNumbers === null ||
             chosenNumbers.length === 0 ||
@@ -121,7 +117,7 @@ const createMission = new WizardScene('createMission',
             ctx.reply('I droni che hai inserito non sono validi, per favore riprova.')
             return
         }
-        ctx.session.command.params.drones.chosen = drones
+        ctx.session.command.params.drones.chosen = chosenNumbers
         return ctx.scene.leave()
     }))
     .leave(ctx => {
@@ -131,14 +127,14 @@ const createMission = new WizardScene('createMission',
         return
     }  
     ctx.reply('La missione è stata creata con successo!\nTi ricontterò appena una squadra sarà disponibile.')
-    .then(ctx.reply(`Ecco intanto un riepilogo sui dati della missione\n\nData: ${ctx.session.command.params.date}\nDurata prevista: ${ctx.session.command.params.expectedDuration}\nData: ${ctx.session.command.params.date}\nRango: ${ctx.session.command.params.rank}\nDroni scelti: ${ctx.session.command.params.drones.chosen.join(', ')}`))
+    .then(ctx.reply(`Ecco intanto un riepilogo sui dati della missione\n\nData: ${ctx.session.command.params.date}\nDurata prevista: ${ctx.session.command.params.expectedDuration}\nRango: ${ctx.session.command.params.rank}\nDroni scelti: ${ctx.session.command.params.drones.chosen.join(', ')}`))
     .catch(err => console.log(err))
     
     var dronesData = [] // Array che mantiene id e tipo dei droni da inserire nella missione
     ctx.session.command.params.drones.chosen.forEach(chosenDrone => {
         ctx.session.command.params.drones.loaded.forEach(loadedDrone => {
             if (loadedDrone.number === chosenDrone)
-                dronesData.push({id: loadedDrone._id, type: loadedDrone.type})
+                dronesData.push({_id: loadedDrone._id, type: loadedDrone.type})
         })
     })
 
@@ -153,7 +149,7 @@ const createMission = new WizardScene('createMission',
             },
             rank: ctx.session.command.params.rank,
         },
-        drones: dronesId
+        drones: dronesData
     })
 
 });
