@@ -71,7 +71,7 @@ const requestMission = new WizardScene('requestMission',
         }
         // TODO: non sono sicuro sia il caso di renotificare chi l'ha richiesta visto che è un dato che non teniamo nel DB
         ctx.reply('La richiesta è stata inoltrata con successo. Verrai notificato nel caso la missione venga accettata.')
-        .then(ctx.reply(`Ecco intanto un riepilogo sui dati della missione:\n\nData prevista: ${ctx.session.command.params.date}\nBase di partenza: ${ctx.session.command.params.base.name}\nResponsabile: ${ctx.session.command.params.base.supervisor}\nDescrizione: ${ctx.session.command.params.description}`))
+        .then(ctx.reply(`Ecco intanto un riepilogo sui dati della missione:\n\nData prevista: ${utils.Date.format(ctx.session.command.params.date, 'DD-MM-YYYY')}\nBase di partenza: ${ctx.session.command.params.base.name}\nResponsabile: ${ctx.session.command.params.base.supervisor}\nDescrizione: ${ctx.session.command.params.description}`))
         .catch(err => console.log(err))
         // Qua mando il messaggio al base supervisor che deve ricevere la notifica
         // Estraggo il telegramId a partire dall'id del supervisore e mando il messaggio con i dati appena inseriti della missione richiesta
