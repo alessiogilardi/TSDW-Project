@@ -1,4 +1,5 @@
 const queries = require('../../db/queries')
+const Telegraf = require('telegraf')
 
 // TODO: al personale viene mandato un pulsante con cui possono accettare o rifiutare
 // nella callBack del pulsante forse è possibile inserire anche l'id della missione che viene accettata
@@ -11,15 +12,30 @@ const sendNotifications = () => this.toNotify.forEach(person => {
     switch(person.role){
         case 'pilot':
             // Mando notifica da pilota
-            this.bot.telegram.sendMessage(person.idTelegram, 'Richiesta di missione come pilota, /accept o /decline?')
+            this.bot.telegram.sendMessage(person.idTelegram, `Richiesta di missione come *pilota*:\n${this.mission}`, Telegraf.Extra
+            .markdown()
+            .markup( m => m.inlineKeyboard([
+                m.callbackButton('Accetta', 'accept'),
+                m.callbackButton('Rifiuta', 'decline')
+            ])))
             break;
         case 'crew':
             // Mando la notifica da crew
-            this.bot.telegram.sendMessage(person.idTelegram, 'Richiesta di missione come crew, /accept o /decline?')
+            this.bot.telegram.sendMessage(person.idTelegram, `Richiesta di missione come *membro dell'equipaggio*:\n${this.mission}`, Telegraf.Extra
+            .markdown()
+            .markup( m => m.inlineKeyboard([
+                m.callbackButton('Accetta', 'accept'),
+                m.callbackButton('Rifiuta', 'decline')
+            ])))
             break;
         case 'maintainer':
             // Mando la notifica da manutentore
-            this.bot.telegram.sendMessage(person.idTelegram, 'Richiesta di missione come manutentore, /accept o /decline?')
+            this.bot.telegram.sendMessage(person.idTelegram, `Richiesta di missione come *manutentore*:\n${this.mission}`, Telegraf.Extra
+            .markdown()
+            .markup( m => m.inlineKeyboard([
+                m.callbackButton('Accetta', 'accept'),
+                m.callbackButton('Rifiuta', 'decline')
+            ])))
             break;
     }
 })
