@@ -8,6 +8,8 @@ const Stage = require('telegraf/stage')
 const createMission = require('./bot/commands/create-mission');
 const requestMission = require('./bot/commands/request-mission')
 const notify = require('./bot/notifications/notify')
+const acceptMission = require('./bot/actions/accept-mission')
+const declineMission = require('./bot/actions/decline-mission')
 const { enter, leave } = Stage
 
 const backtick = '\`';
@@ -66,7 +68,9 @@ bot.command(['requestMission', 'requestmission'], ctx => {
 	ctx.scene.enter('requestMission');
 });
 
+bot.action('accept', acceptMission())
 
+bot.action('decline', declineMission())
 
 bot.startPolling();
 /*
