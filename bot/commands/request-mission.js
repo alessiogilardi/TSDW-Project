@@ -3,7 +3,6 @@ const Composer      = require('telegraf/composer')
 const queries       = require('../../db/queries')
 const eventEmitters = require('../../event-emitters')
 
-// TODO: validare la data
 
 // TODO: va formattato l'output quando mostro i droni disponibili (decidere cosa mostrare e come)
 // TODO: la data va formattata in output

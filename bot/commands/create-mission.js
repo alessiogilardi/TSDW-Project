@@ -5,7 +5,6 @@ const schemas       = require('../../db/schemas')
 const utils         = require('../../utils')
 
 // TODO: va formattato l'output quando mostro i droni disponibili (decidere cosa mostrare e come)
-// TODO: validare la data
 // TODO: gestire il formato della data
 
 const dataStructure = {
