@@ -2,8 +2,7 @@ const WizardScene   = require('telegraf/scenes/wizard/index')
 const Composer      = require('telegraf/composer')
 const queries       = require('../../db/queries')
 const eventEmitters = require('../../event-emitters')
-
-// TODO: validare la data
+const utils         = require('../../utils')
 
 // TODO: va formattato l'output quando mostro i droni disponibili (decidere cosa mostrare e come)
 // TODO: la data va formattata in output
@@ -33,14 +32,12 @@ const requestMission = new WizardScene('requestMission',
     },
     new Composer()
     .on('text', ctx => {
-        // Recupero il testo e verifico che sia una data
-        // TODO: la data deve essere inseribile in un formato più elastico oppure deve essere spiegato il formato in cui inserirla
-        // TODO: la data deve essere successiva ad oggi
-        ctx.session.command.params.date = Date.parse(ctx.message.text)
-        if (isNaN(ctx.session.command.params.date)) {
-            ctx.reply('La data inserita è in un formato non valido, per favore reinseriscila')
+        // Parso la data inserita e la verifico                
+        if (!utils.Date.isValid(ctx.message.text)) {
+            ctx.reply('La data inserita non è valida, per favore reinseriscila')
             return
         }
+        ctx.session.command.params.date = utils.Date.parse(ctx.message.text)
         ctx.reply('A quale base vuoi affidare la missione? Inserisci il nome della base:')
         return ctx.wizard.next()
     }),
