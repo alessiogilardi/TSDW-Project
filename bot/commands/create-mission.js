@@ -36,15 +36,13 @@ const createMission = new WizardScene('createMission',
     },
     new Composer()
     .on('text', ctx => {
-        // Recupero il testo e verifico che sia una data
-        // TODO: la data deve essere inseribile in un formato più elastico oppure deve essere spiagto il formato in cui inserirla
-        // TODO: fixare verifica della data successiva ad oggi
-        ctx.session.command.params.date = Date.parse(ctx.message.text)
-        if (isNaN(ctx.session.command.params.date ||
-            ctx.session.command.params.date < new Date(new Date().setHours(0,0,0,0)))) {
+        // Parso la data inserita e la verifico                
+        if (!utils.Date.isValid(ctx.message.text)) {
             ctx.reply('La data inserita non è valida, per favore reinseriscila')
             return
         }
+
+        ctx.session.command.params.date = utils.Date.parse(ctx.message.text)
         ctx.reply('Quanto durerà la missione? Inserisci la durata prevista in ore')
         return ctx.wizard.next()
     }),
