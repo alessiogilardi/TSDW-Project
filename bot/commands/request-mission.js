@@ -2,12 +2,7 @@ const WizardScene   = require('telegraf/scenes/wizard/index')
 const Composer      = require('telegraf/composer')
 const queries       = require('../../db/queries')
 const eventEmitters = require('../../event-emitters')
-<<<<<<< HEAD
-
-=======
 const utils         = require('../../utils')
->>>>>>> 41bd09435d4fd073064ea98d69a3f10f5f0d4196
-
 // TODO: va formattato l'output quando mostro i droni disponibili (decidere cosa mostrare e come)
 // TODO: la data va formattata in output
 

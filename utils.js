@@ -21,10 +21,6 @@ exports.arrayContainsArray = (superset, subset) => {
     return true;
   }
 
-
-// TODO: errore, se creo con data di oggi da false
-// -> isAfter da falso
-// Provare a sottrarre 1 secondo
 exports.Date = this.Date = {
     parse: aDate => {
         return moment(aDate, this.Date.validFormats).toDate()
