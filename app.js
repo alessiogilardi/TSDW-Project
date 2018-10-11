@@ -46,7 +46,7 @@ bot.start(ctx => {
 	.catch(err => console.log(err));
 	bf.setBotStarted(ctx.message.from.id)
 });
-bot.help(ctx => ctx.reply(`Command list:\n ${ctx.session.userData.commands.join('\n')}`));
+bot.help(ctx => ctx.reply(`Command list:\n${ctx.session.userData.commands.join('\n')}`));
 // TODO: action -> delete no funziona  Da verificare il tipo di action
 bot.action('delete', ctx => bf.resetBotStarted(ctx.message.from.id))
 
