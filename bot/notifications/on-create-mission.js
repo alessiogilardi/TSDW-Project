@@ -1,6 +1,8 @@
 const queries = require('../../db/queries')
 const Telegraf = require('telegraf')
 
+// TODO: il personale un volta notificato deve essere inserito nei notificati della missione
+
 // TODO: al personale viene mandato un pulsante con cui possono accettare o rifiutare
 // nella callBack del pulsante forse è possibile inserire anche l'id della missione che viene accettata
 // nel caso serva per fare dei controlli
@@ -18,6 +20,8 @@ const sendNotifications = () => this.toNotify.forEach(person => {
                 m.callbackButton('Accetta', 'accept'),
                 m.callbackButton('Rifiuta', 'decline')
             ])))
+            .then(queries.Mission.Pilot.setAsNotified(this.mission._id, person._id))
+            .catch(err => console.log(err))
             break;
         case 'crew':
             // Mando la notifica da crew
@@ -93,16 +97,16 @@ const onCreateMission = (bot, mission) => {
 
     queries.Personnel.find(find.pilots.query(), find.pilots.projection, pilots => {
         if (pilots !== undefined) {
-            pilots.forEach(pilot => this.toNotify.push({id: pilot._id, idTelegram: pilot.telegramData.idTelegram, role: 'pilot'}))            
+            pilots.forEach(pilot => this.toNotify.push({_id: pilot._id, idTelegram: pilot.telegramData.idTelegram, role: 'pilot'}))            
 
         }
         queries.Personnel.find(find.crew.query(), find.crew.projection, crew => {
             if (crew !== undefined)
-                crew.forEach(crewMember => this.toNotify.push({id: crewMember._id, idTelegram: crewMember.telegramData.idTelegram, role: 'crew'}))            
+                crew.forEach(crewMember => this.toNotify.push({_id: crewMember._id, idTelegram: crewMember.telegramData.idTelegram, role: 'crew'}))            
 
             queries.Personnel.find(find.maintainers.query(), find.maintainers.projection, maintainers => {
                 if (maintainers !== undefined)
-                    maintainers.forEach(maintainer => this.toNotify.push({id: maintainer._id, idTelegram: maintainer.telegramData.idTelegram, role: 'maintainer'}))
+                    maintainers.forEach(maintainer => this.toNotify.push({_id: maintainer._id, idTelegram: maintainer.telegramData.idTelegram, role: 'maintainer'}))
                 sendNotifications()
             })
         })
