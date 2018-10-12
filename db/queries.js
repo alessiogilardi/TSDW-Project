@@ -470,6 +470,7 @@ exports.Mission = Mission = {
         setAsAccepted: (aMissionId, aCrewId) => {
             Mission.updateById(aMissionId, {$pull: {'crew.notified': aCrewId}});
             Mission.updateById(aMissionId, {$push: {'crew.accepted': aCrewId}});
+            
         },
         setAsChosen: (aMissionId, aCrewId) => {
             Mission.updateById(aMissionId, {$pull: {'crew.accepted': aCrewId}});
@@ -489,6 +490,29 @@ exports.Mission = Mission = {
             Mission.updateById(aMissionId, {$pull: {'maintainers.accepted': aMaintainerId}});
             Mission.updateById(aMissionId, {$push: {'maintainers.chosen': aMaintainerId}});
         }
+    },
+
+    // pilots, crew, maintainers sono array
+    // Quando viene scelto un team la missione passa a running
+    addTeam: (aMissionId, chiefPilotId, coPilotId, crewIds, maintainersIds) => {
+        Mission.updateById(aMissionId, {$push: {teams: {
+            pilots: {
+                chief: chiefPilotId,
+                co: coPilotId
+            },
+            crew: crewIds,
+            maintainers: maintainersIds
+        }}})
+        Personnel.updateById(chiefPilotId, {$push: {'missions.pilot.waitingForLogbook': aMissionId}})
+        Personnel.updateById(coPilotId, {$push: {'missions.pilot.waitingForLogbook': aMissionId}})
+        crewIds.forEach(id => Personnel.updateById(id, {$push: {'missions.crew.pending': aMissionId}}))
+        maintainersIds.forEach(id => Personnel.updateById(id, {$push: {'missions.maintainer.pending': aMissionId}}))
+        Mission.setStatus(aMissionId, 2)
+    },
+
+    // TODO: la missione passa a completata, nel personale crew e maintainer la missione passa a completed
+    complete: aMissionId => {
+
     },
 
     findByIdSync: (aId, projection) => {
