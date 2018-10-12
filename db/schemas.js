@@ -71,7 +71,7 @@ exports.personnelSchema = new mongoose.Schema({
     },
     missions: {
         available: {type: Boolean, default: true}, // Indica se un membro del personale è attualmente occupato in missione
-        supervisor:  {
+        supervisor: {
             completed: [{type: ObjectId, default: [], ref: 'mission'}],
             pending: [{type: ObjectId, default: [], ref: 'mission'}]
         },
@@ -178,8 +178,8 @@ exports.missionsSchema = new mongoose.Schema({
     }],
     teams: [{
         pilots: {
-            chief: {type: ObjectId, ref: 'personnel', default: []},
-            co: {type: ObjectId, ref: 'personnel', default: []}
+            chief: {type: ObjectId, ref: 'personnel', default: undefined},
+            co: {type: ObjectId, ref: 'personnel', default: undefined}
         },
         crew: [{type: ObjectId, ref: 'personnel', default: []}],
         maintainers: [{type: ObjectId, ref: 'personnel', default: []}]
