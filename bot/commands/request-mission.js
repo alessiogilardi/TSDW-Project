@@ -5,6 +5,7 @@ const eventEmitters = require('../../event-emitters')
 const utils         = require('../../utils')
 // TODO: va formattato l'output quando mostro i droni disponibili (decidere cosa mostrare e come)
 // TODO: la data va formattata in output
+// TODO: non rinotificare chi ha richiesto la missione
 
 const dataStructure = {
     name: 'requestMission',
@@ -76,7 +77,7 @@ const requestMission = new WizardScene('requestMission',
         // Qua mando il messaggio al base supervisor che deve ricevere la notifica
         // Estraggo il telegramId a partire dall'id del supervisore e mando il messaggio con i dati appena inseriti della missione richiesta
         queries.Personnel.findById(ctx.session.command.params.base.supervisor, {}, aPerson => {
-            eventEmitters.Bot.emit('requestMission', aPerson, `E' stata richiesta una missione con i seguenti dati:\nData prevista: ${ctx.session.command.params.date}\nBase di partenza: ${ctx.session.command.params.base.name}\nDescrizione: ${ctx.session.command.params.description}`)
+            eventEmitters.Bot.emit('requestMission', aPerson, `E' stata richiesta una missione con i seguenti dati:\nData prevista: ${utils.Date.format(ctx.session.command.params.date, 'DD-MM-YYYY')}\nBase di partenza: ${ctx.session.command.params.base.name}\nDescrizione: ${ctx.session.command.params.description}`)
         });
 });
 
