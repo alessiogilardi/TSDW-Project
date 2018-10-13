@@ -1,7 +1,7 @@
 const mongoose      = require('mongoose');
 const models        = require('./models');
 const deasync       = require('deasync');
-var eventEmitters   = require('../event-emitters');
+var eventEmitters   = require('../events/event-emitters');
 
 // TODO: quando creo la missione devo anche settare i droni scelti come non disponibili
 // e aggiungere la missione alle loro waitingForQtb missions
@@ -230,7 +230,6 @@ exports.Personnel = Personnel = {
     },
 */
 
-    // TODO: Bisogna migliorare la possibilità di ricerca per poter filtrare le persone adatte alla missione
     find: (selection, projection, callback) => {
         models.Personnel.find(selection)
         .select(projection)
@@ -408,6 +407,9 @@ exports.Mission = Mission = {
             console.log(`Inserted Mission with id: ${mission._id}`)
             // Viene aggiunta la missione alle pending missions del Supervisor
             Personnel.updateById(mission.supervisor, {$push: {'missions.supervisor.pending': mission._id}})
+
+            // Setto i droni come non disponibili
+            mission.drones.forEach(drone => Drones.updateById(drone._id, {'state.availability': 1}))
 
             // Emetto l'evento missione inserita
             eventEmitters.Db.Mission.emit('insert', mission)
