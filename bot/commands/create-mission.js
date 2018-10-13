@@ -136,7 +136,7 @@ const createMission = new WizardScene('createMission',
     })
 
     queries.Mission.insert({
-        id: null,
+        //_id: null,
         date: ctx.session.command.params.date,
         base: ctx.session.userData.person.base,
         supervisor: ctx.session.userData.person._id,
