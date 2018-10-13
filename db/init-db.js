@@ -2,7 +2,7 @@ require('./db-connect.js').connect()
 const models    = require('./models.js')
 const queries   = require('./queries.js')
 const docs      = require('./db-documents.js')
-const eventEmitters = require('../event-emitters')
+const eventEmitters = require('../events/event-emitters')
 
 var count = 0;
 
