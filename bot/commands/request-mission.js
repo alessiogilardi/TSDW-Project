@@ -1,7 +1,7 @@
 const WizardScene   = require('telegraf/scenes/wizard/index')
 const Composer      = require('telegraf/composer')
 const queries       = require('../../db/queries')
-const eventEmitters = require('../../event-emitters')
+const eventEmitters = require('../../events/event-emitters')
 const utils         = require('../../utils')
 // TODO: va formattato l'output quando mostro i droni disponibili (decidere cosa mostrare e come)
 // TODO: la data va formattata in output
@@ -70,16 +70,16 @@ const requestMission = new WizardScene('requestMission',
             ctx.reply('Richiesta missione annullata.')
             return
         }
-        // TODO: non sono sicuro sia il caso di renotificare chi l'ha richiesta visto che è un dato che non teniamo nel DB
+        // TODO: non sono sicuro sia il caso di rinotificare chi l'ha richiesta visto che è un dato che non teniamo nel DB
         ctx.reply('La richiesta è stata inoltrata con successo. Verrai notificato nel caso la missione venga accettata.')
         .then(ctx.reply(`Ecco intanto un riepilogo sui dati della missione:\n\nData prevista: ${utils.Date.format(ctx.session.command.params.date, 'DD-MM-YYYY')}\nBase di partenza: ${ctx.session.command.params.base.name}\nResponsabile: ${ctx.session.command.params.base.supervisor}\nDescrizione: ${ctx.session.command.params.description}`))
         .catch(err => console.log(err))
-        // Qua mando il messaggio al base supervisor che deve ricevere la notifica
-        // Estraggo il telegramId a partire dall'id del supervisore e mando il messaggio con i dati appena inseriti della missione richiesta
-        queries.Personnel.findById(ctx.session.command.params.base.supervisor, {}, aPerson => {
-            eventEmitters.Bot.emit('requestMission', aPerson, `E' stata richiesta una missione con i seguenti dati:\nData prevista: ${utils.Date.format(ctx.session.command.params.date, 'DD-MM-YYYY')}\nBase di partenza: ${ctx.session.command.params.base.name}\nDescrizione: ${ctx.session.command.params.description}`)
-        });
-});
+
+        // Mando il messaggio al base supervisor che deve ricevere la notifica
+        queries.Personnel.findById(ctx.session.command.params.base.supervisor, {}, aSupervisor => {
+            eventEmitters.Bot.emit('requestMission', {supervisor: aSupervisor, params: ctx.session.command.params})
+        })
+})
 
 
 module.exports = requestMission
