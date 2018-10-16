@@ -47,10 +47,8 @@ const find = {
     pilots: {
         query: () => {
             return {
-                _id: {$ne: this.mission.supervisor},
                 base: this.mission.base,
                 'roles.occupation.pilot': true,
-                'missions.available': true,
                 'pilot.license.maxMissionRank': {$gte: this.mission.description.rank}, 
                 'pilot.droneTypes': {$all: [this.mission.drones[0].type]}
             }
@@ -62,8 +60,7 @@ const find = {
             return {
                 base: this.mission.base,
                 'roles.occupation.crew': true,
-                'missions.available': true,
-                _id: {$nin: Array.from(this.toNotify, person => person._id).push(this.mission.supervisor)}
+                _id: {$nin: Array.from(this.toNotify, person => person._id)}
             }
         },
         projection: '_id telegramData.idTelegram'
@@ -71,10 +68,9 @@ const find = {
     maintainers: {
         query: () => {
             return {
-                _id: {$nin: Array.from(this.toNotify, person => person._id).push(this.mission.supervisor)},
+                _id: {$nin: Array.from(this.toNotify, person => person._id)},
                 base: this.mission.base,
-                'roles.occupation.maintainer': true,
-                'missions.available': true,
+                'roles.occupation.maintainer': true
             }
         },
         projection: '_id telegramData.idTelegram'
