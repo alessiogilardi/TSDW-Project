@@ -64,8 +64,9 @@ bot.command(['requestMission', 'requestmission'], ctx => {
 bot.on('callback_query', ctx => {
 	// Rispondo alle actions dei Button ed emetto l'evento appropriato
 	var cbQuery = JSON.parse(ctx.callbackQuery.data)
-	ctx.answerCbQuery(cbQuery.cbMessage)
-	eventEmitters.Bot.emit(cbQuery.action, cbQuery.data)
+	//ctx.answerCbQuery(cbQuery.cbMessage)
+	//ctx.editMessageReplyMarkup({})
+	eventEmitters.Bot.emit(cbQuery.action, cbQuery.data, ctx)
 })
 
 bot.startPolling();
