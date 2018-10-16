@@ -85,7 +85,8 @@ const createMission = new WizardScene('createMission',
         ctx.session.command.params.droneTypes = ctx.message.text
         ctx.session.command.searching = true
         ctx.reply('Va bene, sto cercando i droni, aspetta...')
-        queries.Drone.findByType(ctx.session.command.params.droneTypes, {base: ctx.session.userData.person.base, 'state.availability': {$eq: 0}}, {}, drones => {
+        // TODO: i droni vanno selezionati scartando quelli che hanno data di una missione uguale alla data della missione che sto creando
+        queries.Drone.findByType(ctx.session.command.params.droneTypes, {base: ctx.session.userData.person.base, 'state.availability': {$ne: 2}, 'missions.waitingForQtb.date': {$ne: ctx.session.command.params.date}}, {}, drones => {
             ctx.session.command.params.drones.loaded = drones
             ctx.session.command.searching = false
             if (ctx.session.command.params.drones.loaded === null || 
