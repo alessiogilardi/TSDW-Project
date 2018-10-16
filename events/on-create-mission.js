@@ -12,32 +12,32 @@ const Telegraf = require('telegraf')
 // TODO: i bottoni lanciano action con l'id della missione
 // TODO: definire un action listener del bot in modo da rispondere ad una missione specifica
 
-const notify = (idTelegram, message) => {
+const notify = (idTelegram, message, role) => {
     this.bot.telegram.sendMessage(idTelegram, message, Telegraf.Extra
         .markdown()
         .markup( m => m.inlineKeyboard([
-            m.callbackButton('Accetta', JSON.stringify({action: 'accept', cbMessage: 'Missione accettata', data: {mission: {_id: this.mission._id}}})),
-            m.callbackButton('Rifiuta', JSON.stringify({action: 'decline'}))
+            m.callbackButton('Accetta', JSON.stringify({action: 'acceptMission', cbMessage: 'Missione accettata', data: {mission: {_id: this.mission._id}}, role: role})),
+            m.callbackButton('Rifiuta', JSON.stringify({action: 'declineMission'}))
     ])))
 }
 
 
 const sendNotifications = () => this.toNotify.forEach(person => {
-    console.log(`Notifing: ${person}`)
+    console.log(`Notifing: ${person} as ${person.role}`)
     switch(person.role){
         case 'pilot':
             // Mando notifica da pilota
-            notify(person.idTelegram, `Richiesta di missione come *pilota*:\n${this.mission}`)
+            notify(person.idTelegram, `Richiesta di missione come *pilota*:\n${this.mission}`, person.role)
             queries.Mission.Pilot.setAsNotified(this.mission._id, person._id)
             break;
         case 'crew':
             // Mando la notifica da crew
-            notify(person.idTelegram, `Richiesta di missione come *membro dell'equipaggio*:\n${this.mission}`)
+            notify(person.idTelegram, `Richiesta di missione come *membro dell'equipaggio*:\n${this.mission}`, person.role)
             queries.Mission.Pilot.setAsNotified(this.mission._id, person._id)
             break;
         case 'maintainer':
             // Mando la notifica da manutentore
-            notify(person.idTelegram, `Richiesta di missione come *manutentore*:\n${this.mission}`)
+            notify(person.idTelegram, `Richiesta di missione come *manutentore*:\n${this.mission}`, person.role)
             queries.Mission.Pilot.setAsNotified(this.mission._id, person._id)
             break;
     }
