@@ -11,7 +11,7 @@ const eventHandlers = {
     },
     Bot: {
         requestMission: () => eventEmitters.Bot.on('requestMission', data => onRequestMission(this.bot, data)),
-        acceptMission: () => eventEmitters.Bot.on('accept', onAcceptMission()/*data => onAcceptMission(data)*/)
+        acceptMission: () => eventEmitters.Bot.on('acceptMisson', onAcceptMission()/*data => onAcceptMission(data)*/)
     }
 }
 
