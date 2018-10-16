@@ -408,8 +408,8 @@ exports.Mission = Mission = {
             // Viene aggiunta la missione alle pending missions del Supervisor
             Personnel.updateById(mission.supervisor, {$push: {'missions.supervisor.pending': mission._id}})
 
-            // Setto i droni come non disponibili
-            mission.drones.forEach(drone => Drones.updateById(drone._id, {'state.availability': 1}))
+            // Setto i droni come non disponibili e aggiungo la missione alle waitingForQtb del drone
+            mission.drones.forEach(drone => Drone.updateById(drone._id, {'state.availability': 1, 'missions.waitingForQtb': {$push: {idMission: mission._id, date: new Date(mission.date)}}}))
 
             // Emetto l'evento missione inserita
             eventEmitters.Db.Mission.emit('insert', mission)
@@ -471,8 +471,7 @@ exports.Mission = Mission = {
         },
         setAsAccepted: (aMissionId, aCrewId) => {
             Mission.updateById(aMissionId, {$pull: {'crew.notified': aCrewId}});
-            Mission.updateById(aMissionId, {$push: {'crew.accepted': aCrewId}});
-            
+            Mission.updateById(aMissionId, {$push: {'crew.accepted': aCrewId}});            
         },
         setAsChosen: (aMissionId, aCrewId) => {
             Mission.updateById(aMissionId, {$pull: {'crew.accepted': aCrewId}});
