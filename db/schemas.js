@@ -70,21 +70,33 @@ exports.personnelSchema = new mongoose.Schema({
         droneTypes: [{type: String, default: [], enum: droneTypes}]
     },
     missions: {
-        available: {type: Boolean, default: true}, // Indica se un membro del personale è attualmente occupato in missione
+        //available: {type: Boolean, default: true}, // Indica se un membro del personale è attualmente occupato in missione
         supervisor: {
             completed: [{type: ObjectId, default: [], ref: 'mission'}],
             pending: [{type: ObjectId, default: [], ref: 'mission'}]
         },
         pilot: {
             completed: [{type: ObjectId, default: [], ref: 'mission'}],
-            waitingForLogbook: [{type: ObjectId, default: [], ref: 'mission'}]
+            waitingForLogbook: [{type: ObjectId, default: [], ref: 'mission'}],
+            accepted: [{
+                idMission: {type: ObjectId, default: undefined, ref: 'mission'},
+                date: {type: Date, default: undefined}
+            }]
         },
         crew:  {
             completed: [{type: ObjectId, default: [], ref: 'mission'}],
+            accepted: [{
+                idMission: {type: ObjectId, default: undefined, ref: 'mission'},
+                date: {type: Date, default: undefined}
+            }],
             pending: {type: ObjectId, default: undefined, ref: 'mission'} // Indica la missione in cui è attualmente impegnato
         },
         maintainers:  {
             completed: [{type: ObjectId, default: [], ref: 'mission'}],
+            accepted: [{
+                idMission: {type: ObjectId, default: undefined, ref: 'mission'},
+                date: {type: Date, default: undefined}
+            }],
             pending: {type: ObjectId, default: undefined, ref: 'mission'} // Indica la missione in cui è attualmente impegnato
         },
     },
@@ -132,7 +144,10 @@ exports.dronesSchema = new mongoose.Schema({
     },
     missions: {
         completed: [{type: ObjectId, default: [], ref: 'mission'}],
-        waitingForQtb: [{type: ObjectId, default: [], ref: 'mission'}] /* Missioni per cui non è ancora stato inserito un QTB */
+        waitingForQtb: [{
+            idMission: {type: ObjectId, default: undefined, ref: 'mission'},
+            date: {type: Date, default: undefined}
+        }], /* Missioni per cui non è ancora stato inserito un QTB */
     }
 });
 
