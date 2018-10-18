@@ -119,9 +119,9 @@ const createMission = new WizardScene('createMission',
         return ctx.scene.leave()
     }))
     .leave(ctx => {
-    if (ctx.session.command.params.drones.chosen === null ||
-        ctx.session.command.params.drones.chosen.length === 0) {
+    if (ctx.message.text == '/cancel') {
         ctx.reply('Creazione missione annullata.')
+        ctx.session.command = dataStructure;
         return
     }  
     ctx.reply('La missione è stata creata con successo!\nTi ricontterò appena una squadra sarà disponibile.')
