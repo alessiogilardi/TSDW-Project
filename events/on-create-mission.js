@@ -1,7 +1,11 @@
+/**
+ * Modulo che contiente gli eventi e le procedure scatenate nel momento in cui
+ * una missione è inserita nel database
+ */
+
 const queries = require('../db/queries')
 const Telegraf = require('telegraf')
 
-// TODO: il personale un volta notificato deve essere inserito nei notificati della missione
 
 // TODO: al personale viene mandato un pulsante con cui possono accettare o rifiutare
 // nella callBack del pulsante forse è possibile inserire anche l'id della missione che viene accettata
@@ -9,14 +13,12 @@ const Telegraf = require('telegraf')
 
 // TODO: recuperare anche le ore di volo dei piloti
 
-// TODO: i bottoni lanciano action con l'id della missione
-// TODO: definire un action listener del bot in modo da rispondere ad una missione specifica
 
 const notify = (idTelegram, message, role) => {
     this.bot.telegram.sendMessage(idTelegram, message, Telegraf.Extra
         .markdown()
         .markup( m => m.inlineKeyboard([
-            m.callbackButton('Accetta', JSON.stringify({action: 'acceptMission', cbMessage: 'Missione accettata', data: {mission: {_id: this.mission._id}}, role: role})),
+            m.callbackButton('Accetta', JSON.stringify({action: 'acceptMission', cbMessage: 'Missione accettata', data: {mission: {_id: this.mission._id}, role: role}})),
             m.callbackButton('Rifiuta', JSON.stringify({action: 'declineMission'}))
     ])))
 }
@@ -26,23 +28,27 @@ const sendNotifications = () => this.toNotify.forEach(person => {
     console.log(`Notifing: ${person} as ${person.role}`)
     switch(person.role){
         case 'pilot':
-            // Mando notifica da pilota
+            // Mando notifica da pilota e lo setto come notificato nella Missione
             notify(person.idTelegram, `Richiesta di missione come *pilota*:\n${this.mission}`, person.role)
             queries.Mission.Pilot.setAsNotified(this.mission._id, person._id)
             break;
         case 'crew':
-            // Mando la notifica da crew
+            // Mando la notifica da crew e lo setto come notificato nella Missione
             notify(person.idTelegram, `Richiesta di missione come *membro dell'equipaggio*:\n${this.mission}`, person.role)
             queries.Mission.Pilot.setAsNotified(this.mission._id, person._id)
             break;
         case 'maintainer':
-            // Mando la notifica da manutentore
+            // Mando la notifica da manutentore e lo setto come notificato nella Missione
             notify(person.idTelegram, `Richiesta di missione come *manutentore*:\n${this.mission}`, person.role)
             queries.Mission.Pilot.setAsNotified(this.mission._id, person._id)
             break;
     }
 })
 
+// Le query ritornano membri del personale (piloti, crew, manutentori) che
+// appartengono alla base in questione, hanno effetivamente quel quolo nella base, e non hanno acettato missioni
+// nello stesso giorno della missione che si sta creando.
+// In più per i piloti: vengono notificati solo colore che rispettano i paramtri della missione
 const find = {
     pilots: {
         query: () => {
@@ -50,7 +56,8 @@ const find = {
                 base: this.mission.base,
                 'roles.occupation.pilot': true,
                 'pilot.license.maxMissionRank': {$gte: this.mission.description.rank}, 
-                'pilot.droneTypes': {$all: [this.mission.drones[0].type]}
+                'pilot.droneTypes': {$all: [this.mission.drones[0].type]},
+                'missions.pilot.accepted.date': {$ne: ctx.session.command.params.date}
             }
         },
         projection: '_id telegramData.idTelegram'
@@ -60,7 +67,8 @@ const find = {
             return {
                 base: this.mission.base,
                 'roles.occupation.crew': true,
-                _id: {$nin: Array.from(this.toNotify, person => person._id)}
+                _id: {$nin: Array.from(this.toNotify, person => person._id)},
+                'missions.crew.accepted.date': {$ne: ctx.session.command.params.date}
             }
         },
         projection: '_id telegramData.idTelegram'
@@ -70,7 +78,8 @@ const find = {
             return {
                 _id: {$nin: Array.from(this.toNotify, person => person._id)},
                 base: this.mission.base,
-                'roles.occupation.maintainer': true
+                'roles.occupation.maintainer': true,
+                'missions.maintainer.accepted.date': {$ne: ctx.session.command.params.date}
             }
         },
         projection: '_id telegramData.idTelegram'
