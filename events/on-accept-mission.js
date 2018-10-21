@@ -2,6 +2,16 @@ const queries = require('../db/queries')
 // TODO: da gestire il fatto che prima che l'utente ne accetti una potrebbero arrivargli più richieste
 // di più missioni
 
+
+
+/**
+ * data: {
+ *  mission: {
+ *      _id: // MissionId
+ *  },
+ *   role: // Ruolo che la persona potrà avere nella missione (pilota, crew, manutentore)
+ * }
+ */
 const acceptMission = () => (data, ctx) => {
     switch(data.role) {
         case 'pilot':
