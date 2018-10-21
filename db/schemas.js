@@ -2,9 +2,6 @@
  * Modulo che conserva i vari Schema della struttura del DB
 **/
 
-// TODO: aggiungere ai dati della missione anche il tipo di drone aggiunto
-// in modo da sempleificare le query di ricerca quando si inserisce una nuova missione
-
 const mongoose = require('mongoose');
 const ObjectId = mongoose.Schema.Types.ObjectId;
 
@@ -70,7 +67,6 @@ exports.personnelSchema = new mongoose.Schema({
         droneTypes: [{type: String, default: [], enum: droneTypes}]
     },
     missions: {
-        //available: {type: Boolean, default: true}, // Indica se un membro del personale è attualmente occupato in missione
         supervisor: {
             completed: [{type: ObjectId, default: [], ref: 'mission'}],
             pending: [{type: ObjectId, default: [], ref: 'mission'}]
