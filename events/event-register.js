@@ -1,7 +1,7 @@
-const eventEmitters = require('./event-emitters')
-const onCreateMission = require('./on-create-mission')
-const onRequestMission = require('./on-request-mission')
-const onAcceptMission = require('./on-accept-mission')
+const eventEmitters     = require('./event-emitters')
+const onCreateMission   = require('./db/on-create-mission')
+const onRequestMission  = require('./bot/on-request-mission')
+const onAcceptMission   = require('./bot/on-accept-mission')
 
 const eventHandlers = {
     Db: {
@@ -11,7 +11,7 @@ const eventHandlers = {
     },
     Bot: {
         requestMission: () => eventEmitters.Bot.on('requestMission', data => onRequestMission(this.bot, data)),
-        acceptMission: () => eventEmitters.Bot.on('acceptMisson', onAcceptMission()/*data => onAcceptMission(data)*/)
+        acceptMission: () => eventEmitters.Bot.on('acceptMisson', (data, ctx) => onAcceptMission(data, ctx, this.bot))
     }
 }
 
