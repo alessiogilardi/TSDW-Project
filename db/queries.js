@@ -455,9 +455,11 @@ exports.Mission = Mission = {
         setAsNotified: (aMissionId, aPilotId) => {
             Mission.updateById(aMissionId, {$push: {'pilots.notified': aPilotId}});
         },
-        setAsAccepted: (aMissionId, aPilotId) => {
+        setAsAccepted: (aMissionId, aPilotId, aDate) => {
             Mission.updateById(aMissionId, {$pull: {'pilots.notified': aPilotId}});
             Mission.updateById(aMissionId, {$push: {'pilots.accepted': aPilotId}});
+            // Aggiungo la missione a quello accettate dal pilota
+            Personnel.updateById(aPilotId, {$push: {'missions.pilots.accepted': {idMission: aMissionId, date: aDate}}});
         },
         setPilotAsChosen: (aMissionId, aPilotId) => {
             Mission.updateById(aMissionId, {$pull: {'pilots.accepted': aPilotId}});
@@ -471,7 +473,9 @@ exports.Mission = Mission = {
         },
         setAsAccepted: (aMissionId, aCrewId) => {
             Mission.updateById(aMissionId, {$pull: {'crew.notified': aCrewId}});
-            Mission.updateById(aMissionId, {$push: {'crew.accepted': aCrewId}});            
+            Mission.updateById(aMissionId, {$push: {'crew.accepted': aCrewId}});
+            // Aggiungo la missione a quello accettate dal membro dell'equipaggio
+            Personnel.updateById(aCrewId, {$push: {'missions.crew.accepted': {idMission: aMissionId, date: aDate}}});         
         },
         setAsChosen: (aMissionId, aCrewId) => {
             Mission.updateById(aMissionId, {$pull: {'crew.accepted': aCrewId}});
@@ -486,6 +490,8 @@ exports.Mission = Mission = {
         setAsAccepted: (aMissionId, aMaintainerId) => {
             Mission.updateById(aMissionId, {$pull: {'maintainers.notified': aMaintainerId}});
             Mission.updateById(aMissionId, {$push: {'maintainers.accepted': aMaintainerId}});
+            // Aggiungo la missione a quello accettate dal manutentore
+            Personnel.updateById(aMaintainerId, {$push: {'missions.maintainers.accepted': {idMission: aMissionId, date: aDate}}});
         },
         setAsChosen: (aMissionId, aMaintainerId) => {
             Mission.updateById(aMissionId, {$pull: {'maintainers.accepted': aMaintainerId}});
