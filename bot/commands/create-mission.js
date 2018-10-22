@@ -1,3 +1,13 @@
+/**
+ * Modulo che gestisce la creazione di una missione.
+ * Utilizza una Scene implmentata attraverso vari step consecutivi.
+ * Al completamento di tutti gli step la Scene viene lasciata e viene creata una missione.
+ * 
+ * Se è lanciato il comando /cancel la creazione viene interrotta, i dati inseriti vengono scartati
+ * e la Scene è lasciata senza apportare modifiche.
+ */
+
+
 const WizardScene   = require('telegraf/scenes/wizard/index')
 const Composer      = require('telegraf/composer')
 const queries       = require('../../db/queries')
@@ -5,7 +15,7 @@ const schemas       = require('../../db/schemas')
 const utils         = require('../../utils')
 
 // TODO: va formattato l'output quando mostro i droni disponibili (decidere cosa mostrare e come)
-// TODO: gestire il formato della data
+// TODO: decidere come forattare la data
 
 const dataStructure = {
     name: 'createMission',
@@ -85,7 +95,7 @@ const createMission = new WizardScene('createMission',
         ctx.session.command.params.droneTypes = ctx.message.text
         ctx.session.command.searching = true
         ctx.reply('Va bene, sto cercando i droni, aspetta...')
-        // Vengon scartati dalla ricerca i droni che hanno missioni non completate in date uguali 
+        // Vengono scartati dalla ricerca i droni che hanno missioni non completate in date uguali 
         // alla data della missione che sto creando
         queries.Drone.findByType(ctx.session.command.params.droneTypes, {base: ctx.session.userData.person.base, 'state.availability': {$ne: 2}, 'missions.waitingForQtb.date': {$ne: ctx.session.command.params.date}}, {}, drones => {
             ctx.session.command.params.drones.loaded = drones
@@ -104,8 +114,8 @@ const createMission = new WizardScene('createMission',
     }),
     new Composer()
     .on('text', ctx => {
-        // * Va generato un array con le targhe(number) dei droni caricati 
-        // * in modo da verificare che quelli scelti siano tra quelli caricati
+        // Viene generato un array con le targhe(number) dei droni caricati 
+        // in modo da verificare che quelli scelti siano tra quelli caricati
         var chosenNumbers = ctx.message.text.split(',').map(s => s.trim()) // Droni che voglio inserire nella missione
         var loadedNumbers = Array.from(ctx.session.command.params.drones.loaded, drone => drone.number)
        
@@ -137,8 +147,8 @@ const createMission = new WizardScene('createMission',
         })
     })
 
+    // Inserisco la missione nel database
     queries.Mission.insert({
-        //_id: null,
         date: ctx.session.command.params.date,
         base: ctx.session.userData.person.base,
         supervisor: ctx.session.userData.person._id,
