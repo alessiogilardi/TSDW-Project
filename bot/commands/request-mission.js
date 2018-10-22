@@ -1,3 +1,15 @@
+/**
+ * Modulo che gestisce la richista di una missione da parte di un AM nei confronti di un responsabile di base.
+ * Utilizza una Scene implmentata attraverso vari step consecutivi.
+ * Al completamento di tutti gli step la Scene viene lasciata e viene richiesta missione.
+ * Viene lanciato un evento requestMission gestuto dal modulo onRequestMission
+ * 
+ * Se è lanciato il comando /cancel la procedura viene interrotta, i dati inseriti vengono scartati
+ * e la Scene è lasciata senza apportare modifiche.
+ */
+
+
+
 const WizardScene   = require('telegraf/scenes/wizard/index')
 const Composer      = require('telegraf/composer')
 const queries       = require('../../db/queries')
