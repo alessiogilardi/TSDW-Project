@@ -1,3 +1,9 @@
+/**
+ * Modulo che esegue la connessione al db.
+ * Connect -> esegue connessione
+ * Disconnect -> esegue disconnessione
+ */
+
 require('dotenv').config();
 const mongoose = require('mongoose');
 
@@ -5,6 +11,9 @@ var dbAddress   = process.env.DB_ADDRESS || 'localhost';
 var dbPort      = process.env.DB_PORT || '27017';
 var dbName      = process.env.DB_NAME || 'TSDW';
 
+/**
+ * Funzione che esegue la connessione al db MongoDB e restituisce un oggetto Mongooses
+ */
 exports.connect = () => {
     mongoose.connect('mongodb://' + dbAddress + ':' + dbPort + '/' + dbName, {useNewUrlParser: true});
     var db = mongoose.connection;
@@ -21,6 +30,10 @@ exports.connect = () => {
     return mongoose;  
 }
 
+/**
+ * Funzione che esegue la disconnessione dal db MongoDB dopo un intervallod di tempo prestabilito,
+ * in modo da consentire che eventuali operazioni ancora pendenti terminino.
+ */
 exports.disconnect = (time = 1500) => {
     setTimeout(() => {
         mongoose.disconnect();

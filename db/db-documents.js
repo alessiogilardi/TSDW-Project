@@ -1,3 +1,7 @@
+/**
+ * Dati per inizialiare il db
+ */
+
 const schemas = require('./schemas')
 exports.AirOperators = [{
     _id: null,

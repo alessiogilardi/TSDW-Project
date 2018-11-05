@@ -1,3 +1,7 @@
+/**
+ * Modulo che contiene gli EventEmitters per varie entità.
+ * Eventi per il db e per il bot.
+ */
 const events = require('events')
 
 const emitters = {

@@ -1,3 +1,7 @@
+/**
+ * Modulo che inizializza il db
+ */
+
 require('./db-connect.js').connect()
 const models    = require('./models.js')
 const queries   = require('./queries.js')

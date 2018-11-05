@@ -1,5 +1,13 @@
 /**
- * Modulo che conserva i vari Schema della struttura del DB
+ * Modulo che conserva i vari Schema della struttura del DB.
+ * - AirOperator
+ * - Personnel
+ * - Base
+ * - Drone
+ * - Battery
+ * - Mission
+ * - Logbook
+ * - QTB
 **/
 
 const mongoose = require('mongoose');

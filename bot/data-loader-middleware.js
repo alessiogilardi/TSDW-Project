@@ -1,3 +1,8 @@
+/**
+ * Modulo middleware del bot.
+ * Il modulo si occupa di verificare se i dati dell'utente sono già stati caricati in memoria e 
+ * nel caso esegue una query al db per caricarli.
+ */
 const bf = require('./bot-functions.js');
 
 const middleware = () => (ctx, next) => {

@@ -13,6 +13,9 @@ const { enter, leave } = Stage
 
 const backtick = '\`';
 
+// TODO: completare la notifica del supervisore quando è pronto un Team.
+// TODO: aggiungere comando per creare un team una volta che ci sono sufficienti persone
+
 // TODO: potrebbe essere possibile creare un middleware che controlla l'input,
 // se è un comando allora verifica che l'utente sia autorizzato a lanciarlo altrimeni restituisce errore
 

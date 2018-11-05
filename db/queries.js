@@ -1,3 +1,10 @@
+/**
+ * Modulo di interazione con il db.
+ * Qui vengono tenute le funzioni che eseguono query al db.
+ * Le funzioni che devono restituire un risultato invocano una funzione di callback
+ * alla quale sono passati i dati recuperati dal db.
+ */
+
 const mongoose      = require('mongoose');
 const models        = require('./models');
 const deasync       = require('deasync');
@@ -8,7 +15,15 @@ var eventEmitters   = require('../events/event-emitters');
 
 // TODO: quando completo la missione devo rilasciare personale e droni e renderli nuovamante disponibili
 
+/**
+ * Funzioni relative all'Operatore Aereo
+ */
 exports.AirOperator = AirOperator = {
+    /**
+     * Funzione che inserisce un Operatore Aereo.
+     * 
+     * @param {AirOperator} aAirOperator
+     */
     insert: aAirOperator => {
         aAirOperator._id = mongoose.Types.ObjectId();
         new models.AirOperator(aAirOperator)
@@ -23,6 +38,11 @@ exports.AirOperator = AirOperator = {
 
     },
 
+    /**
+     * Funzione che esegue l'update dell'Operatore Aereo.
+     * @param {} selection parametro usato per la selezione del documento di cui eseguire l'update
+     * @param {} newValues parametro con i nuovi valori da inserire
+     */
     update: (selection, newValues) => {
         models.AirOperator.updateOne(selection, newValues, err => {
             if (err) return console.log(err)
@@ -32,27 +52,22 @@ exports.AirOperator = AirOperator = {
         })
     },
 
+    /**
+     * Funzione che esegue l'operazione di update selezionando l'Operatore Aereo per nome.
+     */
     updateByName: (aName, newValues) => AirOperator.update({name: aName}, newValues),
 
+    /**
+     * Funzione che esegue l'operazione di update selezionando l'Operatore Aereo per id.
+     */
     updateById: (aId, newValues) => AirOperator.update({_id: aId}, newValues),
 
-/*
-    updateByName: (aName, newValues) => {
-        models.AirOperator.updateOne({name: aName}, newValues, err => {
-            if (err)
-                return console.log(err);
-            console.log('Updated AirOperator with name: ' + aName);
-        });
-    },
-
-    updateById: (aId, newValues) => {
-        models.AirOperator.updateOne({_id: aId}, newValues, err => {
-            if (err)
-                return console.log(err);
-            console.log('Updated AirOperator with _id: ' + aId);
-    });
-    },
-*/
+    /**
+     * Funzione che cerca un Operatore Aereo in base al nome.
+     * @param {String} aName nome dell'Operatore da cercare
+     * @param {String} projection attributi da cercare
+     * @param {Function} callback funzione di callback a cui è passato l'Operatore trovato
+     */
     findByName: (aName, projection, callback) => {
         models.AirOperator.findOne()
         .where('name').equals(aName)
@@ -79,7 +94,18 @@ exports.AirOperator = AirOperator = {
 
 };
 
+/**
+ * Funzioni relative alla base
+ */
 exports.Base = Base = {
+    /**
+     * Funzione che inserisce un Base.
+     * L'Operatore Aereo a cui la base appartiene è recuperato da una query in base al nome 
+     * dell'Operatore.
+     * Quando la query viene eseguita aggiungo la Base alla lista delle basi dell'Operatore Aereo.
+     * 
+     * @param {Base} aBase
+     */
     insert: aBase => {
         AirOperator.findByName(aBase.airOperator, '_id', aAirOperator => {
             aBase._id = mongoose.Types.ObjectId();
@@ -97,6 +123,11 @@ exports.Base = Base = {
         });
     },
 
+    /**
+     * Funzione che esegue l'update dela Base.
+     * @param {} selection parametro usato per la selezione del documento di cui eseguire l'update
+     * @param {} newValues parametro con i nuovi valori da inserire
+     */
     update: (selection, newValues) => {
         models.Base.updateOne(selection, newValues, err => {
             if (err) return console.log(err)
@@ -105,25 +136,21 @@ exports.Base = Base = {
         })
     },
 
+    /**
+     * Funzione che esegue l'operazione di update selezionando la Base per nome.
+     */
     updateByName: (aName, newValues) => Base.update({name: aName}, newValues),
+    /**
+     * Funzione che esegue l'operazione di update selezionando la Base per id.
+     */
     updateById: (aId, newValues) => Base.update({_id: aId}, newValues),
-/*
-    updateByName: (aName, newValues) => {
-        models.Base.updateOne({name: aName}, newValues, err => {
-            if (err)
-                console.log(err);
-            console.log('Updated Base with name: ' + aName);
-        });
-    },
 
-    updateById: (aId, newValues) => {
-        models.Base.updateOne({_id: aId}, newValues, err => {
-            if (err)
-                console.log(err);
-            console.log('Updated Base with id: ' + aId);
-        });
-    },
-*/
+    /**
+     * Funzione che cerca una Base in base al nome.
+     * @param {String} aName nome della Base da cercare
+     * @param {String} projection attributi da cercare
+     * @param {Function} callback funzione di callback a cui è passata la Base trovato
+     */
     findByName: (name, projection, callback) => {
         models.Base.findOne()
         .where('name').equals(name)
@@ -147,7 +174,19 @@ exports.Base = Base = {
     }
 };
 
+/**
+ * Funzioni relative al personale.
+ */
 exports.Personnel = Personnel = {
+    /**
+     * Funzione che inserisce un membro del Personale.
+     * L'operatore Aereo e la Base a cui la Persona appartiene vengono recuperati da una query
+     * in base al nome dell'Operatore e della Base.
+     * Quando la query viene eseguita aggiorno la Base e l'Operatore Aereo in base ai ruili che quella
+     * la Persona ricopre.
+     * 
+     * @param {Personnel} aPersonnel
+     */
     insert: aPersonnel => {
         AirOperator.findByName(aPersonnel.airOperator, '_id', aAirOperator => {
             Base.findByName(aPersonnel.base, '_id', aBase => {
@@ -190,6 +229,11 @@ exports.Personnel = Personnel = {
         });
     },
 
+    /**
+     * Funzione che esegue l'update del membro del Personale.
+     * @param {} selection parametro usato per la selezione del documento su cui eseguire l'update
+     * @param {} newValues parametro con i nuovi valori da inserire
+     */
     update: (selection, newValues) => {
         models.Personnel.updateOne(selection, newValues, err => {
             if (err) return console.log(err)
@@ -199,44 +243,35 @@ exports.Personnel = Personnel = {
         })
     },
 
+    /**
+     * Funzione che esegue l'operazione di update selezionando la Persona per CF.
+     */
     updateByCf: (aCf, newValues) => Personnel.update({cf: aCf}, newValues),
+    /**
+     * Funzione che esegue l'operazione di update selezionando la Persona per id.
+     */
     updateById: (aId, newValues) => Personnel.update({_id: aId}, newValues),
+    /**
+     * Funzione che esegue l'operazione di update selezionando la Persona per idTelegram.
+     */
     updateByIdTelegram: (aIdTelegram, newValues) => Personnel.update({'telegramData.idTelegram': aIdTelegram}, newValues),
 
-    /*
-
-    updateByCf: (aCf, newValues) => {
-        models.Personnel.updateOne({cf: aCf}, newValues, (err) => {
-            if (err)
-                return console.log(err);
-            console.log('Updated Personnel with CF: ' + aCf);
-        });
-    },
-
-    updateById: (aId, newValues) => {
-        models.Personnel.updateOne({_id: aId}, newValues, err => {
-            if (err)
-                return console.log(err);
-            console.log('Updated Personnel with id: ' + aId);
-        });
-    },
-
-    updateByIdTelegram: (aIdTelegram, newValues) => {
-        models.Personnel.updateOne({'telegramData.idTelegram': aIdTelegram}, newValues, err => {
-            if (err)
-                return console.log(err);
-            console.log('Updated Personnel with idTelegram: ' + aIdTelegram);
-        });
-    },
-*/
-
+    /**
+     * Funzione che esegue la ricerca di membri del Personale e restituise i risultati
+     * passandoli alla funzione di callback.
+     * @param {String} selection parametro per selezionare i ducumenti da recuperare
+     * @param {String} selection parametro per selezionare gli attributi da cercare
+     * @param {Function} callback funzione di callback a cui passare i risultati della ricerca
+     */
     find: (selection, projection, callback) => {
         models.Personnel.find(selection)
         .select(projection)
         .exec((err, personnel) => callback(personnel))
     },
 
-    // Scrivo una funzione temporanea specifica per la ricerca dell'id
+    /**
+     * Funzione che ricera una Persona in base all'id.
+     */
     findById: (aId, projection, callback) => {
         models.Personnel.findOne()
         .where('_id').equals(aId)
@@ -245,7 +280,9 @@ exports.Personnel = Personnel = {
             callback(personnel);
         });
     },
-
+    /**
+     * Funzione che ricera una Persona in base al CF.
+     */
     findByCf: (aCf, projection, callback) => {
         models.Personnel.findOne()
         .where('cf').equals(aCf)
@@ -254,7 +291,10 @@ exports.Personnel = Personnel = {
             callback(personnel);
         });
     },
-	
+    
+    /**
+     * Funzione che ricera una Persona in base all'idTelegram.
+     */
 	findByIdTelegram: (aIdTelegram, projection, callback) => {
         models.Personnel.findOne()
         .where('telegramData.idTelegram').equals(aIdTelegram)
@@ -279,7 +319,18 @@ exports.Personnel = Personnel = {
 
 };
 
+/**
+ * Funzioni relative ai Droni
+ */
 exports.Drone = Drone = {
+    /**
+     * Funzione che inserisce un Drone.
+     * L'Operatore Aereo e la Base a cui il Drone appartiene vengono recuperati da una query
+     * in base al nome dell'Operatore e della Base.
+     * Quando la query viene eseguita aggiorno la Base a cui il Drone appartiene.
+     * 
+     * @param {Personnel} aPersonnel
+     */
     insert: aDrone => {
         AirOperator.findByName(aDrone.airOperator, '_id', aAirOperator => {
             Base.findByName(aDrone.base, '_id', aBase => {
@@ -300,6 +351,11 @@ exports.Drone = Drone = {
         });
     },
 
+    /**
+     * Funzione che esegue l'update del Drone.
+     * @param {} selection parametro usato per la selezione del documento su cui eseguire l'update
+     * @param {} newValues parametro con i nuovi valori da inserire
+     */
     update: (selection, newValues) => {
         models.Drone.updateOne(selection, newValues, err => {
             if (err) return console.log(err)
@@ -309,28 +365,18 @@ exports.Drone = Drone = {
         })
     },
 
+    /**
+     * Funzione che esegue l'operazione di update selezionando il Drone per numero di targa.
+     */
     updateByNumber: (aNumber, newValues) => Drone.update({number: aNumber}, newValues),
+    /**
+     * Funzione che esegue l'operazione di update selezionando il Drone per id.
+     */
     updateById: (aId, newValues) => Drone.update({_id: aId}, newValues),
     
-
-    /*
-    updateByNumber: (aNumber, newValues) => {
-        models.Drone.updateOne({number: aNumber}, newValues, (err) => {
-            if (err)
-                return console.log(err);
-            console.log('Updated Drone with number: ' + aNumber);
-        });
-    },
-
-    updateById: (aId, newValues) => {
-        models.Drone.updateOne({_id: aId}, newValues, (err) => {
-        if (err)
-            return console.log(err);
-        console.log('Updated Drone with id: ' + aId);
-        });
-    },
-*/
-
+    /**
+     * Funzione che ricercaa un Drone in base all'id.
+     */
     findById: (aId, projection, callback) => {
         models.Drone.findOne()
         .where('_id').equals(aId)
@@ -338,7 +384,13 @@ exports.Drone = Drone = {
         .exec((err, doc) => callback(doc))
     },
 
-
+    /**
+     * Funzione che ricercaa un drone in base al tipo e ai parametri inseriti in selection.
+     * @param {String} aType il tipo di drone da cercare
+     * @param {String} selection parametri di reicerca del drone
+     * @param {String} aType attributi da restituire
+     * @param {Function} aType funzione di callback a cui è passato il drone recuperato
+     */
     findByType: (aType, selection, projection, callback) => {
         models.Drone.find(selection)
         .where('type').equals(aType)
@@ -361,6 +413,9 @@ exports.Drone = Drone = {
         return ret;
     },
 
+    /**
+     * Funzione che ricercaa un Drone in base al numero di targa.
+     */
     findByNumber: (aNumber, projection, callback) => {
         models.Drone.findOne()
         .where('number').equals(aNumber)
