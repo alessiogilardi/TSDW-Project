@@ -235,26 +235,26 @@ exports.Personnel = Personnel = {
      * @param {} newValues parametro con i nuovi valori da inserire
      */
     update: (selection, newValues) => {
-        models.Personnel.updateOne(selection, newValues, err => {
+        return models.Personnel.updateOne(selection, newValues, err => {
             if (err) return console.log(err)
             // Emetto evento update
             eventEmitters.Db.Personnel.emit('update')
             console.log(`Updated Personnel selected by: ${JSON.stringify(selection)}`)
-        })
+        }).exec()
     },
 
     /**
      * Funzione che esegue l'operazione di update selezionando la Persona per CF.
      */
-    updateByCf: (aCf, newValues) => Personnel.update({cf: aCf}, newValues),
+    updateByCf: (aCf, newValues) => {return Personnel.update({cf: aCf}, newValues) },
     /**
      * Funzione che esegue l'operazione di update selezionando la Persona per id.
      */
-    updateById: (aId, newValues) => Personnel.update({_id: aId}, newValues),
+    updateById: (aId, newValues) => { return Personnel.update({_id: aId}, newValues) },
     /**
      * Funzione che esegue l'operazione di update selezionando la Persona per idTelegram.
      */
-    updateByIdTelegram: (aIdTelegram, newValues) => Personnel.update({'telegramData.idTelegram': aIdTelegram}, newValues),
+    updateByIdTelegram: (aIdTelegram, newValues) => {return Personnel.update({'telegramData.idTelegram': aIdTelegram}, newValues) },
 
     /**
      * Funzione che esegue la ricerca di membri del Personale e restituise i risultati
@@ -472,7 +472,7 @@ exports.Mission = Mission = {
         })
 
     },
-
+/*
     update: (selection, newValues) => {
         models.Mission.updateOne(selection, newValues, err => {
             if (err) return console.log(err)
@@ -481,8 +481,26 @@ exports.Mission = Mission = {
             console.log(`Updated Mission selected by: ${JSON.stringify(selection)}`)
         })
     },
+*/
 
-    updateById: (aId, newValues) => Mission.update({_id: aId}, newValues),
+    update: (selection, newValues) => {
+        return models.Mission.updateOne(selection, newValues, err => {
+            if (err) return console.log(err)
+            // Emetto l'evento update
+            eventEmitters.Db.Mission.emit('update')
+            console.log(`Updated Mission selected by: ${JSON.stringify(selection)}`)
+        }).exec()
+    },
+/*
+    update_promise: (selection, newValues) => {
+        return models.Mission.updateOne(selection, newValues, err => {
+            if (err) console.log(err)
+            console.log('Callback update promise')
+        })
+        .exec()
+    },
+*/
+    updateById: (aId, newValues) => { return Mission.update({_id: aId}, newValues) },
 
 
 /*
@@ -510,11 +528,28 @@ exports.Mission = Mission = {
         setAsNotified: (aMissionId, aPilotId) => {
             Mission.updateById(aMissionId, {$push: {'pilots.notified': aPilotId}});
         },
+        /*
         setAsAccepted: (aMissionId, aPilotId, aDate) => {
-            Mission.updateById(aMissionId, {$pull: {'pilots.notified': aPilotId}});
-            Mission.updateById(aMissionId, {$push: {'pilots.accepted': aPilotId}});
-            // Aggiungo la missione a quello accettate dal pilota
-            Personnel.updateById(aPilotId, {$push: {'missions.pilots.accepted': {idMission: aMissionId, date: aDate}}});
+            return new Promise((resolve, reject) => {
+                Mission.updateById(aMissionId, {$pull: {'pilots.notified': aPilotId}})
+                .then(() => 
+                    Mission.updateById(aMissionId, {$push: {'pilots.accepted': aPilotId}})
+                    .then(() => {
+                        Personnel.updateById(aPilotId, {$push: {'missions.pilots.accepted': {idMission: aMissionId, date: aDate}}});
+                    }) 
+                )
+            })
+
+        },*/
+        setAsAccepted: (aMissionId, aPilotId, aDate/* Data della missione */) => {
+            return new Promise((resolve, reject) => 
+                Mission.updateById(aMissionId, {$pull: {'pilots.notified': aPilotId}})
+                .then(() => Mission.updateById(aMissionId, {$push: {'pilots.accepted': aPilotId}}))
+                .then(() => Personnel.updateById(aPilotId, {$push: {'missions.pilots.accepted': {idMission: aMissionId, date: aDate}}}))
+                .then(() => resolve())
+                .catch(() => reject())
+            )
+
         },
         setPilotAsChosen: (aMissionId, aPilotId) => {
             Mission.updateById(aMissionId, {$pull: {'pilots.accepted': aPilotId}});
@@ -526,12 +561,22 @@ exports.Mission = Mission = {
         setAsNotified: (aMissionId, aCrewId) => {
             Mission.updateById(aMissionId, {$push: {'crew.notified': aCrewId}});
         },
+        setAsAccepted: (aMissionId, aPilotId, aDate) => {
+            return new Promise((resolve, reject) => 
+                Mission.updateById(aMissionId, {$pull: {'crew.notified': aPilotId}})
+                .then(() => Mission.updateById(aMissionId, {$push: {'crew.accepted': aPilotId}}))
+                .then(() => Personnel.updateById(aPilotId, {$push: {'missions.crew.accepted': {idMission: aMissionId, date: aDate}}}))
+                .then(() => resolve())
+                .catch(() => reject())
+            )
+        },
+        /*
         setAsAccepted: (aMissionId, aCrewId) => {
             Mission.updateById(aMissionId, {$pull: {'crew.notified': aCrewId}});
             Mission.updateById(aMissionId, {$push: {'crew.accepted': aCrewId}});
             // Aggiungo la missione a quello accettate dal membro dell'equipaggio
             Personnel.updateById(aCrewId, {$push: {'missions.crew.accepted': {idMission: aMissionId, date: aDate}}});         
-        },
+        },*/
         setAsChosen: (aMissionId, aCrewId) => {
             Mission.updateById(aMissionId, {$pull: {'crew.accepted': aCrewId}});
             Mission.updateById(aMissionId, {$push: {'crew.chosen': aCrewId}});
@@ -540,14 +585,24 @@ exports.Mission = Mission = {
 
     Maintainer: {
         setAsNotified: (aMissionId, aMaintainerId) => {
-            Mission.updateById(aMissionId, {$push: {'maintainer.notified': aMaintainerId}});
+            Mission.updateById(aMissionId, {$push: {'maintainers.notified': aMaintainerId}});
         },
+        setAsAccepted: (aMissionId, aPilotId, aDate) => {
+            return new Promise((resolve, reject) => 
+                Mission.updateById(aMissionId, {$pull: {'maintainers.notified': aPilotId}})
+                .then(() => Mission.updateById(aMissionId, {$push: {'maintainers.accepted': aPilotId}}))
+                .then(() => Personnel.updateById(aPilotId, {$push: {'missions.maintainers.accepted': {idMission: aMissionId, date: aDate}}}))
+                .then(() => resolve())
+                .catch(() => reject())
+            )
+        },
+        /*
         setAsAccepted: (aMissionId, aMaintainerId) => {
             Mission.updateById(aMissionId, {$pull: {'maintainers.notified': aMaintainerId}});
             Mission.updateById(aMissionId, {$push: {'maintainers.accepted': aMaintainerId}});
             // Aggiungo la missione a quello accettate dal manutentore
             Personnel.updateById(aMaintainerId, {$push: {'missions.maintainers.accepted': {idMission: aMissionId, date: aDate}}});
-        },
+        },*/
         setAsChosen: (aMissionId, aMaintainerId) => {
             Mission.updateById(aMissionId, {$pull: {'maintainers.accepted': aMaintainerId}});
             Mission.updateById(aMissionId, {$push: {'maintainers.chosen': aMaintainerId}});

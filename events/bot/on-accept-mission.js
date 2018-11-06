@@ -131,15 +131,18 @@ const acceptMission = (data, ctx, bot) => {
     // Il personale è aggiunto alla missione come accettato 
     // e la missione è aggiunta tra quelle accettate dalla persona
     queries.Mission[data.role].setAsAccepted(data.mission._id, ctx.session.userData.person._id, data.mission.date)
-
-    // Verifico il personale che ha accettato la missione per ora e nel caso notifico il supervisore
-    checkForTeam(data.mission._id)
-    .then(aMission => {
-        // Se c'è un team pronto recupero i dati e poi notifico il supervisore di base
-        getTeam(aMission.supervisor, aMission.pilots.accepted, aMission.crew.accepted, aMission.maintainers.accepted)
-        .then(notifySupervisor())
+    .then(() => {
+        // Verifico il personale che ha accettato la missione per ora e nel caso notifico il supervisore
+        checkForTeam(data.mission._id)
+        .then(aMission => {
+            // Se c'è un team pronto recupero i dati e poi notifico il supervisore di base
+            getTeam(aMission.supervisor, aMission.pilots.accepted, aMission.crew.accepted, aMission.maintainers.accepted)
+            .then(() => notifySupervisor())
+        })
+        .catch(aMission => console.log('Team non ancora pronto. Occorrono più persone.'))
     })
-    .catch(aMission => console.log('Team non ancora pronto. Occorrono più persone.'))
+
+    
 
 }
 

@@ -84,22 +84,24 @@ exports.personnelSchema = new mongoose.Schema({
             waitingForLogbook: [{type: ObjectId, default: [], ref: 'mission'}],
             accepted: [{
                 idMission: {type: ObjectId, default: undefined, ref: 'mission'},
-                date: {type: Date, default: undefined}
+                date: {type: Date, default: undefined} // Data della missione, usata per vedere se un pilota è occupato in missione
             }]
         },
         crew:  {
             completed: [{type: ObjectId, default: [], ref: 'mission'}],
             accepted: [{
                 idMission: {type: ObjectId, default: undefined, ref: 'mission'},
-                date: {type: Date, default: undefined}
+                date: {type: Date, default: undefined} // Data della missione, usata per vedere se un crew è occupato in missione
             }],
             pending: {type: ObjectId, default: undefined, ref: 'mission'} // Indica la missione in cui è attualmente impegnato
         },
+        // TODO: cambiare da maintaines a manitainer
+        // cerca Personnel -> 'missions.maintainers'
         maintainers:  {
             completed: [{type: ObjectId, default: [], ref: 'mission'}],
             accepted: [{
                 idMission: {type: ObjectId, default: undefined, ref: 'mission'},
-                date: {type: Date, default: undefined}
+                date: {type: Date, default: undefined} // Data della missione, usata per vedere se un manutentore è occupato in missione
             }],
             pending: {type: ObjectId, default: undefined, ref: 'mission'} // Indica la missione in cui è attualmente impegnato
         },
