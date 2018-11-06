@@ -137,7 +137,7 @@ const acceptMission = (data, ctx, bot) => {
     .then(aMission => {
         // Se c'è un team pronto recupero i dati e poi notifico il supervisore di base
         getTeam(aMission.supervisor, aMission.pilots.accepted, aMission.crew.accepted, aMission.maintainers.accepted)
-        .then(notifySupervisor())
+        .then(() => notifySupervisor())
     })
     .catch(aMission => console.log('Team non ancora pronto. Occorrono più persone.'))
 
