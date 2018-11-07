@@ -234,6 +234,7 @@ exports.Personnel = Personnel = {
      * @param {} selection parametro usato per la selezione del documento su cui eseguire l'update
      * @param {} newValues parametro con i nuovi valori da inserire
      */
+    /*
     update: (selection, newValues) => {
         return models.Personnel.updateOne(selection, newValues, err => {
             if (err) return console.log(err)
@@ -241,6 +242,21 @@ exports.Personnel = Personnel = {
             eventEmitters.Db.Personnel.emit('update')
             console.log(`Updated Personnel selected by: ${JSON.stringify(selection)}`)
         }).exec()
+    },*/
+    update: (selection, newValues) => {
+        return new Promise((resolve, reject) => {
+            models.Personnel.updateOne(selection, newValues, err => {
+                if (err) { 
+                    console.log(err)
+                    reject(err)
+                } else {
+                    // Emetto evento update
+                    eventEmitters.Db.Personnel.emit('update')
+                    console.log(`Updated Personnel selected by: ${JSON.stringify(selection)}`)
+                    resolve()
+                }
+            })
+        })
     },
 
     /**
@@ -482,7 +498,7 @@ exports.Mission = Mission = {
         })
     },
 */
-
+/*
     update: (selection, newValues) => {
         return models.Mission.updateOne(selection, newValues, err => {
             if (err) return console.log(err)
@@ -491,26 +507,26 @@ exports.Mission = Mission = {
             console.log(`Updated Mission selected by: ${JSON.stringify(selection)}`)
         }).exec()
     },
-/*
-    update_promise: (selection, newValues) => {
-        return models.Mission.updateOne(selection, newValues, err => {
-            if (err) console.log(err)
-            console.log('Callback update promise')
-        })
-        .exec()
-    },
 */
+
+    update: (selection, newValues) => {
+        return new Promise((resolve, reject) => {
+            models.Mission.updateOne(selection, newValues, err => {
+                if (err) {
+                    console.log(err)
+                    reject(err)
+                } else {
+                    // Emetto l'evento update
+                    eventEmitters.Db.Mission.emit('update')
+                    console.log(`Updated Mission selected by: ${JSON.stringify(selection)}`)
+                    resolve()
+                }
+            })
+        })
+    },
+
     updateById: (aId, newValues) => { return Mission.update({_id: aId}, newValues) },
 
-
-/*
-    updateById: (aId, newValues) => {
-        models.Mission.updateOne({_id: aId}, newValues, err => {
-            if (err)
-                return console.log(err);
-        });
-    },
-*/
     findById: (aId, projection, callback) => {
         models.Mission.findOne()
         .where('_id').equals(aId)
@@ -545,7 +561,7 @@ exports.Mission = Mission = {
             return new Promise((resolve, reject) => 
                 Mission.updateById(aMissionId, {$pull: {'pilots.notified': aPilotId}})
                 .then(() => Mission.updateById(aMissionId, {$push: {'pilots.accepted': aPilotId}}))
-                .then(() => Personnel.updateById(aPilotId, {$push: {'missions.pilots.accepted': {idMission: aMissionId, date: aDate}}}))
+                .then(() => Personnel.updateById(aPilotId, {$push: {'missions.pilot.accepted': {idMission: aMissionId, date: aDate}}}))
                 .then(() => resolve())
                 .catch(() => reject())
             )
