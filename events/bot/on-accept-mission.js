@@ -3,7 +3,7 @@
  * Il modulo si occupa di inserire il Personale che accetta la missione nei dati della missione
  * e controlla se sia già pronto un team. In caso affermativo notifica il supervisore che ha richiesto la missione.
  */
-const queries = require('../db/queries')
+const queries = require('../../db/queries')
 // TODO: implementare funzione notifySupervisor
 // TODO: da gestire il fatto che prima che l'utente ne accetti una potrebbero arrivargli più richieste
 // di più missioni

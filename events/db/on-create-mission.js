@@ -6,7 +6,7 @@
  * vengono loro mandati dei Button con cui possono accettare o declinare.
  */
 
-const queries = require('../db/queries')
+const queries = require('../../db/queries')
 const Telegraf = require('telegraf')
 
 // TODO: recuperare anche le ore di volo dei piloti
