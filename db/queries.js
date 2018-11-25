@@ -8,7 +8,7 @@
 const mongoose      = require('mongoose');
 const models        = require('./models');
 const deasync       = require('deasync');
-var eventEmitters   = require('../events/event-emitters');
+const eventEmitters = require('../events/event-emitters');
 
 // TODO: quando creo la missione devo anche settare i droni scelti come non disponibili
 // e aggiungere la missione alle loro waitingForQtb missions
