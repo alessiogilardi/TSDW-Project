@@ -55,7 +55,7 @@ const find = {
                 'roles.occupation.pilot': true,
                 'pilot.license.maxMissionRank': {$gte: this.mission.description.rank}, 
                 'pilot.droneTypes': {$all: [this.mission.drones[0].type]},
-                'missions.pilot.accepted.date': {$ne: ctx.session.command.params.date}
+                'missions.pilot.accepted.date': {$ne: this.ctx.session.command.params.date}
             }
         },
         projection: '_id telegramData.idTelegram'
@@ -66,7 +66,7 @@ const find = {
                 base: this.mission.base,
                 'roles.occupation.crew': true,
                 _id: {$nin: Array.from(this.toNotify, person => person._id)},
-                'missions.crew.accepted.date': {$ne: ctx.session.command.params.date}
+                'missions.crew.accepted.date': {$ne: this.ctx.session.command.params.date}
             }
         },
         projection: '_id telegramData.idTelegram'
@@ -77,7 +77,7 @@ const find = {
                 _id: {$nin: Array.from(this.toNotify, person => person._id)},
                 base: this.mission.base,
                 'roles.occupation.maintainer': true,
-                'missions.maintainer.accepted.date': {$ne: ctx.session.command.params.date}
+                'missions.maintainer.accepted.date': {$ne: this.ctx.session.command.params.date}
             }
         },
         projection: '_id telegramData.idTelegram'
@@ -93,7 +93,6 @@ const onCreateMission = (bot, mission) => {
     if (mission === null || mission === undefined) throw new Error('Missing a valid Mission')
 
     this.bot = bot
-    // MODIFICA
     this.ctx = this.bot.ctx
     this.mission = mission
     this.toNotify = []
