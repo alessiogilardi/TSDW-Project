@@ -10,12 +10,18 @@
  * - QTB
 **/
 
-const mongoose = require('mongoose');
-const ObjectId = mongoose.Schema.Types.ObjectId;
+const mongoose = require('mongoose')
+const Schema = mongoose.Schema
+const ObjectId = mongoose.Schema.Types.ObjectId
 
-exports.droneTypes = droneTypes = ['S', 'M', 'L', 'XL'] // TODO: Da cambiare con i valori veri
+const eventTypes = ['comandoBot', 'notifica']
+const riskEvaluation = {
+    
+}
+exports.droneTypes = droneTypes = ['VL', 'L', 'CRO']
 
-exports.airOperatorSchema = new mongoose.Schema({
+
+exports.airOperatorSchema = new Schema({
   _id: ObjectId,
   name: {type: String, unique: true},
   location: {
@@ -31,7 +37,7 @@ exports.airOperatorSchema = new mongoose.Schema({
   bases: [{type: ObjectId, default: [], ref: 'base'}]
 });
 
-exports.personnelSchema = new mongoose.Schema({
+exports.personnelSchema = new Schema({
     _id: ObjectId,
     telegramData: {
         idTelegram: {type: Number, unique: true},
@@ -50,7 +56,7 @@ exports.personnelSchema = new mongoose.Schema({
     roles: {
         command: {
             airOperator: {
-                AM: {type: Boolean, defaulf: false},
+                AM: {type: Boolean, default: false},
                 SM: {type: Boolean, default: false},
                 CQM: {type: Boolean, default: false}
             },
@@ -69,7 +75,7 @@ exports.personnelSchema = new mongoose.Schema({
         license: {
             id: {type: String, default: null},
             type: {type: String, default: null},
-            maxMissionRank: {type: Number, default: null, min: 1, max: 5},
+            //maxMissionRank: {type: Number, default: null, min: 1, max: 5},
             expiring: {type: Date, default: null}
         },
         droneTypes: [{type: String, default: [], enum: droneTypes}]
@@ -109,7 +115,7 @@ exports.personnelSchema = new mongoose.Schema({
     locPermission: {type: Boolean, default: false}
 });
 
-exports.basesSchema = new mongoose.Schema({
+exports.basesSchema = new Schema({
     _id: ObjectId,
     name: {type: String, unique: true},
     airOperator: {type: ObjectId, ref: 'air_operator'},
@@ -134,7 +140,7 @@ exports.basesSchema = new mongoose.Schema({
     drones: [{type: ObjectId, default: [], ref: 'drone'}]
 });
 
-exports.dronesSchema = new mongoose.Schema({
+exports.dronesSchema = new Schema({
     _id: ObjectId,
     number: {type: String, unique: true}, /* Non sapendo se sia numerico o alfanumerico */
     type: {type: String, enum: droneTypes},
@@ -157,45 +163,83 @@ exports.dronesSchema = new mongoose.Schema({
     }
 });
 
-exports.batterySchema = new mongoose.Schema({
+exports.batterySchema = new Schema({
     _id: ObjectId,
     code: {type: String, unique: true},
     type: {type: String, ref: 'drone'}
 });
 
-exports.missionsSchema = new mongoose.Schema({
+exports.missionsSchema = new Schema({
     id: ObjectId,
-    date: Date,
+    date: Date, // Giorno in cui viene effettuata la missione
     base: {type: ObjectId, ref: 'base'},
     supervisor: {type: ObjectId, ref: 'personnel'},
-    status: {type: Number, default: 0, min: 0, max: 4}, /* 0 -> Instantiated, 1 -> Pending, 2 -> Running, 3 -> Completed, 4 -> Completed and documented */
+    AM: {type: ObjectId, ref: 'personnel'}, // Campo usato per semplificare il sistema di notifica
+    location: {
+        latitude: Number,
+        longitude: Number
+    },
+    status: {
+        requested: { // la missione è richietsa dall'AM ad un BAseSup
+            value: {type: Boolean, default: false},
+            timestamp: {type: Date, default: Date.now},
+            timeout: Date // Tempo entro il quale il BaseSup deve rispondere, se non risponde va notificato l'AM
+        },
+        waitingForTeam: { // Il baseSup ha preso in carico la missione, l'AM è notificato e si attende che le persone diano disponibilità 
+            value: {type: Boolean, default: false},
+            timestamp: {type: Date, default: Date.now},
+        },
+        teamCreated: { // Il team viene creato dal baseSup e l'AM viene notificato
+            value: {type: Boolean, default: false},
+            timestamp: {type: Date, default: Date.now}
+        },
+        started: { // Il baseSup dichiara iniziata la missione
+            value: {type: Boolean, default: false},
+            timestamp: {type: Date, default: Date.now}
+        },
+        waitingForDocuments: { // La missione è stata completata, il baseSup e l'AM vengono notificati. Si resta in attesa della documentazione di droni e piloti
+            value: {type: Boolean, default: false},
+            timestamp: {type: Date, default: Date.now}
+        },
+        completed: { // La missione è completata e la documentazione è stata inserita
+            value: {type: Boolean, default: false},
+            timestamp: {type: Date, default: Date.now}
+        }
+    },
     pilots: {
         notified: [{type: ObjectId, ref: 'personnel', default: []}],
         accepted: [{type: ObjectId, ref: 'personnel', default: []}], /* Nome del campo da rivedere */
-        chosen: [{type: ObjectId, ref: 'personnel', default: []}] /* Nome del campo da rivedere */
+        chosen: [{type: ObjectId, ref: 'personnel', default: []}], /* Nome del campo da rivedere */
+        declined: [{type: ObjectId, ref: 'personnel', default: []}]
     },
     crew: {
         notified: [{type: ObjectId, ref: 'personnel', default: []}],
         accepted: [{type: ObjectId, ref: 'personnel', default: []}], /* Nome del campo da rivedere */
-        chosen: [{type: ObjectId, ref: 'personnel', default: []}] /* Nome del campo da rivedere */
+        chosen: [{type: ObjectId, ref: 'personnel', default: []}], /* Nome del campo da rivedere */
+        declined: [{type: ObjectId, ref: 'personnel', default: []}]
     },
     maintainers: {
         notified: [{type: ObjectId, ref: 'personnel', default: []}],
         accepted: [{type: ObjectId, ref: 'personnel', default: []}], /* Nome del campo da rivedere */
-        chosen: [{type: ObjectId, ref: 'personnel', default: []}] /* Nome del campo da rivedere */
+        chosen: [{type: ObjectId, ref: 'personnel', default: []}], /* Nome del campo da rivedere */
+        declined: [{type: ObjectId, ref: 'personnel', default: []}]
     },
     description: {
         duration: { /* Durata della missione, può differire dai tempi di volo */
             expected: Number,
             effective: Number
         },
-        rank: {type: Number, min: 1, max: 5}, /* Difficoltà della missione (0 -> 5) */
+        //rank: {type: Number, min: 1, max: 5}, /* Difficoltà della missione (0 -> 5) */
+        riskEvaluation: {
+            scenario: String,
+            level: Number
+        },
         flightPlan: String, /* Presumibilemente sarà un riferimento ad un documento come il Logbook */
         notes: String
     },
     drones:[{
         _id: {type: ObjectId, ref: 'drone'},
-        type: {type: String, enum: droneTypes} // deve essere un tipo valido
+        type: {type: String, enum: droneTypes}
     }],
     teams: [{
         pilots: {
@@ -203,21 +247,22 @@ exports.missionsSchema = new mongoose.Schema({
             co: {type: ObjectId, ref: 'personnel', default: undefined}
         },
         crew: [{type: ObjectId, ref: 'personnel', default: []}],
-        maintainers: [{type: ObjectId, ref: 'personnel', default: []}]
+        maintainers: [{type: ObjectId, ref: 'personnel', default: []}],
+        timestamp: {type: Date, default: Date.now} // Timestamp della creazione del team
     }],
     logbooks: [{type: ObjectId, default: [], ref: 'logbook'}],
     qtb: [{type: ObjectId, default: [], ref: 'qtb'}]
 });
 
-exports.logbooksSchema = new mongoose.Schema({
+exports.logbooksSchema = new Schema({
     _id: ObjectId,
     date: Date,
     documentRef: String,
     pilot: {type: ObjectId, ref: 'personnel'},
     mission: {type: ObjectId, ref: 'mission'},
-});
+})
 
-exports.qtbSchema = new mongoose.Schema({
+exports.qtbSchema = new Schema({
     _id: ObjectId,
     date: Date,
     drone:  {type: ObjectId, ref: 'drone'},
@@ -228,4 +273,14 @@ exports.qtbSchema = new mongoose.Schema({
         batteryCode: String,
         notes: String
     }]
-});
+})
+
+exports.eventLogSchema = new Schema({
+    type: {type: String, enum: eventTypes},
+    personnel: ObjectId, // Persona che scatena l'evento
+    timestamp: {type: Date, default: Date.now}, 
+    object: { // Oggetto su cui avviene l'evento
+        type: String, // Collection dell'Oggetto su cui avviene l'evento (Missions, Drones, Logbooks, Qtbs)
+        _id: ObjectId // ObjectId dell'Oggetto su cui aviene l'evento
+    }
+})
