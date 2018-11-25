@@ -12,7 +12,7 @@ var dbPort      = process.env.DB_PORT || '27017';
 var dbName      = process.env.DB_NAME || 'TSDW';
 
 /**
- * Funzione che esegue la connessione al db MongoDB e restituisce un oggetto Mongooses
+ * Funzione che esegue la connessione al db MongoDB e restituisce un oggetto Mongoose
  */
 exports.connect = () => {
     mongoose.connect('mongodb://' + dbAddress + ':' + dbPort + '/' + dbName, {useNewUrlParser: true});
