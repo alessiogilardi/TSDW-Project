@@ -93,6 +93,8 @@ const onCreateMission = (bot, mission) => {
     if (mission === null || mission === undefined) throw new Error('Missing a valid Mission')
 
     this.bot = bot
+    // MODIFICA
+    this.ctx = this.bot.ctx
     this.mission = mission
     this.toNotify = []
 
