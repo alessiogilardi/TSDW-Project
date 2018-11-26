@@ -6,11 +6,12 @@ const onAcceptMission   = require('./bot/on-accept-mission')
 const eventHandlers = {
     Db: {
         Mission: {
-            insert: () => eventEmitters.Db.Mission.on('insert', mission => onCreateMission(this.bot, mission))
+            //insert: () => eventEmitters.Db.Mission.on('insert', mission => onCreateMission(this.bot, mission))
         }
     },
     Bot: {
-        requestMission: () => eventEmitters.Bot.on('requestMission', data => onRequestMission(this.bot, data)),
+        //requestMission: () => eventEmitters.Bot.on('requestMission', data => onRequestMission(this.bot, data)),
+        requestMission: () => eventEmitters.Bot.on('requestMission', aMission => onRequestMission(this.bot, aMission)),
         acceptMission: () => eventEmitters.Bot.on('acceptMisson', (data, ctx) => onAcceptMission(data, ctx, this.bot))
     }
 }
