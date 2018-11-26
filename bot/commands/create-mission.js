@@ -135,7 +135,7 @@ const createMission = new WizardScene('createMission',
         ctx.session.command = dataStructure;
         return
     }  
-    ctx.reply('La missione è stata creata con successo!\nTi ricontterò appena una squadra sarà disponibile.')
+    ctx.reply('La missione è stata creata con successo!\nTi ricontatterò appena una squadra sarà disponibile.')
     .then(ctx.reply(`Ecco intanto un riepilogo sui dati della missione\n\nData: ${ctx.session.command.params.date}\nDurata prevista: ${ctx.session.command.params.expectedDuration}\nRango: ${ctx.session.command.params.rank}\nDroni scelti: ${ctx.session.command.params.drones.chosen.join(', ')}`))
     .catch(err => console.log(err))
     
