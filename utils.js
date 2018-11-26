@@ -36,3 +36,17 @@ exports.Date = this.Date = {
     },
     validFormats: ['YYYY-MM-DD', 'DD-MM-YYYY']
 }
+
+exports.stringToUTM = utmString => {
+    var tmp = utmString.split(' ')
+    if (tmp.length !== 4) {
+        //throw new Error('Not a valid UTM string!')
+        return null
+    }
+    return {
+        zoneNumber: tmp[0], 
+        zoneLetter: tmp[1],
+        easting:    tmp[2], 
+        northing:   tmp[3]
+    }
+}
