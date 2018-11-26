@@ -8,6 +8,7 @@
     "mongodb": "^3.1.9",
     "mongoose": "^5.3.12",
     "npm": "^6.4.1",
-    "telegraf": "^3.25.0"
+    "telegraf": "^3.25.0",
+    "utm-latlng": "^1.0.5"
   }
 }
