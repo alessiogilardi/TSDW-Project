@@ -471,6 +471,25 @@ exports.Battery = Battery = {
 
 exports.Mission = Mission = {
     insert: aMission => {
+        return new Promise((resolve, reject) => {
+            aMission._id = mongoose.Types.ObjectId()
+            new models.Mission(aMission)
+            .save((err, aMission) => {
+                if (err) return reject(err)
+                console.log(`Inserted Mission with id: ${mission._id}`)
+                // Viene aggiunta la missione alle pending missions del Supervisor
+                Personnel.updateById(mission.supervisor, {$push: {'missions.supervisor.pending': mission._id}})
+
+                // Setto i droni come non disponibili e aggiungo la missione alle waitingForQtb del drone
+                mission.drones.forEach(drone => Drone.updateById(drone._id, {'state.availability': 1, $push: {'missions.waitingForQtb': {idMission: mission._id, date: new Date(mission.date)}}}))
+
+                // Emetto l'evento missione inserita
+                eventEmitters.Db.Mission.emit('insert', mission)
+                
+                resolve(aMission)
+            })
+        })
+    },/*
         aMission._id = mongoose.Types.ObjectId()
         new models.Mission(aMission)
         .save((err, mission) => {
@@ -487,7 +506,7 @@ exports.Mission = Mission = {
 
         })
 
-    },
+    },*/
 /*
     update: (selection, newValues) => {
         models.Mission.updateOne(selection, newValues, err => {
