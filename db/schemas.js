@@ -15,7 +15,9 @@ const Schema = mongoose.Schema
 const ObjectId = mongoose.Schema.Types.ObjectId
 
 const eventTypes = ['comandoBot', 'notifica']
-const riskEvaluation = {
+exports.scenarios = scenarios = ['A1', 'A2', 'A3', 'A4', 'B1', 'B2', 'C']
+exports.riskLevel = riskLevel = {min: 1, max: 4}
+const riskEvaluation = { // TODO: inserire una valutazione di rischio
     
 }
 exports.droneTypes = droneTypes = ['VL', 'L', 'CRO']
