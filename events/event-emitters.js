@@ -5,17 +5,17 @@
 const events = require('events')
 
 const emitters = {
-    Db: {
+    db: {
         AirOperator: new events.EventEmitter(),
-        Base: new events.EventEmitter(),
-        Personnel: new events.EventEmitter(),
-        Drone: new events.EventEmitter(),
-        Battery: new events.EventEmitter(),
-        Mission: new events.EventEmitter(),
-        Logbook: new events.EventEmitter(),
-        Qtb: new events.EventEmitter()
+        Base:        new events.EventEmitter(),
+        Personnel:   new events.EventEmitter(),
+        Drone:       new events.EventEmitter(),
+        Battery:     new events.EventEmitter(),
+        Mission:     new events.EventEmitter(),
+        Logbook:     new events.EventEmitter(),
+        Qtb:         new events.EventEmitter()
     },
-    Bot: new events.EventEmitter()
+    bot: new events.EventEmitter()
 }
 
 module.exports = emitters
