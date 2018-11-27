@@ -11,6 +11,8 @@ const utm     = new utmObj()
 const Base    = queries.Base
 const Mission = queries.Mission
 
+// TODO: gestire errori ed eccezioni, gestire in questi casi l'uscita dalla Scene
+
 // Modello da seguire:
 const command = {
     name: undefined,
@@ -126,10 +128,13 @@ const requestMission = new WizardScene('requestMission',
         ctx.reply('Inserisci la durata prevista in ore:')
         return ctx.wizard.next()
 
-    })/*
+    })
     .on('location', ctx => { // Inserisco la location da GPS mediante modulo Telegram
+        ctx.session.command.mission.location = ctx.message.location
 
-    })*/,
+        ctx.reply('Inserisci la durata prevista in ore:')
+        return ctx.wizard.next()
+    }),
     new Composer()
     .on('text', ctx => { // Leggo la durata prevista
         if (isNaN(ctx.message.text) || ctx.message.text <= 0) { // Verifico che il valore inserito sia un valore numerico e maggiore di 0
@@ -175,7 +180,12 @@ const requestMission = new WizardScene('requestMission',
     var baseName = mission.base.name
     delete ctx.session.command
     ctx.reply('La missione è stata creata con successo!\nSarai notificato appena il Responsabile di Base l\'avrà presa in carico.')
-    .then(() => ctx.reply(`Ecco intanto un riepilogo sui dati della missione\n\nData: ${utils.Date.format(mission.date, 'DD MMM YYYY')}\nBase: ${baseName}\nDurata prevista: ${mission.description.duration.expected}\nScenario: ${mission.description.riskEvaluation.scenario}\nDifficoltà: ${mission.description.riskEvaluation.level}`))
+    .then(() => ctx.reply(`Ecco intanto un riepilogo sui dati della missione\n\n` +
+                        `Data: ${utils.Date.format(mission.date, 'DD MMM YYYY')}\n` +
+                        `Base: ${baseName}\nDurata prevista: ${mission.description.duration.expected} ore\n` +
+                        `Scenario: ${mission.description.riskEvaluation.scenario}\n` +
+                        `Difficoltà: ${mission.description.riskEvaluation.level}\n`))
+    .then(() => ctx.replyWithLocation(mission.location.latitude, mission.location.longitude))
     .catch(err => console.log(err))
 
     mission.base = mission.base._id
@@ -187,7 +197,7 @@ const requestMission = new WizardScene('requestMission',
     // 3 - Inserire l'evento nell'EventLog
 
     Mission.insert(mission)
-    .then(aMission => eventEmitters.Bot.emit('requestMission', aMission)) // Emetto l'evento requestMission
+    .then(aMission => eventEmitters.bot.emit('requestMission', aMission)) // Emetto l'evento requestMission
     .catch(err => console.log(err))
 })
 
