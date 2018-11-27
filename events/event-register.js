@@ -1,5 +1,5 @@
 const eventEmitters     = require('./event-emitters')
-const onCreateMission   = require('./db/on-create-mission')
+//const onCreateMission   = require('./db/on-create-mission')
 const onRequestMission  = require('./bot/on-request-mission')
 const onAcceptMission   = require('./bot/on-accept-mission')
 
@@ -7,6 +7,7 @@ const eventHandlers = {
     Db: {
         Mission: {
             //insert: () => eventEmitters.Db.Mission.on('insert', mission => onCreateMission(this.bot, mission))
+            insert: () => eventEmitters.Db.Mission.on('insert', mission => {})
         }
     },
     Bot: {
