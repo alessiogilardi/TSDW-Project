@@ -1,8 +1,13 @@
-const eventEmitters     = require('./event-emitters')
+/**
+ * Modulo che assegna ad ogni evento il modulo che lo gestisce
+ */
+
+const ee = require('./event-emitters')
 //const onCreateMission   = require('./db/on-create-mission')
 const onRequestMission  = require('./bot/on-request-mission')
 const onAcceptMission   = require('./bot/on-accept-mission')
 
+/*
 const eventHandlers = {
     Db: {
         Mission: {
@@ -16,16 +21,21 @@ const eventHandlers = {
         acceptMission: () => eventEmitters.Bot.on('acceptMisson', (data, ctx) => onAcceptMission(data, ctx, this.bot))
     }
 }
-
+*/
 
 
 const register = bot => {
     if (bot === null || bot === undefined) throw new Error('Missing Telegram Bot')
-    this.bot = bot
+    //this.bot = bot
 
+    ee.bot.on('requestMission', aMission => onRequestMission(bot, aMission))
+
+
+    /*
     eventHandlers.Db.Mission.insert()
     eventHandlers.Bot.requestMission()
     eventHandlers.Bot.acceptMission()
+    */
 }
 
 
