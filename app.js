@@ -1,14 +1,15 @@
 require('dotenv').config();
-require('./db/db-connect.js').connect();
-const Telegraf = require('telegraf');
-const session = require('telegraf/session')
-const dataLoader = require('./bot/data-loader-middleware');
-const bf = require('./bot/bot-functions.js');
-const Stage = require('telegraf/stage')
-const createMission = require('./bot/commands/create-mission');
-const requestMission = require('./bot/commands/request-mission')
-const eventEmitters = require('./events/event-emitters')
-const eventRegister = require('./events/event-register')
+//require('./db/db-connect.js').connect();
+const db 			 = require('./db/db-connect.js')
+const Telegraf 		 = require('telegraf');
+const session 		 = require('telegraf/session')
+const dataLoader	 = require('./bot/data-loader-middleware');
+const bf 			 = require('./bot/bot-functions.js');
+const Stage 		 = require('telegraf/stage')
+const createMission  = require('./bot/scenes/create-mission');
+const requestMission = require('./bot/scenes/request-mission')
+const eventEmitters	 = require('./events/event-emitters')
+const eventRegister  = require('./events/event-register')
 const { enter, leave } = Stage
 
 const backtick = '\`';
@@ -56,6 +57,8 @@ bot.command(['createMission', 'createmission'], ctx => {
 	ctx.scene.enter('createMission');
 });
 
+bot.on('location', ctx => console.log(ctx.message))
+
 bot.command(['requestMission', 'requestmission'], ctx => {
 	if (!ctx.session.userData.commands.includes('/requestMission')) {
 		ctx.reply('Mi spiace, non hai i diritti per eseguire questo comando.')
@@ -69,7 +72,8 @@ bot.on('callback_query', ctx => {
 	var cbQuery = JSON.parse(ctx.callbackQuery.data)
 	ctx.answerCbQuery(cbQuery.cbMessage)
 	ctx.editMessageReplyMarkup({})
-	eventEmitters.Bot.emit(cbQuery.action, cbQuery.data, ctx)
+	eventEmitters.bot.emit(cbQuery.action, cbQuery.data, ctx)
 })
 
-bot.startPolling();
+db.connect(process.env.DB_ADDRESS, process.env.DB_PORT, process.env.DB_NAME)
+.then(() => bot.startPolling())
