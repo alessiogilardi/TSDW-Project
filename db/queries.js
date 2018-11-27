@@ -151,6 +151,7 @@ exports.Base = Base = {
      * @param {String} projection attributi da cercare
      * @param {Function} callback funzione di callback a cui è passata la Base trovato
      */
+    /*
     findByName: (name, projection, callback) => {
         models.Base.findOne()
         .where('name').equals(name)
@@ -159,7 +160,14 @@ exports.Base = Base = {
             callback(doc);
         });
     },
-
+    */
+    findByName: (name, projection) => {
+        return models.Base.findOne()
+            .where('name').equals(name)
+            .select(projection)
+            .exec()
+    }
+/*
     findByNameSync: (name, projection) =>  {
         var ret = null;
         models.Base.findOne()
@@ -172,6 +180,7 @@ exports.Base = Base = {
             deasync.runLoopOnce();
         return ret;
     }
+    */
 };
 
 /**
@@ -474,7 +483,7 @@ exports.Mission = Mission = {
         return new Promise((resolve, reject) => {
             aMission._id = mongoose.Types.ObjectId()
             new models.Mission(aMission)
-            .save((err, aMission) => {
+            .save((err, mission) => {
                 if (err) return reject(err)
                 console.log(`Inserted Mission with id: ${mission._id}`)
                 // Viene aggiunta la missione alle pending missions del Supervisor
