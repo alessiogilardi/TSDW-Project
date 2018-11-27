@@ -1,41 +1,41 @@
 /**
- * Modulo che esegue la connessione al db.
- * Connect -> esegue connessione
- * Disconnect -> esegue disconnessione
+ * Modulo che gestisce la connessione al db.
+ * Connect -> esegue connessione al DB e ritona una Promise
+ * Disconnect -> esegue disconnessione dal DB e ritorna una Promise
  */
 
-require('dotenv').config();
 const mongoose = require('mongoose');
 
-var dbAddress   = process.env.DB_ADDRESS || 'localhost'; 
-var dbPort      = process.env.DB_PORT || '27017';
-var dbName      = process.env.DB_NAME || 'TSDW';
-
 /**
- * Funzione che esegue la connessione al db MongoDB e restituisce un oggetto Mongoose
+ * Funzione che esegue la connessione al DB
+ * 
+ * @param {*} dbAddress Indirizzo IP del DB
+ * @param {*} dbPort Porta a cui connettersi
+ * @param {*} dbName Node del DB
+ * 
+ * @returns {Promise}
  */
-exports.connect = () => {
-    mongoose.connect('mongodb://' + dbAddress + ':' + dbPort + '/' + dbName, {useNewUrlParser: true});
-    var db = mongoose.connection;
-    db.on('error', console.error.bind(console, 'connection error:'));
-    db.once('open', () => {
-        console.log('Mongoose connection started');
+const connect = (dbAddress, dbPort, dbName) => {
+    mongoose.connection.on('error', console.error.bind(console, 'connection error:'))
+    mongoose.connection.once('open', () => {
+        console.log('Mongoose connection started')
         process.on('SIGINT', () => {
-            mongoose.disconnect(() => {
-                console.log('Closing Mongoose connection');
-                process.exit(0);
-            });
-        });
-    });
-    return mongoose;  
+            disconnect()
+            .then(() => process.exit(0))
+        })
+    })
+    return mongoose.connect(`mongodb://${dbAddress}:${dbPort}/${dbName}`, {useNewUrlParser: true})
 }
 
 /**
- * Funzione che esegue la disconnessione dal db MongoDB dopo un intervallod di tempo prestabilito,
- * in modo da consentire che eventuali operazioni ancora pendenti terminino.
+ * Funzione che esegue la disconnessione dal DB
+ * 
+ * @returns {Promise}
  */
-exports.disconnect = (time = 1500) => {
-    setTimeout(() => {
-        mongoose.disconnect();
-    }, time);
+const disconnect = () => {
+    console.log('Closing Mongoose connection')
+    return mongoose.disconnect()
 }
+
+exports.connect    = connect
+exports.disconnect = disconnect
