@@ -1,33 +1,51 @@
 require('dotenv').config()
 const WizardScene   = require('telegraf/scenes/wizard/index')
 const Composer      = require('telegraf/composer')
+const utmObj        = require('utm-latlng');
 const queries       = require('../../db/queries')
 const schemas       = require('../../db/schemas')
 const eventEmitters = require('../../events/event-emitters')
 const utils         = require('../../utils')
-//const Telegraf      = require('telegraf')
 
+const utm     = new utmObj()
 const Base    = queries.Base
 const Mission = queries.Mission
-//const Personnel = queries.Personnel
-//const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN)
-//const sendMessage = bot.telegram.sendMessage
 
-/* Modello da seguire, non c'è bisogno di dichiararlo:
-    const dataStructure = {
-        name: 'requestMission',
-        error: false,
-        searching: false,
-        params: {
-            base: {
-                name: undefined,
-                supervisor: undefined
+// Modello da seguire:
+const command = {
+    name: undefined,
+    error: undefined,
+    searching: undefined,
+    mission: {
+        date: undefined,
+        base: {
+            _id: undefined,
+            name: undefined
+        },
+        supervisor: undefined, // _id del responsabile di base
+        AM: undefined, // _id dell'AM che richiede la missione
+        location: {
+            latitude: undefined,
+            longitude: undefined
+        },
+        status: {
+            requested: {
+                value: undefined,
+                timestamp: undefined
+            }
+        },
+        description: {
+            duration: {
+                expected: undefined,
             },
-            date: undefined,
-            description: undefined
+            riskEvaluation: {
+                scenario: undefined,
+                level: undefined
+            }
         }
     }
-*/
+}
+
 
 /**
  * Si richiedono:
@@ -46,9 +64,14 @@ const Mission = queries.Mission
  */
 const requestMission = new WizardScene('requestMission',
     ctx => {
+        ctx.session.command = command
+
         ctx.session.command.name      = 'requestMission'
         ctx.session.command.searching = false
         ctx.session.command.error     = false
+
+        ctx.session.command.mission.AM = ctx.session.userData.person._id
+        
         ctx.reply('Bene, iniziamo la procedura per la richiesta di una missione!\nTi verrà chiesto di inserire alcuni parametri.')
         .then(() => ctx.reply('Ti ricordo che puoi annullare l\'operazione  in qualsiasi momento usando il comando /cancel.'))
         .then(() => ctx.reply('Inserisci la data della missione:'))
@@ -56,12 +79,13 @@ const requestMission = new WizardScene('requestMission',
         ctx.wizard.next()
     },
     new Composer()
-    .on('text', ctx => {            
-        if (!utils.Date.isValid(ctx.message.text)) { // Verifico che la data inserita sia in un formato corretto
+    .on('text', ctx => {
+        // Verifico che la data inserita sia in un formato corretto e che sia successiva ala data di oggi
+        if (!utils.Date.isValid(ctx.message.text)) {
             ctx.reply('La data inserita non è valida, per favore reinseriscila')
             return
         }
-        ctx.session.command.params.date = utils.Date.parse(ctx.message.text)
+        ctx.session.command.mission.date = utils.Date.parse(ctx.message.text)
         ctx.reply('A quale base vuoi affidare la missione? Inserisci il nome della base:')
         return ctx.wizard.next()
     }),
@@ -70,37 +94,36 @@ const requestMission = new WizardScene('requestMission',
         if (ctx.session.command.searching)
             return
         ctx.session.command.searching = true
-        /*
+        
         Base.findByName(ctx.message.text, {})
         .then(aBase => {
-
-        })
-        */
-        Base.findByName(ctx.message.text, {}, aBase => {
             ctx.session.command.searching = false
-            if (aBase === null) {
+            //if (aBase === null) {
+            if (!aBase) {
                 ctx.reply('Mi spiace, hai inserito una base non valida, per favore inseriscine un\'altra.')
                 return
             }
-            ctx.session.command.params.base.name = aBase.name;
-            ctx.session.command.params.base.supervisor = aBase.roles.supervisor;
+            ctx.session.command.mission.base._id   = aBase._id
+            ctx.session.command.mission.base.name  = aBase.name
+            ctx.session.command.mission.supervisor = aBase.roles.supervisor
 
-            ctx.reply('Inserisci le coordinate dove avrà luogo la missione.\nInserisci una posizione da GPS oppure scrivile in formato UTM (ZoneNumber ZoneLetter Easting Northing):')
+            ctx.reply('Inserisci le coordinate dove avrà luogo la missione.\nInserisci una posizione da GPS oppure scrivile in formato UTM (es: 33 T 0298830 4646912):')
             return ctx.wizard.next()
         })
+        .catch(err => console.log(err))
     }),
     new Composer()
     .on('text', ctx => { // Leggo la location in coordinate UTM
         var coordinates = utils.stringToUTM(ctx.message.text) // Converto in coordinate UTM
         if (coordinates === null) {
-            ctx.reply('Mi spiace, le coordinate che hai inserito non sono valide, reinseriscile.')
+            ctx.reply('Mi spiace, le coordinate che hai inserito non sono valide, reinseriscile in formato UTM.')
             return
         }
-        coordinates = utm.convertUtmToLatLng(coordinates.easting, coordinates.northing, coordinates.zoneNum, coordinates.zoneLetter);
-        ctx.session.command.params.location.latitude  = coordinates.lat
-        ctx.session.command.params.location.longitude = coordinates.lng
+        coordinates = utm.convertUtmToLatLng(coordinates.easting, coordinates.northing, coordinates.zoneNumber, coordinates.zoneLetter)
+        ctx.session.command.mission.location.latitude  = coordinates.lat
+        ctx.session.command.mission.location.longitude = coordinates.lng
 
-        ctx.reply('Inserisci la durata prevista:')
+        ctx.reply('Inserisci la durata prevista in ore:')
         return ctx.wizard.next()
 
     })/*
@@ -109,22 +132,22 @@ const requestMission = new WizardScene('requestMission',
     })*/,
     new Composer()
     .on('text', ctx => { // Leggo la durata prevista
-        if (isNaN(ctx.message.text)) { // Verifico che il valore inserito sia un valore numerico
+        if (isNaN(ctx.message.text) || ctx.message.text <= 0) { // Verifico che il valore inserito sia un valore numerico e maggiore di 0
             ctx.reply('Mi spiace hai inserito un valore non valido, per favore inseriscine un altro.')
             return
         }
-        ctx.command.params.description.duration.expected = ctx.message.text
+        ctx.session.command.mission.description.duration.expected = ctx.message.text
 
         ctx.reply('Inserisci uno scenario valido:')
         return ctx.wizard.next()
     }),
     new Composer()
     .on('text', ctx => { // Leggo lo scenario A,B,C
-        if (!schemas.scenarios.includes(ctx.message.text)) {
+        if (!schemas.scenarios.includes(ctx.message.text.toUpperCase())) {
             ctx.reply('Scenario non valido, inseriscine un altro.')
             return
         }
-        ctx.session.command.params.description.riskEvaluation.scenario = ctx.message.text
+        ctx.session.command.mission.description.riskEvaluation.scenario = ctx.message.text.toUpperCase()
 
         ctx.reply('Inserisci la difficoltà della missione (1 - 4):')
         return ctx.wizard.next()
@@ -138,7 +161,7 @@ const requestMission = new WizardScene('requestMission',
             ctx.reply('Ops, la difficoltà che hai inserito non è valida, inserisci un valore diverso.')
             return
         }
-        ctx.session.command.params.description.riskEvaluation.level = ctx.message.text
+        ctx.session.command.mission.description.riskEvaluation.level = ctx.message.text
 
         return ctx.scene.leave()
     })
@@ -148,31 +171,24 @@ const requestMission = new WizardScene('requestMission',
         delete ctx.session.command
         return
     }
-
+    var mission = ctx.session.command.mission
+    var baseName = mission.base.name
+    delete ctx.session.command
     ctx.reply('La missione è stata creata con successo!\nSarai notificato appena il Responsabile di Base l\'avrà presa in carico.')
-    //.then(ctx.reply(`Ecco intanto un riepilogo sui dati della missione\n\nData: ${ctx.session.command.params.date}\nDurata prevista: ${ctx.session.command.params.expectedDuration}\nRango: ${ctx.session.command.params.rank}\nDroni scelti: ${ctx.session.command.params.drones.chosen.join(', ')}`))
-    .then(() => ctx.reply('Ecco un riepilogo' + ctx.session.command.params))
+    .then(() => ctx.reply(`Ecco intanto un riepilogo sui dati della missione\n\nData: ${utils.Date.format(mission.date, 'DD MMM YYYY')}\nBase: ${baseName}\nDurata prevista: ${mission.description.duration.expected}\nScenario: ${mission.description.riskEvaluation.scenario}\nDifficoltà: ${mission.description.riskEvaluation.level}`))
     .catch(err => console.log(err))
 
-    var aMission = ctx.session.command.params
-    aMission.status.instantiated.value     = true
-    aMission.status.instantiated.timestamp = new Date()
+    mission.base = mission.base._id
+    mission.status.requested.value     = true
+    mission.status.requested.timestamp = new Date()
 
-    ctx.session.command = undefined
-
-    // TEST:
-    return console.log(aMission)
-    //
-
-    // TODO: 
     // 1 - Inserire la Missione nel DB
     // 2 - Notificare il responsabile di base
     // 3 - Inserire l'evento nell'EventLog
 
-    Mission.insert(aMission)
-    .then(mission => {
-        // Notifico il responsabile di base
-        eventEmitters.Bot.emit('requestMission', mission)
-    })
+    Mission.insert(mission)
+    .then(aMission => eventEmitters.Bot.emit('requestMission', aMission)) // Emetto l'evento requestMission
     .catch(err => console.log(err))
 })
+
+module.exports = requestMission
