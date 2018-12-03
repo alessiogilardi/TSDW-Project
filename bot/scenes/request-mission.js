@@ -64,6 +64,8 @@ const command = {
  *  - Inserire l'evento nel eventsLog
  *  - Notificare il baseSup con i parametri della Missione
  */
+
+ // TODO: usare ctx.scene.session invece di ctx.session
 const requestMission = new WizardScene('requestMission',
     ctx => {
         ctx.session.command = command
