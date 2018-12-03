@@ -105,7 +105,7 @@ exports.personnelSchema = new Schema({
         },
         // TODO: cambiare da maintaines a manitainer
         // cerca Personnel -> 'missions.maintainers'
-        maintainers:  {
+        maintainer:  {
             completed: [{type: ObjectId, default: [], ref: 'mission'}],
             accepted: [{
                 idMission: {type: ObjectId, default: undefined, ref: 'mission'},
@@ -145,14 +145,17 @@ exports.basesSchema = new Schema({
 exports.dronesSchema = new Schema({
     _id: ObjectId,
     number: {type: String, unique: true}, /* Non sapendo se sia numerico o alfanumerico */
-    type: {type: String, enum: droneTypes},
-    airOperator: {type: ObjectId, ref: 'air_operator'},
+    type: {type: String, enum: droneTypes}, // Taglia del drone
+    airOperator: {type: ObjectId, ref: 'air_operator'}, 
     base: {type: ObjectId, ref: 'base'},
     batteryTypes: [{type: String, ref: 'battery'}],
     state: {
         availability: {type: Number, default: 0}, /* 0 -> Disponibile, 1 -> In Missione, 2 -> In manutenzione */
         /* generalState: String, /* Potrebbe non servire */
-        lastMaintenance: Date,
+        maintenances: [{
+            start: Date,
+            end: Date
+        }],
         flightTimeSinceLastMaintenance: Number, /* Aggiornato ogni qual volta viene inserito un QTB e azzerato ad ogni manutenzione, campo utilizzato per verificare lo stato di usura */
         notes: String                           /* Il campo sopra potrebbe essere azzerato nel momento in cui viene modificato il campo lastMaintenance */
     },
@@ -160,7 +163,7 @@ exports.dronesSchema = new Schema({
         completed: [{type: ObjectId, default: [], ref: 'mission'}],
         waitingForQtb: [{
             idMission: {type: ObjectId, default: undefined, ref: 'mission'},
-            date: {type: Date, default: undefined}
+            date: {type: Date, default: undefined} // La data serve a stabilire se il drone è in missione in quel giorno
         }], /* Missioni per cui non è ancora stato inserito un QTB */
     }
 });
