@@ -11,7 +11,7 @@ const eventEmitters = require('../events/event-emitters')
 var count = 0;
 
 docs.AirOperators.forEach(airOperator => queries.AirOperator.insert(airOperator))
-eventEmitters.Db.AirOperator.on('insert', airOperator =>docs.Bases.forEach(base => queries.Base.insert(base)))
+eventEmitters.Db.AirOperator.on('insert', airOperator => docs.Bases.forEach(base => queries.Base.insert(base)))
 eventEmitters.Db.Base.on('insert', base => {
     count++
     if (count === docs.Bases.length) {
