@@ -33,8 +33,8 @@ exports.AirOperator = AirOperator = {
             console.log('Inserted new AirOperator with id: ' + airOperator._id);
 
             // Emetto l'evento insert
-            eventEmitters.Db.AirOperator.emit('insert', airOperator)
-        });
+            eventEmitters.db.AirOperator.emit('insert', airOperator)
+        })
 
     },
 
@@ -47,7 +47,7 @@ exports.AirOperator = AirOperator = {
         models.AirOperator.updateOne(selection, newValues, err => {
             if (err) return console.log(err)
             // Emetto l'evento update
-            eventEmitters.Db.AirOperator.emit('update')
+            eventEmitters.db.AirOperator.emit('update')
             console.log(`Updated AirOperator selected by: ${JSON.stringify(selection)}`);
         })
     },
@@ -116,7 +116,7 @@ exports.Base = Base = {
                     return console.log(err);
                 console.log('Inserted new base with _id: ' + base._id);
                 // Emetto l'evento insert
-                eventEmitters.Db.Base.emit('insert', base)
+                eventEmitters.db.Base.emit('insert', base)
                 // Quando la query viene eseguita, devo aggiungere l'id della base appena creata alla lista di basi dell'operatore aereo corrispondente
                 AirOperator.updateById(base.airOperator, {$push: {'bases': base._id}});
             });
@@ -131,7 +131,7 @@ exports.Base = Base = {
     update: (selection, newValues) => {
         models.Base.updateOne(selection, newValues, err => {
             if (err) return console.log(err)
-            eventEmitters.Db.Base.emit('update')
+            eventEmitters.db.Base.emit('update')
             console.log(`Updated Base selected by: ${JSON.stringify(selection)}`)
         })
     },
@@ -145,12 +145,7 @@ exports.Base = Base = {
      */
     updateById: (aId, newValues) => Base.update({_id: aId}, newValues),
 
-    /**
-     * Funzione che cerca una Base in base al nome.
-     * @param {String} aName nome della Base da cercare
-     * @param {String} projection attributi da cercare
-     * @param {Function} callback funzione di callback a cui è passata la Base trovato
-     */
+    
     /*
     findByName: (name, projection, callback) => {
         models.Base.findOne()
@@ -161,6 +156,12 @@ exports.Base = Base = {
         });
     },
     */
+    /**
+     * Funzione che cerca una Base in base al nome.
+     * @param {String} aName nome della Base da cercare
+     * @param {String} projection attributi da cercare
+     * @returns {Promise}
+     */
     findByName: (name, projection) => {
         return models.Base.findOne()
             .where('name').equals(name)
@@ -209,7 +210,7 @@ exports.Personnel = Personnel = {
                         return console.log(err);
                     console.log('Inserted new Personnel with id: ' + personnel._id);
                     // Emetto evento insert
-                    eventEmitters.Db.Personnel.emit('insert', personnel)
+                    eventEmitters.db.Personnel.emit('insert', personnel)
 
                     // Inserisco i vincoli di integrità
 
@@ -248,7 +249,7 @@ exports.Personnel = Personnel = {
         return models.Personnel.updateOne(selection, newValues, err => {
             if (err) return console.log(err)
             // Emetto evento update
-            eventEmitters.Db.Personnel.emit('update')
+            eventEmitters.db.Personnel.emit('update')
             console.log(`Updated Personnel selected by: ${JSON.stringify(selection)}`)
         }).exec()
     },*/
@@ -260,7 +261,7 @@ exports.Personnel = Personnel = {
                     reject(err)
                 } else {
                     // Emetto evento update
-                    eventEmitters.Db.Personnel.emit('update')
+                    eventEmitters.db.Personnel.emit('update')
                     console.log(`Updated Personnel selected by: ${JSON.stringify(selection)}`)
                     resolve()
                 }
@@ -288,47 +289,47 @@ exports.Personnel = Personnel = {
      * @param {String} selection parametro per selezionare gli attributi da cercare
      * @param {Function} callback funzione di callback a cui passare i risultati della ricerca
      */
-    find: (selection, projection, callback) => {
-        models.Personnel.find(selection)
+    find: (selection, projection/*, callback*/) => {
+        return models.Personnel.find(selection)
         .select(projection)
-        .exec((err, personnel) => callback(personnel))
+        .exec(/*(err, personnel) => callback(personnel)*/)
     },
 
     /**
      * Funzione che ricera una Persona in base all'id.
      */
-    findById: (aId, projection, callback) => {
-        models.Personnel.findOne()
+    findById: (aId, projection/*, callback*/) => {
+        return models.Personnel.findOne()
         .where('_id').equals(aId)
         .select(projection)
-        .exec((err, personnel) => {
+        .exec(/*(err, personnel) => {
             callback(personnel);
-        });
+        }*/)
     },
     /**
      * Funzione che ricera una Persona in base al CF.
      */
-    findByCf: (aCf, projection, callback) => {
-        models.Personnel.findOne()
+    findByCf: (aCf, projection/*, callback*/) => {
+        return models.Personnel.findOne()
         .where('cf').equals(aCf)
         .select(projection)
-        .exec((err, personnel) => {
+        .exec(/*(err, personnel) => {
             callback(personnel);
-        });
+        }*/)
     },
     
     /**
      * Funzione che ricera una Persona in base all'idTelegram.
      */
-	findByIdTelegram: (aIdTelegram, projection, callback) => {
-        models.Personnel.findOne()
+	findByIdTelegram: (aIdTelegram, projection/*, callback*/) => {
+        return models.Personnel.findOne()
         .where('telegramData.idTelegram').equals(aIdTelegram)
         .select(projection)
-        .exec((err, personnel) => {
+        .exec(/*(err, personnel) => {
             callback(personnel);
-        });
+        }*/)
     },
-
+/*
     findByCfSync: (aCf, projection) => {
         var ret = null;
         models.Personnel.findOne()
@@ -341,8 +342,8 @@ exports.Personnel = Personnel = {
             deasync.runLoopOnce();
         return ret;
     }
-
-};
+*/
+}
 
 /**
  * Funzioni relative ai Droni
@@ -368,7 +369,7 @@ exports.Drone = Drone = {
                         return console.log(err);
                     console.log('Inserted new Drone with id: ' + drone._id);
                     // Emetto evento insert
-                    eventEmitters.Db.Drone.emit('insert')
+                    eventEmitters.db.Drone.emit('insert')
                     // Il drone deve essere aggiunto alla lista di droni della base corrispondente
                     Base.updateById(drone.base, {$push: {drones: drone._id}});
                 });
@@ -385,7 +386,7 @@ exports.Drone = Drone = {
         models.Drone.updateOne(selection, newValues, err => {
             if (err) return console.log(err)
             // Emetto l'evento update
-            eventEmitters.Db.Drone.emit('update')
+            eventEmitters.db.Drone.emit('update')
             console.log(`Updated Drone selected by: ${JSON.stringify(selection)}`)
         })
     },
@@ -407,6 +408,12 @@ exports.Drone = Drone = {
         .where('_id').equals(aId)
         .select(projection)
         .exec((err, doc) => callback(doc))
+    },
+
+    find: (selection, projection) => {
+        return models.Drone.find(selection)
+        .select(projection)
+        .exec()
     },
 
     /**
@@ -472,7 +479,7 @@ exports.Battery = Battery = {
             if (err) return console.log(err)
 
             // Emetto evento insert
-            eventEmitters.Battery.Db.emit('insert', battery)
+            eventEmitters.Battery.db.emit('insert', battery)
             console.log(`Iserted Battery with id: ${battery._id}`)
         })
     }
@@ -493,12 +500,12 @@ exports.Mission = Mission = {
                 mission.drones.forEach(drone => Drone.updateById(drone._id, {'state.availability': 1, $push: {'missions.waitingForQtb': {idMission: mission._id, date: new Date(mission.date)}}}))
 
                 // Emetto l'evento missione inserita
-                eventEmitters.Db.Mission.emit('insert', mission)
+                eventEmitters.db.Mission.emit('insert', mission)
                 
                 resolve(aMission)
             })
         })
-    },/*
+    },/* 
         aMission._id = mongoose.Types.ObjectId()
         new models.Mission(aMission)
         .save((err, mission) => {
@@ -511,7 +518,7 @@ exports.Mission = Mission = {
             mission.drones.forEach(drone => Drone.updateById(drone._id, {'state.availability': 1, $push: {'missions.waitingForQtb': {idMission: mission._id, date: new Date(mission.date)}}}))
 
             // Emetto l'evento missione inserita
-            eventEmitters.Db.Mission.emit('insert', mission)
+            eventEmitters.db.Mission.emit('insert', mission)
 
         })
 
@@ -521,7 +528,7 @@ exports.Mission = Mission = {
         models.Mission.updateOne(selection, newValues, err => {
             if (err) return console.log(err)
             // Emetto l'evento update
-            eventEmitters.Db.Mission.emit('update')
+            eventEmitters.db.Mission.emit('update')
             console.log(`Updated Mission selected by: ${JSON.stringify(selection)}`)
         })
     },
@@ -531,7 +538,7 @@ exports.Mission = Mission = {
         return models.Mission.updateOne(selection, newValues, err => {
             if (err) return console.log(err)
             // Emetto l'evento update
-            eventEmitters.Db.Mission.emit('update')
+            eventEmitters.db.Mission.emit('update')
             console.log(`Updated Mission selected by: ${JSON.stringify(selection)}`)
         }).exec()
     },
@@ -545,7 +552,7 @@ exports.Mission = Mission = {
                     reject(err)
                 } else {
                     // Emetto l'evento update
-                    eventEmitters.Db.Mission.emit('update')
+                    eventEmitters.db.Mission.emit('update')
                     console.log(`Updated Mission selected by: ${JSON.stringify(selection)}`)
                     resolve()
                 }
@@ -555,13 +562,13 @@ exports.Mission = Mission = {
 
     updateById: (aId, newValues) => { return Mission.update({_id: aId}, newValues) },
 
-    findById: (aId, projection, callback) => {
-        models.Mission.findOne()
+    findbyId: (aId, projection/*, callback*/) => {
+        return models.Mission.findOne()
         .where('_id').equals(aId)
         .select(projection)
-        .exec((err, mission) => {
+        .exec(/*(err, mission) => {
             callback(mission);
-        });
+        }*/)
     },
 
     setStatus: (aId, aStatus) => {
@@ -703,7 +710,7 @@ exports.Logbook = Logbook = {
             Personnel.updateById(logbook.pilot, {$pull: {'missions.pilot.waitingForLogbook': logbook.mission}});
             Personnel.updateById(logbook.pilot, {$push: {'missions.pilot.completed': logbook.mission}});
             
-            eventEmitters.Db.Logbook.emit('insert', logbook)
+            eventEmitters.db.Logbook.emit('insert', logbook)
             console.log(`Inserted Logbook with id: ${logbook._id}`)
         });
     },
@@ -712,7 +719,7 @@ exports.Logbook = Logbook = {
         models.Logbook.updateOne(selection, newValues, err => {
             if (err) return console.log(err)
 
-            eventEmitters.Db.Logbook.emit('update')
+            eventEmitters.db.Logbook.emit('update')
             console.log(`Updated Logbook selected by: ${JSON.stringify(selection)}`)
         });
     },
@@ -754,7 +761,7 @@ exports.Qtb = Qtb = {
             Drone.updateById(qtb.drone, {$pull: {'missions.waitingForQtb': qtb.mission}});
             Drone.updateById(qtb.drone, {$push: {'missions.completed': qtb.mission}});
 
-            eventEmitters.Db.Qtb.emit('insert', qtb)
+            eventEmitters.db.Qtb.emit('insert', qtb)
             console.log(`Inserted Qtb with id: ${qtb._id}`)
         });
     },
@@ -762,7 +769,7 @@ exports.Qtb = Qtb = {
     update: (selection, newValues) => {
         models.Qtb.updateOne(selection, newValues, err => {
             if (err) return console.log(err)
-            eventEmitters.Db.Qtb.emit('update')
+            eventEmitters.db.Qtb.emit('update')
             console.log(`Updated Qtb selected by: ${JSON.stringify(selection)}`)
         });
     },
