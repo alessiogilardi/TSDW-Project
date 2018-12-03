@@ -1,7 +1,27 @@
-const queries = require('../db/queries.js');
+const queries   = require('../db/queries.js')
+const Personnel = queries.Personnel
 
 /**
- * Comandi conesentiti ad un certo ruolo
+ * Dizionario usato per de-comprimenre i nomi delle actions per evitare il limite di 64 byte
+ * Nel caso si può aumentare la compressione dei nomi delle action
+ */
+exports.unZipActionName = unZipActionName = {
+    orgMiss: 'organizeMission',
+    accMiss: 'acceptMission',
+    decMiss: 'declineMission'
+}
+/**
+ * Dizionario usato per comprimenre i nomi delle actions per evitare il limite di 64 byte
+ * Nel caso si può aumentare la compressione dei nomi delle action
+ */
+exports.zipActionName = zipActionName = {
+    organizeMission: 'orgMiss',
+    acceptMission: 'accMiss',
+    declineMission: 'decMiss'
+}
+
+/**
+ * Comandi consentiti ad un certo ruolo
  */
 const roleToOperation = {
 	AM:     ['/requestMission'],
@@ -33,13 +53,17 @@ const getPermissions = aPerson => {
  * Funzione che recupera i dati di una persona dal db e li passa ad una funzione di callback
  */
 exports.loadData = (idTelegram, callback) => {
-    queries.Personnel.findByIdTelegram(idTelegram, {}, aPerson => {
-        callback({
-            commands: getPermissions(aPerson),
-            person: aPerson
-        });
-    });
-};
+    return new Promise((resolve, reject) => {
+        Personnel.findByIdTelegram(idTelegram, {})
+        .then(aPerson => {
+            resolve({
+                commands: getPermissions(aPerson),
+                person: aPerson
+            })
+        })
+        .catch(err => console.log(err))
+    })
+}
 
 /**
  * Funzione che setta il bot come startato da una persona.
