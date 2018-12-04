@@ -24,17 +24,20 @@ exports.AirOperator = AirOperator = {
      * 
      * @param {AirOperator} aAirOperator
      */
-    insert: aAirOperator => {
-        aAirOperator._id = mongoose.Types.ObjectId();
-        new models.AirOperator(aAirOperator)
-        .save((err, airOperator) => {
-            if (err)
-                return console.log(err);
-            console.log('Inserted new AirOperator with id: ' + airOperator._id);
+    insert: async aAirOperator => {
+        return new Promise((resolve, reject) => {
+            aAirOperator._id = mongoose.Types.ObjectId();
+            new models.AirOperator(aAirOperator)
+            .save((err, airOperator) => {
+                if (err) return reject(err)
 
-            // Emetto l'evento insert
-            eventEmitters.db.AirOperator.emit('insert', airOperator)
+                console.log('Inserted new AirOperator with id: ' + airOperator._id);
+                // Emetto l'evento insert
+                eventEmitters.db.AirOperator.emit('insert', airOperator)
+                resolve(airOperator)
+            })
         })
+        
 
     },
 
@@ -44,12 +47,16 @@ exports.AirOperator = AirOperator = {
      * @param {} newValues parametro con i nuovi valori da inserire
      */
     update: (selection, newValues) => {
-        models.AirOperator.updateOne(selection, newValues, err => {
-            if (err) return console.log(err)
-            // Emetto l'evento update
-            eventEmitters.db.AirOperator.emit('update')
-            console.log(`Updated AirOperator selected by: ${JSON.stringify(selection)}`);
+        return new Promise((resolve, reject) => {
+            models.AirOperator.updateOne(selection, newValues, err => {
+                if (err) return reject(err)
+                // Emetto l'evento update
+                eventEmitters.db.AirOperator.emit('update')
+                console.log(`Updated AirOperator selected by: ${JSON.stringify(selection)}`)
+                resolve()
+            })
         })
+        
     },
 
     /**
@@ -68,17 +75,17 @@ exports.AirOperator = AirOperator = {
      * @param {String} projection attributi da cercare
      * @param {Function} callback funzione di callback a cui è passato l'Operatore trovato
      */
-    findByName: (aName, projection, callback) => {
-        models.AirOperator.findOne()
+    findByName: (aName, projection/*, callback*/) => {
+        return models.AirOperator.findOne()
         .where('name').equals(aName)
         .select(projection)
-        .exec((err, doc) => {
+        .exec(/*(err, doc) => {
             if (err)
                 return console.log(err);
             callback(doc);
-        });
+        }*/);
     },
-
+/*
     findByNameSync: (aName, projection) => {
         var ret = null;
         models.AirOperator.findOne()
@@ -91,6 +98,7 @@ exports.AirOperator = AirOperator = {
             deasync.runLoopOnce();
         return ret;
     }
+    */
 
 };
 
@@ -106,7 +114,25 @@ exports.Base = Base = {
      * 
      * @param {Base} aBase
      */
-    insert: aBase => {
+    insert: async aBase => {
+        return new Promise(async (resolve, reject) => {
+            var airOperator = await AirOperator.findByName(aBase.airOperator, '_id')
+            aBase._id = mongoose.Types.ObjectId();
+            aBase.airOperator = airOperator._id
+
+            new models.Base(aBase)
+            .save((err, base) => {
+                if (err) return reject(err)
+
+                console.log('Inserted new base with _id: ' + base._id);
+                // Emetto l'evento insert
+                eventEmitters.db.Base.emit('insert', base)
+                // Quando la query viene eseguita, devo aggiungere l'id della base appena creata alla lista di basi dell'operatore aereo corrispondente
+                AirOperator.updateById(base.airOperator, {$push: {'bases': base._id}})
+                resolve(base)
+            })
+
+        })/*
         AirOperator.findByName(aBase.airOperator, '_id', aAirOperator => {
             aBase._id = mongoose.Types.ObjectId();
             aBase.airOperator = aAirOperator._id
@@ -120,7 +146,7 @@ exports.Base = Base = {
                 // Quando la query viene eseguita, devo aggiungere l'id della base appena creata alla lista di basi dell'operatore aereo corrispondente
                 AirOperator.updateById(base.airOperator, {$push: {'bases': base._id}});
             });
-        });
+        });*/
     },
 
     /**
@@ -129,21 +155,25 @@ exports.Base = Base = {
      * @param {} newValues parametro con i nuovi valori da inserire
      */
     update: (selection, newValues) => {
-        models.Base.updateOne(selection, newValues, err => {
-            if (err) return console.log(err)
-            eventEmitters.db.Base.emit('update')
-            console.log(`Updated Base selected by: ${JSON.stringify(selection)}`)
-        })
+        return new Promise((resolve, reject) =>
+            models.Base.updateOne(selection, newValues, err => {
+                if (err) return reject(err)
+                eventEmitters.db.Base.emit('update')
+                console.log(`Updated Base selected by: ${JSON.stringify(selection)}`)
+                resolve()
+            })
+        )
+        
     },
 
     /**
      * Funzione che esegue l'operazione di update selezionando la Base per nome.
      */
-    updateByName: (aName, newValues) => Base.update({name: aName}, newValues),
+    updateByName: (aName, newValues) => { return Base.update({name: aName}, newValues) },
     /**
      * Funzione che esegue l'operazione di update selezionando la Base per id.
      */
-    updateById: (aId, newValues) => Base.update({_id: aId}, newValues),
+    updateById: (aId, newValues) => { return Base.update({_id: aId}, newValues) },
 
     
     /*
@@ -196,47 +226,54 @@ exports.Personnel = Personnel = {
      * la Persona ricopre.
      * 
      * @param {Personnel} aPersonnel
+     * @returns {Promise}
      */
-    insert: aPersonnel => {
-        AirOperator.findByName(aPersonnel.airOperator, '_id', aAirOperator => {
-            Base.findByName(aPersonnel.base, '_id', aBase => {
-                aPersonnel._id          = mongoose.Types.ObjectId();
-                aPersonnel.airOperator  = aAirOperator._id;
-                aPersonnel.base         = aBase._id;
+    insert: async aPersonnel => {
+        return new Promise(async (resolve, reject) => {
+            var airOperator = await AirOperator.findByName(aPersonnel.airOperator, '_id')
+            var base        = await Base.findByName(aPersonnel.base, '_id')
 
-                new models.Personnel(aPersonnel)
-                .save((err, personnel) => {
-                    if (err)
-                        return console.log(err);
-                    console.log('Inserted new Personnel with id: ' + personnel._id);
-                    // Emetto evento insert
-                    eventEmitters.db.Personnel.emit('insert', personnel)
+            aPersonnel._id          = mongoose.Types.ObjectId();
+            aPersonnel.airOperator  = airOperator._id;
+            aPersonnel.base         = base._id;
 
-                    // Inserisco i vincoli di integrità
+            new models.Personnel(aPersonnel)
+            .save((err, personnel) => {
+                if (err) {
+                    console.log(err)
+                    return reject(err)
+                }
 
-                    // Aggiorno le occupazioni in base
-                    if (personnel.roles.occupation.pilot)
-                        Base.updateById(personnel.base, {$push: {'staff.pilots': personnel._id}});
-                    if (personnel.roles.occupation.crew)
-                        Base.updateById(personnel.base, {$push: {'staff.crew': personnel._id}});
-                    if (personnel.roles.occupation.maintainer)
-                        Base.updateById(personnel.base, {$push: {'staff.maintainers': personnel._id}});
+                console.log('Inserted new Personnel with id: ' + personnel._id)
+                // Emetto evento insert
+                eventEmitters.db.Personnel.emit('insert', personnel)
 
-                    // Aggiorno i ruoli di comando
-                    if (personnel.roles.command.airOperator.AM)
-                        AirOperator.updateById(personnel.airOperator, {'roles.AM': personnel._id});
-                    if (personnel.roles.command.airOperator.CQM)
-                        AirOperator.updateById(personnel.airOperator, {'roles.CQM': personnel._id});
-                    if (personnel.roles.command.airOperator.SM)
-                        AirOperator.updateById(personnel.airOperator, {'roles.SM': personnel._id});
+                // Inserisco i vincoli di integrità
 
-                    if (personnel.roles.command.base.viceAM)
-                        Base.updateById(personnel.base, {'roles.viceAM': personnel._id});
-                    if (personnel.roles.command.base.supervisor)
-                        Base.updateById(personnel.base, {'roles.supervisor': personnel._id});
-                });
-            });
-        });
+                // Aggiorno le occupazioni in base
+                if (personnel.roles.occupation.pilot)
+                    Base.updateById(personnel.base, {$push: {'staff.pilots': personnel._id}})
+                if (personnel.roles.occupation.crew)
+                    Base.updateById(personnel.base, {$push: {'staff.crew': personnel._id}})
+                if (personnel.roles.occupation.maintainer)
+                    Base.updateById(personnel.base, {$push: {'staff.maintainers': personnel._id}})
+
+                // Aggiorno i ruoli di comando
+                if (personnel.roles.command.airOperator.AM)
+                    AirOperator.updateById(personnel.airOperator, {'roles.AM': personnel._id})
+                if (personnel.roles.command.airOperator.CQM)
+                    AirOperator.updateById(personnel.airOperator, {'roles.CQM': personnel._id})
+                if (personnel.roles.command.airOperator.SM)
+                    AirOperator.updateById(personnel.airOperator, {'roles.SM': personnel._id})
+
+                if (personnel.roles.command.base.viceAM)
+                    Base.updateById(personnel.base, {'roles.viceAM': personnel._id})
+                if (personnel.roles.command.base.supervisor)
+                    Base.updateById(personnel.base, {'roles.supervisor': personnel._id})
+                resolve(personnel)
+            })
+
+        })
     },
 
     /**
@@ -356,25 +393,29 @@ exports.Drone = Drone = {
      * Quando la query viene eseguita aggiorno la Base a cui il Drone appartiene.
      * 
      * @param {Personnel} aPersonnel
+     * @returns {Promise}
      */
-    insert: aDrone => {
-        AirOperator.findByName(aDrone.airOperator, '_id', aAirOperator => {
-            Base.findByName(aDrone.base, '_id', aBase => {
-                aDrone._id = mongoose.Types.ObjectId();
-                aDrone.airOperator = aAirOperator._id;
-                aDrone.base = aBase._id;
-                new models.Drone(aDrone)
+    insert: async aDrone => {
+        return new Promise(async (resolve, reject) => {
+            var airOperator = await AirOperator.findByName(aDrone.airOperator, '_id')
+            var base        = await Base.findByName(aDrone.base, '_id')
+            aDrone._id = mongoose.Types.ObjectId()
+            aDrone.airOperator = airOperator._id
+            aDrone.base = base._id
+            new models.Drone(aDrone)
                 .save((err, drone) => {
-                    if (err)
-                        return console.log(err);
-                    console.log('Inserted new Drone with id: ' + drone._id);
+                    if (err) {
+                        console.log(err)
+                        return reject(err)
+                    }
+                    console.log('Inserted new Drone with id: ' + drone._id)
                     // Emetto evento insert
                     eventEmitters.db.Drone.emit('insert')
                     // Il drone deve essere aggiunto alla lista di droni della base corrispondente
-                    Base.updateById(drone.base, {$push: {drones: drone._id}});
-                });
-            });
-        });
+                    Base.updateById(drone.base, {$push: {drones: drone._id}})
+                    resolve(aDrone)
+            })
+        })
     },
 
     /**
@@ -383,31 +424,38 @@ exports.Drone = Drone = {
      * @param {} newValues parametro con i nuovi valori da inserire
      */
     update: (selection, newValues) => {
-        models.Drone.updateOne(selection, newValues, err => {
-            if (err) return console.log(err)
-            // Emetto l'evento update
-            eventEmitters.db.Drone.emit('update')
-            console.log(`Updated Drone selected by: ${JSON.stringify(selection)}`)
-        })
+        return new Promise((resolve, reject) =>
+            models.Drone.updateOne(selection, newValues, err => {
+                if (err) {
+                    console.log(err)
+                    return reject(err)
+                }
+                // Emetto l'evento update
+                eventEmitters.db.Drone.emit('update')
+                console.log(`Updated Drone selected by: ${JSON.stringify(selection)}`)
+                resolve()
+            })
+        )
+        
     },
 
     /**
      * Funzione che esegue l'operazione di update selezionando il Drone per numero di targa.
      */
-    updateByNumber: (aNumber, newValues) => Drone.update({number: aNumber}, newValues),
+    updateByNumber: (aNumber, newValues) => { return rone.update({number: aNumber}, newValues) },
     /**
      * Funzione che esegue l'operazione di update selezionando il Drone per id.
      */
-    updateById: (aId, newValues) => Drone.update({_id: aId}, newValues),
+    updateById: (aId, newValues) => { return Drone.update({_id: aId}, newValues) },
     
     /**
      * Funzione che ricercaa un Drone in base all'id.
      */
-    findById: (aId, projection, callback) => {
-        models.Drone.findOne()
+    findById: (aId, projection/*, callback*/) => {
+        return models.Drone.findOne()
         .where('_id').equals(aId)
         .select(projection)
-        .exec((err, doc) => callback(doc))
+        .exec(/*(err, doc) => callback(doc)*/)
     },
 
     find: (selection, projection) => {
@@ -423,15 +471,15 @@ exports.Drone = Drone = {
      * @param {String} aType attributi da restituire
      * @param {Function} aType funzione di callback a cui è passato il drone recuperato
      */
-    findByType: (aType, selection, projection, callback) => {
-        models.Drone.find(selection)
+    findByType: (aType, selection, projection/*, callback*/) => {
+        return models.Drone.find(selection)
         .where('type').equals(aType)
         .select(projection)
-        .exec((err, doc) => {
+        .exec(/*(err, doc) => {
             callback(doc);
-        });
+        }*/)
     },
-
+/*
     findByTypeSync: (aType, projection = null) => {
         var ret = null;
         models.Drone.find()
@@ -444,19 +492,19 @@ exports.Drone = Drone = {
             deasync.runLoopOnce();
         return ret;
     },
-
+*/
     /**
      * Funzione che ricercaa un Drone in base al numero di targa.
      */
-    findByNumber: (aNumber, projection, callback) => {
-        models.Drone.findOne()
+    findByNumber: (aNumber, projection/*, callback*/) => {
+        return models.Drone.findOne()
         .where('number').equals(aNumber)
         .select(projection)
-        .exec((err, doc) => {
+        .exec(/*(err, doc) => {
             callback(doc);
-        });
+        }*/);
     },
-
+/*
     findByNumberSync: (aNumber, projection) =>  {
         var ret = null;
         models.Base.findOne()
@@ -469,6 +517,7 @@ exports.Drone = Drone = {
             deasync.runLoopOnce();
         return ret;
     }
+    */
 };
 
 exports.Battery = Battery = {
@@ -562,7 +611,7 @@ exports.Mission = Mission = {
 
     updateById: (aId, newValues) => { return Mission.update({_id: aId}, newValues) },
 
-    findbyId: (aId, projection/*, callback*/) => {
+    findById: (aId, projection/*, callback*/) => {
         return models.Mission.findOne()
         .where('_id').equals(aId)
         .select(projection)
@@ -572,12 +621,12 @@ exports.Mission = Mission = {
     },
 
     setStatus: (aId, aStatus) => {
-        Mission.updateById(aId, {status: aStatus});
+        return Mission.updateById(aId, {status: aStatus});
     },
 
     Pilot: {
         setAsNotified: (aMissionId, aPilotId) => {
-            Mission.updateById(aMissionId, {$push: {'pilots.notified': aPilotId}});
+            return Mission.updateById(aMissionId, {$push: {'pilots.notified': aPilotId}});
         },
         /*
         setAsAccepted: (aMissionId, aPilotId, aDate) => {
@@ -610,7 +659,7 @@ exports.Mission = Mission = {
 
     Crew: {
         setAsNotified: (aMissionId, aCrewId) => {
-            Mission.updateById(aMissionId, {$push: {'crew.notified': aCrewId}});
+            return Mission.updateById(aMissionId, {$push: {'crew.notified': aCrewId}});
         },
         setAsAccepted: (aMissionId, aPilotId, aDate) => {
             return new Promise((resolve, reject) => 
@@ -636,7 +685,7 @@ exports.Mission = Mission = {
 
     Maintainer: {
         setAsNotified: (aMissionId, aMaintainerId) => {
-            Mission.updateById(aMissionId, {$push: {'maintainers.notified': aMaintainerId}});
+            return Mission.updateById(aMissionId, {$push: {'maintainers.notified': aMaintainerId}});
         },
         setAsAccepted: (aMissionId, aPilotId, aDate) => {
             return new Promise((resolve, reject) => 
