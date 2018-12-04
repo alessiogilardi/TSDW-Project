@@ -13,7 +13,7 @@ const queries   = require('../../db/queries')
 const Telegraf  = require('telegraf')
 const bf        = require('../../bot/bot-functions')
 const Personnel = queries.Personnel
-const zip       = bf.zipActionName
+const zip       = bf.zip
 /**
  * Funzione che invia un messaggio con bottone al Responsabile di Base
  * incaricato di organizzare la missione.
@@ -34,16 +34,15 @@ const sendOrganizeMissionButton = (idTelegram, message, buttonText, buttonData) 
     ])))
 }
 
-const onRequestMission = (bot, aMission) => {
+/*
+const onRequestMission_OLD = (bot, aMission) => {
     if (bot === undefined || bot === null) throw new Error('Missing Telegram Bot')
     this.bot = bot
-    var sendMessage  = this.bot.telegram.sendMessage
-    var sendLocation = this.bot.telegram.sendLocation
-
+    
     // Definisco il bottone da mandare al Responsabile di Base
     var buttonMessage = 'Vuoi iniziare ad organizzare la missione?'
     var buttonText = 'Organizza'
-    var buttonData = zip['organizeMission'] + ':' + aMission._id
+    var buttonData = zip['organizeMission'] + ':' + aMission._id + zip['toNotify'] + ':' + 1234567890
     
     var message = `C'è una richiesta di missione:\n\n`+
         `Data: ${utils.Date.format(aMission.date, 'DD MMM YYYY')}\n` +
@@ -55,22 +54,16 @@ const onRequestMission = (bot, aMission) => {
     Personnel.findById(aMission.supervisor, 'telegramData.idTelegram')
     .then(supervisor => {
         var idTelegram = supervisor.telegramData.idTelegram
-        /*
-        this.bot.telegram
-        .sendMessage(idTelegram, message)*/
         this.bot.telegram
         .sendMessage(idTelegram, message)
-        .then(() => {
-            /*this.bot.telegram
-            .sendLocation(idTelegram, aMission.location.latitude, aMission.location.longitude)*/
+        .then(() => 
             this.bot.telegram
             .sendLocation(idTelegram, aMission.location.latitude, aMission.location.longitude)
-        }
-        ).then(() =>{
+        ).then(() =>
             sendOrganizeMissionButton(supervisor.telegramData.idTelegram,
                 buttonMessage,
                 buttonText,
-                buttonData)}
+                buttonData)
         ).catch(err => console.log(err))  
     })
 
@@ -80,5 +73,31 @@ const onRequestMission = (bot, aMission) => {
     // Notified: aMission.supervisor 
     
 }
+*/
+
+const onRequestMission = async (bot, aMission) => {
+    if (bot === undefined || bot === null) throw new Error('Missing Telegram Bot')
+    this.bot = bot
+
+    var am         = await Personnel.findById(aMission.AM, 'telegramData.idTelegram')
+    var supervisor = await Personnel.findById(aMission.supervisor, 'telegramData.idTelegram')
+    
+    var message = `C'è una richiesta di missione:\n\n`+
+        `Data: ${utils.Date.format(aMission.date, 'DD MMM YYYY')}\n` +
+        `Scenario: ${aMission.description.riskEvaluation.scenario}\n` +
+        `Difficoltà: ${aMission.description.riskEvaluation.level}\n`
+
+    // Definisco il bottone da mandare al Responsabile di Base
+    var buttonMessage = 'Vuoi iniziare ad organizzare la missione?'
+    var buttonText    = 'Organizza'
+    var buttonData    = zip['organizeMission'] + ':' + aMission._id + ':' + am.telegramData.idTelegram
+
+    await this.bot.telegram.sendMessage(supervisor.telegramData.idTelegram, message)
+    await this.bot.telegram.sendLocation(supervisor.telegramData.idTelegram, aMission.location.latitude, aMission.location.longitude)
+    // Invio il bottone, premendolo il baseSup entrerà nella scene
+    await sendOrganizeMissionButton(supervisor.telegramData.idTelegram, buttonMessage, buttonText, buttonData)
+}
 
 module.exports = onRequestMission
+
+
