@@ -1,6 +1,6 @@
 const Router = require('telegraf/router')
 const bf     = require('./bot-functions')
-const unZip  = bf.unZipActionName
+const unZip  = bf.unZip
 
 const mRouter = new Router(({ callbackQuery }) => {
     if (!callbackQuery.data) return
