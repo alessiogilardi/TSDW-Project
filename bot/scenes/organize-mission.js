@@ -2,11 +2,12 @@
  * Scene per la procedura di Organizzazione di una Missione.
  * Un responsabile di base quando preme il Botton con action organizeMission 
  * entra in questa Scene dove dovrà inserire le informazioni mancanti sulla Missione.
+ * L'AM deve essere notificato quando si viene iniziata questa procedura in modo da essere sicuro che
+ * il baseSup abbia preso in carico la missione.
  */
 
 const WizardScene   = require('telegraf/scenes/wizard/index')
 const Composer      = require('telegraf/composer')
-const utmObj        = require('utm-latlng');
 const queries       = require('../../db/queries')
 const Mission 		= queries.Mission
 const Drone			= queries.Drone
@@ -20,7 +21,24 @@ const Drone			= queries.Drone
 // Button e decidere così quali aggiungere.
 
 const organizeMission = new WizardScene('organizeMission',
-    ctx => {
+    async ctx => {
+        ctx.reply('Sto ricercando i droni disponibili, attendi per favore...')
+        ctx.scene.state.mission = await Mission.findById(ctx.scene.state.mission._id, '')
+
+        var mission   = ctx.scene.state.mission
+        var scenario  = mission.description.riskEvaluation.scenario
+        var riskLevel = mission.description.riskEvaluation.riskLevel
+
+        var drones = await Drone
+        .find({ base: mission.base,
+            'state.availability': { $ne: 2 }, 
+            'missions.waitingForQtb.date': { $ne: mission.date } })
+        
+        ctx.scene.state.drones = { loaded: drones }
+        return ctx.wizard.next()
+    },
+
+    /*ctx => {
         ctx.reply('Sto ricercando i droni disponibili, attenti per favore...')
         //var missionId = ctx.scene.state.mission._id
         ctx.scene.state.searching = true
@@ -54,7 +72,7 @@ const organizeMission = new WizardScene('organizeMission',
         // Carico i dati sulla missione
         //  Carico i droni disponibili e li faccio scegliere
         
-    },
+    },*/
     ctx => {
         // TODO: RINCOMINCIA QUI!!!
         // Stampo i droni trovati
