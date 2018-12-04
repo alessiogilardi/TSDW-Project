@@ -1,12 +1,11 @@
 require('dotenv').config();
-//require('./db/db-connect.js').connect();
 const db 			 = require('./db/db-connect.js')
 const Telegraf 		 = require('telegraf');
 const session 		 = require('telegraf/session')
 const dataLoader	 = require('./bot/data-loader-middleware');
 const bf 			 = require('./bot/bot-functions.js');
 const Stage 		 = require('telegraf/stage')
-const organizeMission  = require('./bot/scenes/organize-mission');
+const organizeMission = require('./bot/scenes/organize-mission');
 const requestMission = require('./bot/scenes/request-mission')
 const eventEmitters	 = require('./events/event-emitters')
 const eventRegister  = require('./events/event-register')
@@ -69,9 +68,9 @@ bot.command(['requestMission', 'requestmission'], ctx => {
 
 //////////// DEGUGGING DA CANCELLARE ////////////////////
 bot.hears(['A','a'], ctx => {
-    var message = 'Prova'
-    var buttonText = 'Bottone'
-    var buttonData = 'orgMiss:123123131231123123313123'
+    var message = 'Vuoi iniziare ad organizzare la missione?'
+    var buttonText = 'Organizza'
+    var buttonData = zip['organizeMission'] + ':' + '5c06df31bf7be9120087582b' + ':' + 33017299
     ctx.reply(message, Telegraf.Extra
     .markdown()
     .markup(m => m.inlineKeyboard([
@@ -82,30 +81,20 @@ bot.hears(['A','a'], ctx => {
 
 router.on('organizeMission', ctx => {
 	// Entro nella scene: OrganizeMission
+	bot.telegram.sendMessage(ctx.state.data[1], 'Missione accettata dal responsabile di base')
 	ctx.scene.enter('organizeMission', { mission: { _id: ctx.state.data[0] } })
 })
 
 router.on('acceptMission', ctx => {
 	const data = ctx.state.data
-	// Entro nella scene: OrganizeMission
 })
 
 router.on('declineMission', ctx => {
 	const data = ctx.state.data
-	// Entro nella scene: OrganizeMission
 })
 
 bot.on('callback_query', router)
 
-/*
-bot.on('callback_query', ctx => {
-	// Rispondo alle actions dei Button ed emetto l'evento appropriato
-	var cbQuery = JSON.parse(ctx.callbackQuery.data)
-	ctx.answerCbQuery(cbQuery.cbMessage)
-	ctx.editMessageReplyMarkup({})
-	eventEmitters.bot.emit(cbQuery.action, cbQuery.data, ctx)
-})
-*/
 db.connect(process.env.DB_ADDRESS, process.env.DB_PORT, process.env.DB_NAME)
 .then(() => {
 	console.log('Bot started!')
