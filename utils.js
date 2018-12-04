@@ -1,4 +1,5 @@
 const moment = require('moment')
+const fs = require('fs')
 
 /*
 exports.arrayContainsArray = (superset, subset) => {
@@ -49,4 +50,14 @@ exports.stringToUTM = utmString => {
         easting:    tmp[2], 
         northing:   tmp[3]
     }
+}
+
+exports.fileToMatrix = filePath => {
+    let content = fs.readFileSync(filePath, 'utf8');
+    content = content.split('\n');
+    for (let i = 0; i < content.length; i++) {
+        content[i] = content[i].replace('\r','');
+        content[i] = content[i].split(' ');
+    }
+    return content
 }

@@ -1,0 +1,8 @@
+1 2 3 4
+A1 vl/l vl/l cro cro
+A2 cro cro cro cro
+A3 vl/l vl/l cro cro
+A4 cro cro cro cro
+B1 vl/l vl/l cro cro
+B2 vl/l cro cro cro
+C1 vl/l vl/l cro cro
