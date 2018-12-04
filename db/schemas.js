@@ -14,8 +14,8 @@ const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 const ObjectId = mongoose.Schema.Types.ObjectId
 
-const eventTypes = ['comandoBot', 'notifica']
-exports.scenarios = scenarios = ['A1', 'A2', 'A3', 'A4', 'B1', 'B2', 'C']
+const eventTypes = ['comandoBot', 'notifica'] // TO DELETE
+exports.scenarios = scenarios = ['a1', 'a2', 'a3', 'a4', 'b1', 'b2', 'c']
 exports.riskLevel = riskLevel = {min: 1, max: 4}
 const riskEvaluation = { // TODO: inserire una valutazione di rischio
     
