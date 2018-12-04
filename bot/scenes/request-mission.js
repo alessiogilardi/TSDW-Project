@@ -150,11 +150,11 @@ const requestMission = new WizardScene('requestMission',
     }),
     new Composer()
     .on('text', ctx => { // Leggo lo scenario A,B,C
-        if (!schemas.scenarios.includes(ctx.message.text.toUpperCase())) {
+        if (!schemas.scenarios.includes(ctx.message.text.toLowerCase())) {
             ctx.reply('Scenario non valido, inseriscine un altro.')
             return
         }
-        ctx.session.command.mission.description.riskEvaluation.scenario = ctx.message.text.toUpperCase()
+        ctx.session.command.mission.description.riskEvaluation.scenario = ctx.message.text.toLowerCase()
 
         ctx.reply('Inserisci la difficoltà della missione (1 - 4):')
         return ctx.wizard.next()
