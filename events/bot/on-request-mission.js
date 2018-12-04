@@ -26,7 +26,6 @@ const zip       = bf.zipActionName
 
  // TO DEBUG: Non riesco a mandare button con action corretta
 const sendOrganizeMissionButton = (idTelegram, message, buttonText, buttonData) => {
-    console.log(JSON.stringify(button))
     this.bot.telegram
     .sendMessage(idTelegram, message, Telegraf.Extra
         .markdown()
@@ -59,11 +58,13 @@ const onRequestMission = (bot, aMission) => {
         /*
         this.bot.telegram
         .sendMessage(idTelegram, message)*/
-        sendMessage(idTelegram, message)
+        this.bot.telegram
+        .sendMessage(idTelegram, message)
         .then(() => {
             /*this.bot.telegram
             .sendLocation(idTelegram, aMission.location.latitude, aMission.location.longitude)*/
-            sendLocation(idTelegram, aMission.location.latitude, aMission.location.longitude)
+            this.bot.telegram
+            .sendLocation(idTelegram, aMission.location.latitude, aMission.location.longitude)
         }
         ).then(() =>{
             sendOrganizeMissionButton(supervisor.telegramData.idTelegram,
