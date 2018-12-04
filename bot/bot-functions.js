@@ -5,7 +5,7 @@ const Personnel = queries.Personnel
  * Dizionario usato per de-comprimenre i nomi delle actions per evitare il limite di 64 byte
  * Nel caso si può aumentare la compressione dei nomi delle action
  */
-exports.unZipActionName = unZipActionName = {
+exports.unZip = unZip = {
     orgMiss: 'organizeMission',
     accMiss: 'acceptMission',
     decMiss: 'declineMission'
@@ -14,10 +14,10 @@ exports.unZipActionName = unZipActionName = {
  * Dizionario usato per comprimenre i nomi delle actions per evitare il limite di 64 byte
  * Nel caso si può aumentare la compressione dei nomi delle action
  */
-exports.zipActionName = zipActionName = {
+exports.zip = zip = {
     organizeMission: 'orgMiss',
-    acceptMission: 'accMiss',
-    declineMission: 'decMiss'
+    acceptMission:   'accMiss',
+    declineMission:  'decMiss'
 }
 
 /**
