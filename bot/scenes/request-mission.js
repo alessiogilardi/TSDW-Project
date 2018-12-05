@@ -75,6 +75,8 @@ const requestMission = new WizardScene('requestMission',
         ctx.scene.state.command.error     = false
 
         ctx.scene.state.command.mission.AM = ctx.session.userData.person._id
+
+        ctx.scene.state.riskMatrix = utils.loadRiskMatrix('./risk-matrix.txt')
         
         ctx.reply('Bene, iniziamo la procedura per la richiesta di una missione!\nTi verrà chiesto di inserire alcuni parametri.')
         .then(() => ctx.reply('Ti ricordo che puoi annullare l\'operazione  in qualsiasi momento usando il comando /cancel.'))
