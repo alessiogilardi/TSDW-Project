@@ -152,21 +152,21 @@ const requestMission = new WizardScene('requestMission',
     }),
     new Composer()
     .on('text', ctx => { // Leggo lo scenario A,B,C
-        if (!schemas.scenarios.includes(ctx.message.text.toLowerCase())) {
+        if (!(ctx.message.text.toUpperCase() in ctx.scene.state.riskMatrix)) {
             ctx.reply('Scenario non valido, inseriscine un altro.')
             return
         }
-        ctx.scene.state.command.mission.description.riskEvaluation.scenario = ctx.message.text.toLowerCase()
+        ctx.scene.state.command.mission.description.riskEvaluation.scenario = ctx.message.text.toUpperCase()
 
-        ctx.reply('Inserisci la difficoltà della missione (1 - 4):')
+        ctx.reply('Inserisci la difficoltà della missione:')
         return ctx.wizard.next()
     }),
     new Composer()
     .on('text', ctx => { // Leggo il riskLevel della missione
         // Controllo che il valore inserito sia numerico e che sia un valore valido
-        if (isNaN(ctx.message.text) || 
-                ctx.message.text < schemas.riskLevel.min || 
-                ctx.message.text > schemas.riskLevel.max) {
+        let scenario = ctx.scene.state.command.mission.description.riskEvaluation.scenario
+        let diff = ctx.message.text
+        if (diff < 1 || diff > ctx.scene.state.riskMatrix[scenario].length) {
             ctx.reply('Ops, la difficoltà che hai inserito non è valida, inserisci un valore diverso.')
             return
         }
