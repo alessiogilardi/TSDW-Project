@@ -8,9 +8,7 @@ const mRouter = new Router(({ callbackQuery }) => {
     const parts = callbackQuery.data.split(':')
     return {
         route: unZip[parts[0]],
-        state: {
-            data: parts.slice(1,parts.length)
-        }
+        state: { data: parts.slice(1,parts.length) }
     }
 })
 
