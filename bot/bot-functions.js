@@ -8,7 +8,8 @@ const Personnel = queries.Personnel
 exports.unZip = unZip = {
     orgMiss: 'organizeMission',
     accMiss: 'acceptMission',
-    decMiss: 'declineMission'
+    decMiss: 'declineMission',
+    aDrn2Msn: 'addDroneToMission'
 }
 /**
  * Dizionario usato per comprimenre i nomi delle actions per evitare il limite di 64 byte
@@ -17,7 +18,8 @@ exports.unZip = unZip = {
 exports.zip = zip = {
     organizeMission: 'orgMiss',
     acceptMission:   'accMiss',
-    declineMission:  'decMiss'
+    declineMission:  'decMiss',
+    addDroneToMission: 'aDrn2Msn'
 }
 
 /**
