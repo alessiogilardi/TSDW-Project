@@ -198,10 +198,17 @@ const requestMission = new WizardScene('requestMission',
     // 1 - Inserire la Missione nel DB
     // 2 - Notificare il responsabile di base
     // 3 - Inserire l'evento nell'EventLog
+    let days = mission.description.duration.expected/24;
+    days = Math.ceil(days);
+    for(i = 0; i<days; i++){
+        
+        mission.date = new Date(moment(mission.date).add(1, 'd'));
+        Mission.insert(mission)
+        .then(aMission => eventEmitters.bot.emit('requestMission', aMission)) // Emetto l'evento requestMission
+        .catch(err => console.log(err))
+        
+    }
 
-    Mission.insert(mission)
-    .then(aMission => eventEmitters.bot.emit('requestMission', aMission)) // Emetto l'evento requestMission
-    .catch(err => console.log(err))
 })
 
 module.exports = requestMission
