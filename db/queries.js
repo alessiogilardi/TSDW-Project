@@ -546,7 +546,7 @@ exports.Mission = Mission = {
                 Personnel.updateById(mission.supervisor, {$push: {'missions.supervisor.pending': mission._id}})
 
                 // Setto i droni come non disponibili e aggiungo la missione alle waitingForQtb del drone
-                mission.drones.forEach(drone => Drone.updateById(drone._id, {'state.availability': 1, $push: {'missions.waitingForQtb': {idMission: mission._id, date: new Date(mission.date)}}}))
+                // mission.drones.forEach(drone => Drone.updateById(drone._id, {'state.availability': 1, $push: {'missions.waitingForQtb': {idMission: mission._id, date: new Date(mission.date)}}}))
 
                 // Emetto l'evento missione inserita
                 eventEmitters.db.Mission.emit('insert', mission)
