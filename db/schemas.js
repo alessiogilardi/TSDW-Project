@@ -148,7 +148,7 @@ exports.dronesSchema = new Schema({
     base: {type: ObjectId, ref: 'base'},
     batteryTypes: [{type: String, ref: 'battery'}],
     state: {
-        availability: {type: Number, default: 0}, /* 0 -> Disponibile, 1 -> In Missione, 2 -> In manutenzione */
+        availability: {type: Number, default: 0}, /* 0 -> Disponibile, 2 -> In manutenzione */ // Non ha senso tenere in missione, lo capisco dalla data delle missioni per cui è inserito
         /* generalState: String, /* Potrebbe non servire */
         maintenances: [{
             start: Date,
