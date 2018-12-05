@@ -1,10 +1,11 @@
 require('dotenv').config()
 const WizardScene   = require('telegraf/scenes/wizard/index')
+const moment        = require('moment')
 const Composer      = require('telegraf/composer')
 const utmObj        = require('utm-latlng');
 const queries       = require('../../db/queries')
 const schemas       = require('../../db/schemas')
-const eventEmitters = require('../../events/event-emitters')
+const ee            = require('../../events/event-emitters')
 const utils         = require('../../utils')
 
 const utm     = new utmObj()
@@ -173,7 +174,7 @@ const requestMission = new WizardScene('requestMission',
 
         return ctx.scene.leave()
     })
-).leave(ctx => {
+).leave(async ctx => {
     if (ctx.message.text === '/cancel') {
         ctx.reply('Richiesta missione annullata.')
         delete ctx.scene.state.command
@@ -182,33 +183,40 @@ const requestMission = new WizardScene('requestMission',
     var mission = ctx.scene.state.command.mission
     var baseName = mission.base.name
     delete ctx.scene.state.command
-    ctx.reply('La missione è stata creata con successo!\nSarai notificato appena il Responsabile di Base l\'avrà presa in carico.')
-    .then(() => ctx.reply(`Ecco intanto un riepilogo sui dati della missione\n\n` +
-                        `Data: ${utils.Date.format(mission.date, 'DD MMM YYYY')}\n` +
-                        `Base: ${baseName}\nDurata prevista: ${mission.description.duration.expected} ore\n` +
-                        `Scenario: ${mission.description.riskEvaluation.scenario}\n` +
-                        `Difficoltà: ${mission.description.riskEvaluation.level}\n`))
-    .then(() => ctx.replyWithLocation(mission.location.latitude, mission.location.longitude))
-    .catch(err => console.log(err))
 
-    mission.base = mission.base._id
+    ;(async () => {
+        await ctx.reply('La missione è stata creata con successo!\nSarai notificato appena il Responsabile di Base l\'avrà presa in carico.')
+        await ctx.reply(`Ecco intanto un riepilogo sui dati della missione:\n\n` +
+            `Data: ${utils.Date.format(mission.date, 'DD MMM YYYY')}\n` +
+            `Base: ${baseName}\nDurata prevista: ${mission.description.duration.expected} ore\n` +
+            `Scenario: ${mission.description.riskEvaluation.scenario}\n` +
+            `Difficoltà: ${mission.description.riskEvaluation.level}\n`)
+        await ctx.replyWithLocation(mission.location.latitude, mission.location.longitude)
+    })().catch(err => console.log(err))
+
+    mission.base                       = mission.base._id
     mission.status.requested.value     = true
     mission.status.requested.timestamp = new Date()
 
     // 1 - Inserire la Missione nel DB
     // 2 - Notificare il responsabile di base
     // 3 - Inserire l'evento nell'EventLog
-    let days = mission.description.duration.expected/24;
-    days = Math.ceil(days);
-    for(i = 0; i<days; i++){
-        
-        mission.date = new Date(moment(mission.date).add(1, 'd'));
-        Mission.insert(mission)
-        .then(aMission => eventEmitters.bot.emit('requestMission', aMission)) // Emetto l'evento requestMission
-        .catch(err => console.log(err))
-        
-    }
 
+    let days = Math.ceil(mission.description.duration.expected/24)
+    let missions = []
+    for(let i = 0; i < days; i++) {        
+        mission.date = new Date(moment(mission.date).add(i,'d'))
+        //missions.push(Mission.insert(mission))
+        let m = await Mission.insert(mission)
+        console.log(m.date)
+        await missions.push(m)
+        //missions[i] = await Mission.insert(mission)
+    }
+    console.log('Missions', missions)
+    console.log(Promise.all(missions))
+    //missions = await Promise.all(missions)
+    //console.log(missions)
+    ee.bot.emit('missionRequested', missions)
 })
 
 module.exports = requestMission
