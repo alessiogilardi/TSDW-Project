@@ -4,7 +4,7 @@
 
 const ee = require('./event-emitters')
 //const onCreateMission   = require('./db/on-create-mission')
-const onRequestMission  = require('./bot/on-request-mission')
+const onRequestMission  = require('./bot/on-mission-requested')
 const onAcceptMission   = require('./bot/on-accept-mission')
 
 /*
@@ -28,7 +28,7 @@ const register = bot => {
     if (bot === null || bot === undefined) throw new Error('Missing Telegram Bot')
     //this.bot = bot
 
-    ee.bot.on('requestMission', aMission => onRequestMission(bot, aMission))
+    ee.bot.on('missionRequested', missions => onRequestMission(bot, missions))
 
 
     /*
