@@ -52,12 +52,16 @@ exports.stringToUTM = utmString => {
     }
 }
 
-exports.fileToMatrix = filePath => {
+exports.loadRiskMatrix = filePath => {
     let content = fs.readFileSync(filePath, 'utf8');
     content = content.split('\n');
     for (let i = 0; i < content.length; i++) {
         content[i] = content[i].replace('\r','');
         content[i] = content[i].split(' ');
     }
-    return content
+    let contentJson = {};
+    for (let scenario of content)
+        contentJson[scenario[0]] = scenario.slice(1);
+    delete contentJson['diff'];
+    return contentJson;
 }
