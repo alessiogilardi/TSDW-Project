@@ -66,6 +66,7 @@ const command = {
  */
 
  // TODO: usare ctx.scene.session invece di ctx.session
+ // TODO: implementare missioni di più giorni
 const requestMission = new WizardScene('requestMission',
     ctx => {
         ctx.session.command = command
@@ -78,7 +79,7 @@ const requestMission = new WizardScene('requestMission',
         
         ctx.reply('Bene, iniziamo la procedura per la richiesta di una missione!\nTi verrà chiesto di inserire alcuni parametri.')
         .then(() => ctx.reply('Ti ricordo che puoi annullare l\'operazione  in qualsiasi momento usando il comando /cancel.'))
-        .then(() => ctx.reply('Inserisci la data della missione:'))
+        .then(() => ctx.reply('Inserisci la data della missione in formato DD-MM-YYYY:'))
         .catch(err => console.log(err))
         ctx.wizard.next()
     },
@@ -190,7 +191,7 @@ const requestMission = new WizardScene('requestMission',
     .then(() => ctx.replyWithLocation(mission.location.latitude, mission.location.longitude))
     .catch(err => console.log(err))
 
-    mission.base = mission.base._id
+    mission.base                       = mission.base._id
     mission.status.requested.value     = true
     mission.status.requested.timestamp = new Date()
 
