@@ -21,10 +21,8 @@ const zip       = bf.zip
  * @param {*} idTelegram id_telegram dell'utente (Resp. di base) a cui è inviato il bottone
  * @param {*} message Messaggio da allegare al bottone
  * @param {*} buttonText Testo del bottone
- * @param {*} button Parametri del bottone
+ * @param {*} buttonData Parametri del bottone
  */
-
- // TO DEBUG: Non riesco a mandare button con action corretta
 const sendOrganizeMissionButton = (idTelegram, message, buttonText, buttonData) => {
     this.bot.telegram
     .sendMessage(idTelegram, message, Telegraf.Extra
@@ -75,6 +73,11 @@ const onRequestMission_OLD = (bot, aMission) => {
 }
 */
 
+/**
+ * 
+ * @param {Telegraf} bot 
+ * @param {Mission} aMission 
+ */
 const onRequestMission = async (bot, aMission) => {
     if (bot === undefined || bot === null) throw new Error('Missing Telegram Bot')
     this.bot = bot

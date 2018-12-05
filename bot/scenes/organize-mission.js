@@ -26,8 +26,8 @@ const organizeMission = new WizardScene('organizeMission',
         ctx.scene.state.mission = await Mission.findById(ctx.scene.state.mission._id, '')
 
         var mission   = ctx.scene.state.mission
-        var scenario  = mission.description.riskEvaluation.scenario
-        var riskLevel = mission.description.riskEvaluation.riskLevel
+        //var scenario  = mission.description.riskEvaluation.scenario
+        //var riskLevel = mission.description.riskEvaluation.riskLevel
 
         var drones = await Drone
         .find({ base: mission.base,
@@ -35,58 +35,27 @@ const organizeMission = new WizardScene('organizeMission',
             'missions.waitingForQtb.date': { $ne: mission.date } })
         
         ctx.scene.state.drones = { loaded: drones }
+        for (let drone of drones) {
+            ctx.reply(drone)
+        }
+
         return ctx.wizard.next()
     },
-
-    /*ctx => {
-        ctx.reply('Sto ricercando i droni disponibili, attenti per favore...')
-        //var missionId = ctx.scene.state.mission._id
-        ctx.scene.state.searching = true
-        Mission.findById(ctx.scene.state.mission._id, {})
-        .then(aMission => {
-        	ctx.scene.state.mission = aMission
-
-        	var scenario  = aMission.description.evaluationRisk.scenario
-        	var riskLevel = aMission.description.evaluationRisk.riskLevel
-
-        	// Devo poter recuperare il tipo di droni adatto più tutti quelli superiori
-        	// che possono affrontare comunque una missione di questo tipo
-        	// Anzi forse le taglie dei droni sono solo VL e L
-        	// Nella tabella abbiamo indicato tutte le taglie di droni
-        	// non sappiamo quali droni servono per una certa missione
-        	// Direi di recuperare tutti i droni disponibili in base in quella data e 
-        	var type = getDroneTypeByMissionRisk(scenario, riskLevel)
-
-            Drone.find({ base: aMission.base,
-                'state.availability': { $ne: 2 }, 
-                'missions.waitingForQtb.date': { $ne: aMission.date } })
-        })
-        .then(drones => {
-            ctx.scene.state.searching = false
-            ctx.scene.state.drones = { loaded: drones }
-
-            return ctx.scene.next()
-        })
-        .catch(err => console.log(err))
-
-        // Carico i dati sulla missione
-        //  Carico i droni disponibili e li faccio scegliere
-        
-    },*/
     ctx => {
         // TODO: RINCOMINCIA QUI!!!
         // Stampo i droni trovati
-        ctx.scene.state.drones.loaded.forEach(drone => ctx.reply(drone)) // Invio i dati su droni e relativo Button
+        //ctx.scene.state.drones.loaded.forEach(drone => ctx.reply(drone)) // Invio i dati su droni e relativo Button
         // I Button scatenano un action che spero venga intercettata dal router principale
         // A questo punto spero che il router ripassi la palla qui e che lasci gestire
         // a on('addDroneToMission')
 
         // Il dato passato al button potrebbe essere semplicemente l'indice del drone nell'array dei
         // droni loaded
-        return ctx.scene.next()
+        //return ctx.wizard.next()
+        return ctx.scene.leave()
     },
     new Composer()
-    .on('addDroneToMision', ctx => {
+    .on('addDroneToMission', ctx => {
         // DO SOMETHING
     })
 ).leave(ctx => {
