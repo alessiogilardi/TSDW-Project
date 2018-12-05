@@ -65,7 +65,6 @@ const command = {
  *  - Notificare il baseSup con i parametri della Missione
  */
 
- // TODO: usare ctx.scene.session invece di ctx.session
 const requestMission = new WizardScene('requestMission',
     ctx => {
         ctx.scene.state.command = command
