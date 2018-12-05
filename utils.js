@@ -62,6 +62,6 @@ exports.loadRiskMatrix = filePath => {
     let contentJson = {};
     for (let scenario of content)
         contentJson[scenario[0]] = scenario.slice(1);
-    delete contentJson['1'];
+    delete contentJson['diff'];
     return contentJson;
 }
