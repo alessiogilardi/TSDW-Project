@@ -4,22 +4,20 @@
  * entra in questa Scene dove dovrà inserire le informazioni mancanti sulla Missione.
  * L'AM deve essere notificato quando si viene iniziata questa procedura in modo da essere sicuro che
  * il baseSup abbia preso in carico la missione.
+ * 
+ * Il baseSup aggiunge i droni alla missione, ai droni scelti va aggiunta la missione in waiting for QTB
  */
 
+const Telegraf      = require('telegraf')
 const WizardScene   = require('telegraf/scenes/wizard/index')
 const Composer      = require('telegraf/composer')
 const queries       = require('../../db/queries')
+const bf            = require('../bot-functions')
 const Mission 		= queries.Mission
 const Drone			= queries.Drone
+const zip           = bf.zip
 
-// Quando parte inizio a cricare i dati sulla missione e a cercare i droni e chiedo di attendere
-// Intanto passo allo step successivo
-// Lo step 2 è on(Text) se sto cercando non faccio nulla
-// se non sto cercando sono pronto ad accettare i comandi
-
-// Sullo step 2 devo stabilire su cosa reagire perché potei mostrare una lista di droni e con relativo
-// Button e decidere così quali aggiungere.
-
+// TODO: quando scelgo i droni va messa la missione tra le waiting for QTB del drone
 const organizeMission = new WizardScene('organizeMission',
     async ctx => {
         ctx.reply('Sto ricercando i droni disponibili, attendi per favore...')
@@ -35,28 +33,28 @@ const organizeMission = new WizardScene('organizeMission',
             'missions.waitingForQtb.date': { $ne: mission.date } })
         
         ctx.scene.state.drones = { loaded: drones }
+        await ctx.reply('Droni disponibili:')
+        let index = 0
         for (let drone of drones) {
-            ctx.reply(drone)
+            //++index
+            let message = `Targa: ${drone.number}\n` +
+            `Taglia: ${drone.type}`
+            let buttonText = 'Aggiungi'
+            let buttonData = zip['addDroneToMission'] + ':' + index++
+            ctx.reply(drone, Telegraf.Extra
+                .markdown()
+                .markup(m => m.inlineKeyboard([
+                    m.callbackButton(buttonText, buttonData)
+                ])
+            ))
         }
 
         return ctx.wizard.next()
     },
-    ctx => {
-        // TODO: RINCOMINCIA QUI!!!
-        // Stampo i droni trovati
-        //ctx.scene.state.drones.loaded.forEach(drone => ctx.reply(drone)) // Invio i dati su droni e relativo Button
-        // I Button scatenano un action che spero venga intercettata dal router principale
-        // A questo punto spero che il router ripassi la palla qui e che lasci gestire
-        // a on('addDroneToMission')
-
-        // Il dato passato al button potrebbe essere semplicemente l'indice del drone nell'array dei
-        // droni loaded
-        //return ctx.wizard.next()
-        return ctx.scene.leave()
-    },
     new Composer()
     .on('addDroneToMission', ctx => {
         // DO SOMETHING
+
     })
 ).leave(ctx => {
     ctx.reply('Ciao!')
