@@ -13,35 +13,37 @@ const WizardScene   = require('telegraf/scenes/wizard/index')
 const Composer      = require('telegraf/composer')
 const queries       = require('../../db/queries')
 const bf            = require('../bot-functions')
+const ee            = require('../../events/event-emitters')
 const Mission 		= queries.Mission
 const Drone			= queries.Drone
 const zip           = bf.zip
 
 // TODO: quando scelgo i droni va messa la missione tra le waiting for QTB del drone
+// TODO: gestire meglio caso lista droni disponibili vuota
 const organizeMission = new WizardScene('organizeMission',
     async ctx => {
         ctx.reply('Sto ricercando i droni disponibili, attendi per favore...')
         ctx.scene.state.mission = await Mission.findById(ctx.scene.state.mission._id, '')
 
-        var mission   = ctx.scene.state.mission
-        //var scenario  = mission.description.riskEvaluation.scenario
-        //var riskLevel = mission.description.riskEvaluation.riskLevel
-
-        var drones = await Drone
+        let mission = ctx.scene.state.mission
+        let drones  = await Drone
         .find({ base: mission.base,
             'state.availability': { $ne: 2 }, 
             'missions.waitingForQtb.date': { $ne: mission.date } })
         
-        ctx.scene.state.drones = { loaded: drones }
+        if (drones.length === 0) {
+            await ctx.reply('Non ci sono droni disponibili.')
+            return ctx.scene.leave()
+        }
+        
+        ctx.scene.state.drones = { loaded: drones, chosen: [] }
         await ctx.reply('Droni disponibili:')
         let index = 0
         for (let drone of drones) {
-            //++index
-            let message = `Targa: ${drone.number}\n` +
-            `Taglia: ${drone.type}`
+            let message = `Targa: ${drone.number}\nTaglia: ${drone.type}`
             let buttonText = 'Aggiungi'
-            let buttonData = zip['addDroneToMission'] + ':' + index++
-            ctx.reply(drone, Telegraf.Extra
+            let buttonData = `${zip['addDroneToMission']}:${index++}`
+            ctx.reply(message, Telegraf.Extra
                 .markdown()
                 .markup(m => m.inlineKeyboard([
                     m.callbackButton(buttonText, buttonData)
@@ -51,14 +53,43 @@ const organizeMission = new WizardScene('organizeMission',
 
         return ctx.wizard.next()
     },
-    new Composer()
-    .on('addDroneToMission', ctx => {
-        // DO SOMETHING
+    new Composer((ctx, next) => {
+        // Funzione che scarta gli input o i comandi non validi in questa Scene
+        if (ctx.updateType === 'message' && ctx.updateSubTypes.includes('text')) {
+            if (ctx.message.text !== '/end') return
+        }
+        return next()
+    })
+    .on('callback_query', ctx => { // Rispondo alla pressione di un bottone e aggiungo il drone ai droni scelti per la missione
+        const parts = ctx.callbackQuery.data.split(':')
 
+        if (unZip[parts[0]] === 'addDroneToMission') {
+            ctx.answerCbQuery('Drone aggiunto')
+	        ctx.editMessageReplyMarkup({})
+            ctx.scene.state.drones.chosen.push(ctx.scene.state.drones.loaded[parts[1]])
+        }
+    })
+    .command('/end', ctx => { // Comando che termina l'inserimento dei droni
+        if (ctx.scene.state.drones.loaded.length > 0 && ctx.scene.state.drones.chosen.length === 0) {
+            return ctx.reply('Scegli almeno un drone.')
+        }
+        ctx.scene.leave()
     })
 ).leave(ctx => {
-    ctx.reply('Ciao!')
+    // Aggiungo i droni alla missione
+    // Setto waitingForQtb nelle missioni del drone
+    // Lo stato della missione avanza da requested passa waitingForStaff
+    console.log(ctx.scene.state.drones.chosen)
     console.log('Leaving organizeMission')
+
+    // TODO: CONTINUA QUI
+    if (ctx.scene.state.drones.chosen > 0) {
+        Mission.updateById(ctx.scene.state.mission._id,)
+        for (let drone in ctx.scene.state.drones.chosen) {
+            Drone.updateById(drone._id)
+        }
+        ee.bot.emit('missionOrganized', ctx.scene.state.mission._id)
+    }
 })
 
 module.exports = organizeMission
