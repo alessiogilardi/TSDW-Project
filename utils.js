@@ -65,3 +65,11 @@ exports.loadRiskMatrix = filePath => {
     delete contentJson['diff'];
     return contentJson;
 }
+
+exports.copyObject = copyObject = obj => {
+    let ret = {}
+    for (let i in obj) {
+        ret[i] = obj[i]
+    }
+    return ret
+}
