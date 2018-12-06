@@ -180,14 +180,15 @@ const requestMission = new WizardScene('requestMission',
         delete ctx.scene.state.command
         return
     }
-    var mission = ctx.scene.state.command.mission
+    var mission  = ctx.scene.state.command.mission
     var baseName = mission.base.name
+    let date     = new Date(mission.date)
     delete ctx.scene.state.command
 
     ;(async () => {
         await ctx.reply('La missione è stata creata con successo!\nSarai notificato appena il Responsabile di Base l\'avrà presa in carico.')
         await ctx.reply(`Ecco intanto un riepilogo sui dati della missione:\n\n` +
-            `Data: ${utils.Date.format(mission.date, 'DD MMM YYYY')}\n` +
+            `Data: ${utils.Date.format(date, 'DD MMM YYYY')}\n` +
             `Base: ${baseName}\nDurata prevista: ${mission.description.duration.expected} ore\n` +
             `Scenario: ${mission.description.riskEvaluation.scenario}\n` +
             `Difficoltà: ${mission.description.riskEvaluation.level}\n`)
@@ -203,19 +204,13 @@ const requestMission = new WizardScene('requestMission',
     // 3 - Inserire l'evento nell'EventLog
 
     let days = Math.ceil(mission.description.duration.expected/24)
+    let startDate = mission.date
     let missions = []
-    for(let i = 0; i < days; i++) {        
-        mission.date = new Date(moment(mission.date).add(i,'d'))
-        //missions.push(Mission.insert(mission))
-        let m = await Mission.insert(mission)
-        console.log(m.date)
-        await missions.push(m)
-        //missions[i] = await Mission.insert(mission)
+    for (let i = 0; i < days; i++) {        
+        mission.date = new Date(moment(startDate).add(i,'d'))
+        missions[i] = utils.copyObject(await Mission.insert(mission))
     }
-    console.log('Missions', missions)
-    console.log(Promise.all(missions))
-    //missions = await Promise.all(missions)
-    //console.log(missions)
+    
     ee.bot.emit('missionRequested', missions)
 })
 
