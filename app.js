@@ -66,23 +66,25 @@ bot.command(['requestMission', 'requestmission'], ctx => {
 	ctx.scene.enter('requestMission');
 });
 
+
 //////////// DEGUGGING DA CANCELLARE ////////////////////
 bot.hears(['A','a'], ctx => {
     var message = 'Vuoi iniziare ad organizzare la missione?'
     var buttonText = 'Organizza'
-    var buttonData = zip['organizeMission'] + ':' + '5c078422280ba9310c529fea' + ':' + 33017299
+    var buttonData = zip['organizeMission'] + ':' + '5c092341589dce22acc1f9ef' + ':' + 33017299
     ctx.reply(message, Telegraf.Extra
     .markdown()
     .markup(m => m.inlineKeyboard([
         m.callbackButton(buttonText, buttonData)
-    ])))
+	])))
 })
 ////////////////////////////////////////////////////////
 
 router.on('organizeMission', ctx => {
 	// Entro nella scene: OrganizeMission
-	ctx.answerCbQuery({})
-	ctx.editMessageReplyMarkup({})
+	//ctx.answerCbQuery({})
+	ctx.deleteMessage()
+	//ctx.editMessageReplyMarkup({})
 	bot.telegram.sendMessage(ctx.state.data[1], 'Missione accettata dal responsabile di base')
 	ctx.scene.enter('organizeMission', { mission: { _id: ctx.state.data[0] } })
 })
