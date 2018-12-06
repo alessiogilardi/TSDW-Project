@@ -23,12 +23,8 @@ const zip       = bf.zip
 const onMissionRequested = async (bot, missions) => {
     if (bot === undefined || bot === null) throw new Error('Missing Telegram Bot')
     this.bot = bot
-    //missions = await Promise.all(missions)
     var am         = await Personnel.findById(missions[0].AM, 'telegramData.idTelegram')
     var supervisor = await Personnel.findById(missions[0].supervisor, 'telegramData.idTelegram')
-    console.log(missions)
-
-    //console.log(missions)
 
     for (let mission of missions) {
         var message = `C'è una richiesta di missione:\n\n`+
