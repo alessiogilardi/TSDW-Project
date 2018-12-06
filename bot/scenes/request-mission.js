@@ -174,7 +174,7 @@ const requestMission = new WizardScene('requestMission',
 
         return ctx.scene.leave()
     })
-).leave(async ctx => {
+).leave(ctx => {
     if (ctx.message.text === '/cancel') {
         ctx.reply('Richiesta missione annullata.')
         delete ctx.scene.state.command
@@ -202,16 +202,17 @@ const requestMission = new WizardScene('requestMission',
     // 1 - Inserire la Missione nel DB
     // 2 - Notificare il responsabile di base
     // 3 - Inserire l'evento nell'EventLog
-
     let days = Math.ceil(mission.description.duration.expected/24)
     let startDate = mission.date
     let missions = []
-    for (let i = 0; i < days; i++) {        
-        mission.date = new Date(moment(startDate).add(i,'d'))
-        missions[i] = utils.copyObject(await Mission.insert(mission))
-    }
+    ;(async () => {
+        for (let i = 0; i < days; i++) {        
+            mission.date = new Date(moment(startDate).add(i,'d'))
+            missions[i] = utils.copyObject(await Mission.insert(mission))
+        }
+        ee.bot.emit('missionRequested', missions)
+    })()
     
-    ee.bot.emit('missionRequested', missions)
 })
 
 module.exports = requestMission
