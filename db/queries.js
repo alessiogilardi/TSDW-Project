@@ -843,7 +843,7 @@ exports.Qtb = Qtb = {
             callback(qtb);
         });
     },
-
+/*
     findByIdSync: (aId, projection) => {
         var ret = null;
         models.Qtb.findOne()
@@ -857,4 +857,18 @@ exports.Qtb = Qtb = {
             deasync.runLoopOnce();
         return ret;
     }
-};
+*/
+}
+
+exports.EventLog = EventLog = {
+    insert: aEvent => {
+        return new Promise((resolve, reject) => {
+            new models.EventLog(aEvent)
+            .save((err, event) => {
+                if (err) return reject(err)
+                console.log(`Inserted new Event with _id: ${event._id}`)
+                resolve(event)
+            })
+        })
+    }
+}
