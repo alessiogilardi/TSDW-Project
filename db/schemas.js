@@ -278,12 +278,13 @@ exports.qtbSchema = new Schema({
     }]
 })
 
+
 exports.eventLogSchema = new Schema({
-    type: {type: String, enum: eventTypes},
-    personnel: ObjectId, // Persona che scatena l'evento
-    timestamp: {type: Date, default: Date.now}, 
-    object: { // Oggetto su cui avviene l'evento
-        type: String, // Collection dell'Oggetto su cui avviene l'evento (Missions, Drones, Logbooks, Qtbs)
-        _id: ObjectId // ObjectId dell'Oggetto su cui aviene l'evento
-    }
+    type: String, // Tipo di evento, es: missionRequested
+    actor: ObjectId, // Chi compie l'evento
+    subject: { // Chi subisce l'evento
+        type: {type: String, enum: ['Mission', 'Personnel', 'Drone', 'Logbook', 'Qtb']},
+        _id: ObjectId
+    }, 
+    timestamp: {type: Date, default: Date.now}
 })
