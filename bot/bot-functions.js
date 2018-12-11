@@ -1,4 +1,5 @@
 const queries   = require('../db/queries.js')
+const timers    = require('timers')
 const Personnel = queries.Personnel
 
 /**
@@ -77,3 +78,21 @@ exports.setBotStarted = idTelegram => queries.Personnel.updateByIdTelegram(idTel
  * Funzione che resetta il flag botStarted.
  */
 exports.resetBotStarted = idTelegram => queries.Personnel.updateByIdTelegram(idTelegram, {'telegramData.botStarted': false})
+
+/**
+ * Funzione che controlla le missioni non istanziate ogni minuto
+ */
+exports.checkTimeout = async () => {
+    timers.setInterval(() => {
+        let coeff = 60000                           // arrotondamento al minuto più vicino
+        let now = new Date();
+        now = new Date(Math.round(now.getTime() / coeff) * coeff)
+        let missions = queries.Mission.find({'status.requested.value': true, 'status.waitingForTeam.value': false}, 'status.requested.timestamp')
+        for (let m of missions) {
+            let missionDate = new Date(Math.round(m.status.requested.timestamp / coeff) * coeff)
+            if (now - missionDate == 15)
+                // invio messaggio all'AM
+                break
+        }
+    }, 60000)
+}

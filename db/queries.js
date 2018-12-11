@@ -620,6 +620,12 @@ exports.Mission = Mission = {
         }*/)
     },
 
+    find: (selection, projection) => {
+        return models.Mission.find(selection)
+        .select(projection)
+        .exec()
+    },
+
     setStatus: (aId, aStatus) => {
         return Mission.updateById(aId, {status: aStatus});
     },
