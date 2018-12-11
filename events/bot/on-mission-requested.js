@@ -14,6 +14,7 @@ const Telegraf  = require('telegraf')
 const bf        = require('../../bot/bot-functions')
 const Personnel = queries.Personnel
 const zip       = bf.zip
+const EventLog = queries.EventLog
 
 /**
  * 
@@ -46,6 +47,16 @@ const onMissionRequested = async (bot, missions) => {
             .markup(m => m.inlineKeyboard([
                 m.callbackButton(buttonText, buttonData)
         ])))
+		eventHandler = () => {
+		// Questa funzione che serve a gestire l'evento chiama la funzione
+		// che esegue la query di inserimento di un evento nell'EventLog
+	  
+		// Esempio:
+		let mMission = {mission}
+		let mEvent = { type: 'mission requested', actor: mMission.AM, subject: {type: 'Mission', _id: mMission._id}, timestamp: new Date() }
+		EventLog.insert(mEvent)
+  
+}
     }
 }
 
