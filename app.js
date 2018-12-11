@@ -58,6 +58,10 @@ bot.command(['createMission', 'createmission'], ctx => {
 	ctx.scene.enter('createMission');
 });
 */
+
+// Chiamo la funzione per il timeout delle missioni
+bf.checkTimeout()
+
 bot.command(['requestMission', 'requestmission'], ctx => {
 	if (!ctx.session.userData.commands.includes('/requestMission')) {
 		ctx.reply('Mi spiace, non hai i diritti per eseguire questo comando.')

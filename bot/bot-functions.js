@@ -80,19 +80,19 @@ exports.setBotStarted = idTelegram => queries.Personnel.updateByIdTelegram(idTel
 exports.resetBotStarted = idTelegram => queries.Personnel.updateByIdTelegram(idTelegram, {'telegramData.botStarted': false})
 
 /**
- * Funzione che controlla le missioni non istanziate ogni minuto
+ * Funzione che controlla le missioni non istanziate ogni minuto e notifica l'AM dopo 15 minuti che non viene istanziata
  */
 exports.checkTimeout = async () => {
-    timers.setInterval(() => {
-        let coeff = 60000                           // arrotondamento al minuto più vicino
-        let now = new Date();
-        now = new Date(Math.round(now.getTime() / coeff) * coeff)
-        let missions = queries.Mission.find({'status.requested.value': true, 'status.waitingForTeam.value': false}, 'status.requested.timestamp')
+    timers.setInterval(async () => {
+        let now = new Date().getMinutes()
+        let missions = await queries.Mission.find({'status.requested.value': true, 'status.waitingForTeam.value': false}, 'status.requested.timestamp')
         for (let m of missions) {
-            let missionDate = new Date(Math.round(m.status.requested.timestamp / coeff) * coeff)
-            if (now - missionDate == 15)
-                // invio messaggio all'AM
-                break
+            let missionDate = new Date(m.status.requested.timestamp).getMinutes()
+            if (now - missionDate == 1) { // DEBUG: cambiare in 15 minuti
+                // invio notifica all'AM
+                console.log(m)
+            }
         }
+        missions = []
     }, 60000)
 }
