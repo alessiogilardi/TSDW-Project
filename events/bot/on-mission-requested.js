@@ -48,12 +48,8 @@ const onMissionRequested = async (bot, missions) => {
                 m.callbackButton(buttonText, buttonData)
         ])))
 		eventHandler = () => {
-		// Questa funzione che serve a gestire l'evento chiama la funzione
-		// che esegue la query di inserimento di un evento nell'EventLog
-	  
-		// Esempio:
-		let mMission = {mission}
-		let mEvent = { type: 'mission requested', actor: mMission.AM, subject: {type: 'Mission', _id: mMission._id}, timestamp: new Date() }
+		
+		let mEvent = { type: 'missionRequested', actor: mission.AM, subject: {type: 'Mission', _id: mission._id}, timestamp: new Date() }
 		EventLog.insert(mEvent)
   
 }
