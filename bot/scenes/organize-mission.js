@@ -76,19 +76,25 @@ const organizeMission = new WizardScene('organizeMission',
         ctx.scene.leave()
     })
 ).leave(ctx => {
-    // Aggiungo i droni alla missione
-    // Setto waitingForQtb nelle missioni del drone
-    // Lo stato della missione avanza da requested passa waitingForStaff
+    // Aggiungo i droni alla missione -> FATTO da testare
+    // Setto waitingForQtb nelle missioni del drone -> FATTO da testare
+    // Lo stato della missione avanza da requested passa waitingForStaff -> FATTO testare
     console.log(ctx.scene.state.drones.chosen)
     console.log('Leaving organizeMission')
 
     // TODO: CONTINUA QUI
     if (ctx.scene.state.drones.chosen > 0) {
-        Mission.updateById(ctx.scene.state.mission._id,)
+        drones = []
         for (let drone in ctx.scene.state.drones.chosen) {
-            Drone.updateById(drone._id)
+            drones.push({ _id: drone._id, type: drone.type })
         }
-        ee.bot.emit('missionOrganized', ctx.scene.state.mission._id)
+        ctx.scene.state.mission.status.waitingForTeam.value = true
+        ctx.scene.state.mission.status.waitingForTeam.timestamp = new Date()
+        Mission.updateById(ctx.scene.state.mission._id, {$push: {drones: drones}})
+        for (let drone in drones) {
+            Drone.updateById(drone._id, {$push: {'missions.waitingForQtb': { idMission: ctx.scene.state.mission._id, date: ctx.scene.state.mission.date }}})
+        }
+        ee.bot.emit('missionOrganized', ctx.scene.state.mission)
     }
 })
 
