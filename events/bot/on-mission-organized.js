@@ -6,10 +6,12 @@
  * vengono loro mandati dei Button con cui possono accettare o declinare.
  */
 
-const queries = require('../../db/queries')
-const Telegraf = require('telegraf')
+const queries   = require('../../db/queries')
+const Telegraf  = require('telegraf')
 const bf        = require('../../bot/bot-functions')
 const zip       = bf.zip
+const Personnel = queries.Personnel
+const Mission   = queries.Mission
 
 // TODO: recuperare anche le ore di volo dei piloti
 
@@ -23,24 +25,31 @@ const notify = (idTelegram, message, roles) => {
     this.bot.telegram.sendMessage(idTelegram, message, Telegraf.Extra
         .markdown()
         .markup( m => m.inlineKeyboard([
-            //m.callbackButton('Accetta', JSON.stringify({action: 'acceptMission', cbMessage: 'Missione accettata', data: {mission: {_id: this.mission._id, date: this.mission.date}, role: role}})),
             m.callbackButton('Accetta', `${zip['acceptMission']}:${mission._id}:${roles.join(',')}`),
-            m.callbackButton('Rifiuta', JSON.stringify({action: 'declineMission'}))
+            m.callbackButton('Rifiuta', `${zip['declineMission']}:${mission._id}`)
     ])))
 }
 
 /**
  * Funzione che notifica il personale.
  * 
- * @param {*} persons 
- * @param {*} mission 
+ * @param {Personnel} persons 
+ * @param {Mission}   mission 
  */
 const sendNotifications = (persons, mission) => {
+    const r = ['pilot', 'crew', 'maintainer']
     for (let person of persons) {
         let roles = [person.roles.occupation.pilot, person.roles.occupation.crew, person.roles.occupation.maintainer]
+        let tmp = []
+        for (let i in roles) {
+            if (roles[i]) { tmp.push(r[i]) }
+        }
+        roles = tmp
         console.log(`Notifing: ${person} as ${roles}`)
-        notify(person.telegramData.idTelegram, `Richiesta di missione come ${roles}:\n${mission}`)
+        notify(person.telegramData.idTelegram, `Richiesta di missione come ${roles.join(',')}:\n${mission}`)
         // TODO: scrivere query per aggiungere ogni persona a personnel.notified della tabella missions
+        Mission.updateById(mission._id, { $push: { 'personnel.notified': person._id } })
+
     }
 
     /*
@@ -113,7 +122,6 @@ const sendNotifications = (persons, mission) => {
  * @param {*} bot 
  * @param {*} mission 
  */
-
 const onOrganizedMission = (bot, mission) => {
     // TODO: la missione deve essere aggiunta alle organized missions del baseSup
 
@@ -149,15 +157,13 @@ const onOrganizedMission = (bot, mission) => {
     })
     */
 
-    let selection = {}
-
     // Vengono cercati tutti i membri del personale che ricoprono almeno uno dei ruoli pilota, crew, manutentore
-    selection = {
+    const selection = {
         base: mission.base,
-        $or: [{'roles.occupation.pilot': true}, {'roles.occupation.crew': true,}, {'roles.occupation.maintainer': true}],
+        $or: [{ 'roles.occupation.pilot': true }, { 'roles.occupation.crew': true }, { 'roles.occupation.maintainer': true }],
         'missions.accepted.date': {$ne: mission.date}
     }
-    let queryResult = await queries.Personnel.find(selection, '') // tutto il personale che può svolgere la missione
+    const queryResult = await Personnel.find(selection, '') // tutto il personale che può svolgere la missione
 
     // Filtro il personale trovato per eliminare il ruolo di pilota a chi non soddisfa i requisiti sul tipo di drone pilotabile
     let personnel = []
