@@ -28,21 +28,34 @@ const Mission   = queries.Mission
  * 		 missione a sua discrezione
  */
 
+ /**
+  * CONSIDERAZIONE:
+  * Se ogni volta che ho un team pronto notifico il BaseSup con tutti quelli che hanno accettato
+  * invio un sacco di messaggi e richio anche di reinviare messaggi già mandati.
+  * 
+  * Sarebbe meglio dire al BaseSup che è pronto un team con tot membri e loro dati,
+  * e dargli la possibilità di premere un bottone per vedere chi sono e eventulmente formare un team con quelli che hanno accettato.
+  * 	--> IMPORTANTE: gestire questa cosa con una Scene e cancellare i messaggi mandati in questa Scene quando si esce
+  */
+
+ const notify = (telegramId, message) => {
+
+ }
 
 const acceptMission = async (bot, ctx) => {
     const missionId = ctx.state.data[0]
 	const roles 	= ctx.state.data[1].split(',') // Ruoli che può ricoprire nella missione
 	const person 	= ctx.session.userData
 	
-	let aMission 	= await Mission.findById(missionId, '')
+	const aMission 	= await Mission.findById(missionId, '')
 
 	await Personnel.updateById(person._id, { $push: { 'accepted.idMission': aMission._id, date: aMission.date, roles: roles } })
 	await Mission.updateById(aMission._id, { $pull: { 'personnel.notified': person._id } })
 	await Mission.updateById(aMission._id, { $push: { 'personnel.accepted': person._id } })
 
 	// Cerco le persone che hanno accettato
-	let aMission = await Mission.findById(missionId, '')
-	let accepted = aMission.personnel.accepted
+	const aMission = await Mission.findById(missionId, '')
+	const accepted = aMission.personnel.accepted
 	if (accepted.length < 3) {
 		return
 	}
