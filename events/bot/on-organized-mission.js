@@ -37,7 +37,7 @@ const sendNotifications = (persons, mission) => {
         let roles = [person.roles.occupation.pilot, person.roles.occupation.crew, person.roles.occupation.maintainer]
         console.log(`Notifing: ${person} as ${roles}`)
         notify(person.telegramData.idTelegram, `Richiesta di missione come ${roles}:\n${mission}`)
-        // aggiornare tramite query specifiche il database
+        // TODO: scrivere query per aggiungere ogni persona a personnel.notified della tabella missions
     }
 
     /*
