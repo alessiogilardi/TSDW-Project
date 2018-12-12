@@ -79,37 +79,30 @@ exports.personnelSchema = new Schema({
     },
     missions: {
         supervisor: {
-            completed: [{type: ObjectId, default: [], ref: 'mission'}],
-            pending: [{type: ObjectId, default: [], ref: 'mission'}]
+            requested: [{type: ObjectId, default: [], ref: 'mission'}],
+            organized: [{type: ObjectId, default: [], ref: 'mission'}],
+            started:   [{type: ObjectId, default: [], ref: 'mission'}],
+            completed: [{type: ObjectId, default: [], ref: 'mission'}]
         },
         pilot: {
-            completed: [{type: ObjectId, default: [], ref: 'mission'}],
-            waitingForLogbook: [{type: ObjectId, default: [], ref: 'mission'}],
-            accepted: [{
-                idMission: {type: ObjectId, default: undefined, ref: 'mission'},
-                date: {type: Date, default: undefined} // Data della missione, usata per vedere se un pilota è occupato in missione
-            }]
+            completed:         [{type: ObjectId, default: [], ref: 'mission'}],
+            waitingForLogbook: [{type: ObjectId, default: [], ref: 'mission'}]
         },
-        crew:  {
-            completed: [{type: ObjectId, default: [], ref: 'mission'}],
-            accepted: [{
-                idMission: {type: ObjectId, default: undefined, ref: 'mission'},
-                date: {type: Date, default: undefined} // Data della missione, usata per vedere se un crew è occupato in missione
-            }],
-            pending: {type: ObjectId, default: undefined, ref: 'mission'} // Indica la missione in cui è attualmente impegnato
+        crew: {
+            completed:  [{type: ObjectId, default: [], ref: 'mission'}],
+            running:    {type: ObjectId, default: undefined, ref: 'mission'} // Indica la missione in cui è attualmente impegnato
         },
-        // TODO: cambiare da maintaines a manitainer
-        // cerca Personnel -> 'missions.maintainers'
-        maintainer:  {
-            completed: [{type: ObjectId, default: [], ref: 'mission'}],
-            accepted: [{
-                idMission: {type: ObjectId, default: undefined, ref: 'mission'},
-                date: {type: Date, default: undefined} // Data della missione, usata per vedere se un manutentore è occupato in missione
-            }],
-            pending: {type: ObjectId, default: undefined, ref: 'mission'} // Indica la missione in cui è attualmente impegnato
+        maintainer: {
+            completed:  [{type: ObjectId, default: [], ref: 'mission'}],
+            running:    {type: ObjectId, default: undefined, ref: 'mission'} // Indica la missione in cui è attualmente impegnato
         },
+        accepted: [{
+            idMission:  {type: ObjectId, default: undefined, ref: 'mission'}, // _id delle Missioni accettate
+            date:       {type: Date, default: undefined}, // Data delle missioni accettate --> usata per vedere se è impegnato in missione
+            roles:      [{type: String, enum: ['pilot', 'crew', 'maintainer']}] // Ruoli che può ricoprire nella missione
+        }],
     },
-    locPermission: {type: Boolean, default: false}
+    locPermission: {type: Boolean, default: false} // Da rimuovere
 });
 
 exports.basesSchema = new Schema({
