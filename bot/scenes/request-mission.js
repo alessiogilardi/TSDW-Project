@@ -54,10 +54,10 @@ const command = {
  * Funzione che richiede una nuova missione e fa partire l'iter corrispondente.
  * 
  * Si richiedono:
- *  - Data della missione
- *  - Base di partenza
- *  - Location di inizio della missione
- *  - Descrizione
+ *  1. Data della missione
+ *  2. Base di partenza
+ *  3. Location di inizio della missione
+ *  4. Descrizione
  *      - Durata prevista -> usata per generare più missioni e aggiungere Manutentori
  *      - Valutazione di rischio
  * 
@@ -69,7 +69,7 @@ const command = {
  */
 
 const requestMission = new WizardScene('requestMission',
-    ctx => {
+    async ctx => {
         ctx.scene.state.command = command
 
         ctx.scene.state.command.name      = 'requestMission'
@@ -80,10 +80,10 @@ const requestMission = new WizardScene('requestMission',
 
         ctx.scene.state.riskMatrix = utils.loadRiskMatrix('./risk-matrix.txt')
         
-        ctx.reply('Bene, iniziamo la procedura per la richiesta di una missione!\nTi verrà chiesto di inserire alcuni parametri.')
-        .then(() => ctx.reply('Ti ricordo che puoi annullare l\'operazione  in qualsiasi momento usando il comando /cancel.'))
-        .then(() => ctx.reply('Inserisci la data della missione:'))
-        .catch(err => console.log(err))
+        await ctx.reply('Bene, iniziamo la procedura per la richiesta di una missione!\nTi verrà chiesto di inserire alcuni parametri.')
+        await ctx.reply('Ti ricordo che puoi annullare l\'operazione  in qualsiasi momento usando il comando /cancel.')
+        await ctx.reply('Inserisci la data della missione:')
+        
         ctx.wizard.next()
     },
     new Composer()
@@ -98,27 +98,24 @@ const requestMission = new WizardScene('requestMission',
         return ctx.wizard.next()
     }),
     new Composer()
-    .on('text', ctx => {
+    .on('text', async ctx => {
         if (ctx.scene.state.command.searching)
             return
         ctx.scene.state.command.searching = true
-        
-        Base.findByName(ctx.message.text, {})
-        .then(aBase => {
-            ctx.scene.state.command.searching = false
-            //if (aBase === null) {
-            if (!aBase) {
-                ctx.reply('Mi spiace, hai inserito una base non valida, per favore inseriscine un\'altra.')
-                return
-            }
-            ctx.scene.state.command.mission.base._id   = aBase._id
-            ctx.scene.state.command.mission.base.name  = aBase.name
-            ctx.scene.state.command.mission.supervisor = aBase.roles.supervisor
+        const aBase = await Base.findByName(ctx.message.text, '')        
+        ctx.scene.state.command.searching = false
+        if (!aBase) {
+            ctx.reply('Mi spiace, hai inserito una base non valida, per favore inseriscine un\'altra.')
+            return
+        }
+        ctx.scene.state.command.mission.base._id   = aBase._id
+        ctx.scene.state.command.mission.base.name  = aBase.name
+        ctx.scene.state.command.mission.supervisor = aBase.roles.supervisor
 
-            ctx.reply('Inserisci le coordinate dove avrà luogo la missione.\nInserisci una posizione da GPS oppure scrivile in formato UTM (es: 33 T 0298830 4646912):')
-            return ctx.wizard.next()
-        })
-        .catch(err => console.log(err))
+        ctx.reply('Inserisci le coordinate dove avrà luogo la missione.\nInserisci una posizione da GPS oppure scrivile in formato UTM (es: 33 T 0298830 4646912):')
+        return ctx.wizard.next()
+        
+        //.catch(err => console.log(err))
     }),
     new Composer()
     .on('text', ctx => { // Leggo la location in coordinate UTM
@@ -183,8 +180,8 @@ const requestMission = new WizardScene('requestMission',
         delete ctx.scene.state.command
         return
     }
-    var mission  = ctx.scene.state.command.mission
-    var baseName = mission.base.name
+    let mission  = ctx.scene.state.command.mission
+    let baseName = mission.base.name
     let date     = new Date(mission.date)
     delete ctx.scene.state.command
 
