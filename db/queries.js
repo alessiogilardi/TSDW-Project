@@ -554,45 +554,8 @@ exports.Mission = Mission = {
                 resolve(aMission)
             })
         })
-    },/* 
-        aMission._id = mongoose.Types.ObjectId()
-        new models.Mission(aMission)
-        .save((err, mission) => {
-            if (err) return console.log(err)
-            console.log(`Inserted Mission with id: ${mission._id}`)
-            // Viene aggiunta la missione alle pending missions del Supervisor
-            Personnel.updateById(mission.supervisor, {$push: {'missions.supervisor.pending': mission._id}})
-
-            // Setto i droni come non disponibili e aggiungo la missione alle waitingForQtb del drone
-            mission.drones.forEach(drone => Drone.updateById(drone._id, {'state.availability': 1, $push: {'missions.waitingForQtb': {idMission: mission._id, date: new Date(mission.date)}}}))
-
-            // Emetto l'evento missione inserita
-            eventEmitters.db.Mission.emit('insert', mission)
-
-        })
-
-    },*/
-/*
-    update: (selection, newValues) => {
-        models.Mission.updateOne(selection, newValues, err => {
-            if (err) return console.log(err)
-            // Emetto l'evento update
-            eventEmitters.db.Mission.emit('update')
-            console.log(`Updated Mission selected by: ${JSON.stringify(selection)}`)
-        })
     },
-*/
-/*
-    update: (selection, newValues) => {
-        return models.Mission.updateOne(selection, newValues, err => {
-            if (err) return console.log(err)
-            // Emetto l'evento update
-            eventEmitters.db.Mission.emit('update')
-            console.log(`Updated Mission selected by: ${JSON.stringify(selection)}`)
-        }).exec()
-    },
-*/
-
+    
     update: (selection, newValues) => {
         return new Promise((resolve, reject) => {
             models.Mission.updateOne(selection, newValues, err => {
@@ -624,95 +587,6 @@ exports.Mission = Mission = {
         return models.Mission.find(selection)
         .select(projection)
         .exec()
-    },
-
-    setStatus: (aId, aStatus) => {
-        return Mission.updateById(aId, {status: aStatus});
-    },
-
-    Pilot: {
-        setAsNotified: (aMissionId, aPilotId) => {
-            return Mission.updateById(aMissionId, {$push: {'pilots.notified': aPilotId}});
-        },
-        /*
-        setAsAccepted: (aMissionId, aPilotId, aDate) => {
-            return new Promise((resolve, reject) => {
-                Mission.updateById(aMissionId, {$pull: {'pilots.notified': aPilotId}})
-                .then(() => 
-                    Mission.updateById(aMissionId, {$push: {'pilots.accepted': aPilotId}})
-                    .then(() => {
-                        Personnel.updateById(aPilotId, {$push: {'missions.pilots.accepted': {idMission: aMissionId, date: aDate}}});
-                    }) 
-                )
-            })
-
-        },*/
-        setAsAccepted: (aMissionId, aPilotId, aDate/* Data della missione */) => {
-            return new Promise((resolve, reject) => 
-                Mission.updateById(aMissionId, {$pull: {'pilots.notified': aPilotId}})
-                .then(() => Mission.updateById(aMissionId, {$push: {'pilots.accepted': aPilotId}}))
-                .then(() => Personnel.updateById(aPilotId, {$push: {'missions.pilot.accepted': {idMission: aMissionId, date: aDate}}}))
-                .then(() => resolve())
-                .catch(() => reject())
-            )
-
-        },
-        setPilotAsChosen: (aMissionId, aPilotId) => {
-            Mission.updateById(aMissionId, {$pull: {'pilots.accepted': aPilotId}});
-            Mission.updateById(aMissionId, {$push: {'pilots.chosen': aPilotId}});
-        }
-    },
-
-    Crew: {
-        setAsNotified: (aMissionId, aCrewId) => {
-            return Mission.updateById(aMissionId, {$push: {'crew.notified': aCrewId}});
-        },
-        setAsAccepted: (aMissionId, aPilotId, aDate) => {
-            return new Promise((resolve, reject) => 
-                Mission.updateById(aMissionId, {$pull: {'crew.notified': aPilotId}})
-                .then(() => Mission.updateById(aMissionId, {$push: {'crew.accepted': aPilotId}}))
-                .then(() => Personnel.updateById(aPilotId, {$push: {'missions.crew.accepted': {idMission: aMissionId, date: aDate}}}))
-                .then(() => resolve())
-                .catch(() => reject())
-            )
-        },
-        /*
-        setAsAccepted: (aMissionId, aCrewId) => {
-            Mission.updateById(aMissionId, {$pull: {'crew.notified': aCrewId}});
-            Mission.updateById(aMissionId, {$push: {'crew.accepted': aCrewId}});
-            // Aggiungo la missione a quello accettate dal membro dell'equipaggio
-            Personnel.updateById(aCrewId, {$push: {'missions.crew.accepted': {idMission: aMissionId, date: aDate}}});         
-        },*/
-        setAsChosen: (aMissionId, aCrewId) => {
-            Mission.updateById(aMissionId, {$pull: {'crew.accepted': aCrewId}});
-            Mission.updateById(aMissionId, {$push: {'crew.chosen': aCrewId}});
-        }
-    },
-
-    Maintainer: {
-        setAsNotified: (aMissionId, aMaintainerId) => {
-            return Mission.updateById(aMissionId, {$push: {'maintainers.notified': aMaintainerId}});
-        },
-        setAsAccepted: (aMissionId, aPilotId, aDate) => {
-            return new Promise((resolve, reject) => 
-                Mission.updateById(aMissionId, {$pull: {'maintainers.notified': aPilotId}})
-                .then(() => Mission.updateById(aMissionId, {$push: {'maintainers.accepted': aPilotId}}))
-                .then(() => Personnel.updateById(aPilotId, {$push: {'missions.maintainers.accepted': {idMission: aMissionId, date: aDate}}}))
-                .then(() => resolve())
-                .catch(() => reject())
-            )
-        },
-        /*
-        setAsAccepted: (aMissionId, aMaintainerId) => {
-            Mission.updateById(aMissionId, {$pull: {'maintainers.notified': aMaintainerId}});
-            Mission.updateById(aMissionId, {$push: {'maintainers.accepted': aMaintainerId}});
-            // Aggiungo la missione a quello accettate dal manutentore
-            Personnel.updateById(aMaintainerId, {$push: {'missions.maintainers.accepted': {idMission: aMissionId, date: aDate}}});
-        },*/
-        setAsChosen: (aMissionId, aMaintainerId) => {
-            Mission.updateById(aMissionId, {$pull: {'maintainers.accepted': aMaintainerId}});
-            Mission.updateById(aMissionId, {$push: {'maintainers.chosen': aMaintainerId}});
-        }
     },
 
     // pilots, crew, maintainers sono array
