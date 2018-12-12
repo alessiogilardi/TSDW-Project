@@ -94,7 +94,30 @@ router.on('organizeMission', ctx => {
 })
 
 router.on('acceptMission', ctx => {
-	const data = ctx.state.data
+	/**
+	 * 1. Ricevo _id della missione accetttata tramite callbackMessage
+	 * 2. Aggiungo la missione a quelle accettate in
+	 *  	--> missions.pilot.accepted se pilota o pilota/crew
+	 * 		--> missions.crew.accepted 
+	 *		--> ...
+	 * 3. Aggiungo il Personale che ha accettato alla missione
+	 *    seguendo regole simili a quelle sopra
+	 * 		--> rimuovo da pilots.notified
+	 * 		--> pilots.accepted
+	 * 		--> stesso per crew e maintainers
+	 * 4. Man mano che le persone accettano controllo quanti hanno
+	 * 	  accettato finora e nel caso notifico il baseSup
+	 * 
+	 * NOTA: il baseSup sceglierà i ruoli che ognuno avrà nella
+	 * 		 missione a sua discrezione
+	 */
+	const data		= ctx.state.data
+	const missionId = ctx.state.data[0]
+	const role 		= ctx.state.dat[1]
+
+	
+
+
 })
 
 router.on('declineMission', ctx => {
