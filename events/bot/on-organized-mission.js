@@ -11,7 +11,12 @@ const Telegraf = require('telegraf')
 
 // TODO: recuperare anche le ore di volo dei piloti
 
-
+/**
+ * Funzione che notifica il personale, mediante un messaggio Telegram e attraverso un messaggio.
+ * @param {*} idTelegram 
+ * @param {*} message 
+ * @param {*} role 
+ */
 const notify = (idTelegram, message, role) => {
     this.bot.telegram.sendMessage(idTelegram, message, Telegraf.Extra
         .markdown()
