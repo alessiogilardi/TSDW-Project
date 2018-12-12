@@ -22,26 +22,28 @@ const notify = (idTelegram, message, role) => {
 }
 
 
-const sendNotifications = () => this.toNotify.forEach(person => {
-    console.log(`Notifing: ${person} as ${person.role}`)
-    switch(person.role){
-        case 'pilot':
-            // Mando notifica da pilota e lo setto come notificato nella Missione
-            notify(person.idTelegram, `Richiesta di missione come *pilota*:\n${this.mission}`, person.role)
-            queries.Mission.Pilot.setAsNotified(this.mission._id, person._id)
-            break;
-        case 'crew':
-            // Mando la notifica da crew e lo setto come notificato nella Missione
-            notify(person.idTelegram, `Richiesta di missione come *membro dell'equipaggio*:\n${this.mission}`, person.role)
-            queries.Mission.Pilot.setAsNotified(this.mission._id, person._id)
-            break;
-        case 'maintainer':
-            // Mando la notifica da manutentore e lo setto come notificato nella Missione
-            notify(person.idTelegram, `Richiesta di missione come *manutentore*:\n${this.mission}`, person.role)
-            queries.Mission.Pilot.setAsNotified(this.mission._id, person._id)
-            break;
+const sendNotifications = (persons) => {
+    for (let person of persons) {
+        console.log(`Notifing: ${person} as ${person.role}`)
+        switch(person.role){
+            case 'pilot':
+                // Mando notifica da pilota e lo setto come notificato nella Missione
+                notify(person.idTelegram, `Richiesta di missione come *pilota*:\n${this.mission}`, person.role)
+                queries.Mission.Pilot.setAsNotified(this.mission._id, person._id)
+                break;
+            case 'crew':
+                // Mando la notifica da crew e lo setto come notificato nella Missione
+                notify(person.idTelegram, `Richiesta di missione come *membro dell'equipaggio*:\n${this.mission}`, person.role)
+                queries.Mission.Pilot.setAsNotified(this.mission._id, person._id)
+                break;
+            case 'maintainer':
+                // Mando la notifica da manutentore e lo setto come notificato nella Missione
+                notify(person.idTelegram, `Richiesta di missione come *manutentore*:\n${this.mission}`, person.role)
+                queries.Mission.Pilot.setAsNotified(this.mission._id, person._id)
+                break;
+        }
     }
-})
+}
 
 // Le query ritornano membri del personale (piloti, crew, manutentori) che
 // appartengono alla base in questione, hanno effetivamente quel quolo nella base, e non hanno acettato missioni
@@ -121,10 +123,35 @@ const onOrganizedMission = (bot, mission) => {
     })
     */
 
-    projection = '_id telegramData.idTelegram'
-    
-    // Cerco i piloti che soddisfano i requisiti per la missione (disponibilità di data, tipi di drone, base)
-    
+    let selection
+
+    // NOTIFICA PILOTI
+    selection = {
+        base: mission.base,
+        'roles.occupation.pilot': true, 
+        'pilot.droneTypes': {$all: [mission.drones[0].type]},
+        'missions.pilot.accepted.date': {$ne: mission.date}
+    }
+    let pilots = await queries.Personnel.find(selection, '')
+    sendNotifications(pilots)
+
+    // NOTIFICA CREW
+    selection = {
+        base: mission.base,
+        'roles.occupation.crew': true,
+        'missions.crew.accepted.date': {$ne: mission.date}
+    }
+    let crew = await queries.Personnel.find(selection, '')
+    sendNotifications(crew)
+
+    // NOTIFICA MANUTENTORI
+    selection = {
+        base: mission.base,
+        'roles.occupation.maintainer': true,
+        'missions.maintainer.accepted.date': {$ne: mission.date}
+    }
+    let maintainers = await queries.Personnel.find(selection, '')
+    sendNotifications(maintainers)
 }
 
 module.exports = onOrganizedMission
