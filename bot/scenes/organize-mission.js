@@ -20,6 +20,11 @@ const zip           = bf.zip
 
 // TODO: quando scelgo i droni va messa la missione tra le waiting for QTB del drone
 // TODO: gestire meglio caso lista droni disponibili vuota
+/**
+ * Funzione che organizza la missione.
+ * Essa cerca i droni disponibili.
+ */
+
 const organizeMission = new WizardScene('organizeMission',
     async ctx => {
         ctx.reply('Sto ricercando i droni disponibili, attendi per favore...')
