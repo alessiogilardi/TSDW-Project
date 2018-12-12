@@ -91,10 +91,14 @@ const sendNotifications = (persons, mission) => {
     }
 }*/
 
+/**
+ * Funzione che si occupa di chiamare altre funzioni per la notifica del personale. 
+ * Vengono anche registrati i comandi `accept` e `decline` sul bot.
+ * @param {*} bot 
+ * @param {*} mission 
+ */
 
 const onOrganizedMission = (bot, mission) => {
-// Funzione che si occupa di richiamare altre funzioni per la notifica del personale
-// Vengono anche registrati i comandi accept e decline sul bot
 
     if (bot === null || bot === undefined) throw new Error('Missing Telegram Bot')
     if (mission === null || mission === undefined) throw new Error('Missing a valid Mission')
