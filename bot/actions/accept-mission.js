@@ -38,7 +38,7 @@ const Mission   = queries.Mission
   * 	--> IMPORTANTE: gestire questa cosa con una Scene e cancellare i messaggi mandati in questa Scene quando si esce
   */
 
- const notify = (telegramId, message) => {
+ const notify = async (telegramId, message) => {
 
  }
 
