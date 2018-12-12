@@ -97,10 +97,10 @@ exports.personnelSchema = new Schema({
             running:    {type: ObjectId, default: undefined, ref: 'mission'} // Indica la missione in cui è attualmente impegnato
         },
         accepted: [{
-            idMission:  {type: ObjectId, default: undefined, ref: 'mission'}, // _id delle Missioni accettate
-            date:       {type: Date, default: undefined}, // Data delle missioni accettate --> usata per vedere se è impegnato in missione
+            idMission:  {type: ObjectId, default: undefined, ref: 'mission'},   // _id delle Missioni accettate
+            date:       {type: Date, default: undefined},                       // Data delle missioni accettate --> usata per vedere se è impegnato in missione
             roles:      [{type: String, enum: ['pilot', 'crew', 'maintainer']}] // Ruoli che può ricoprire nella missione
-        }],
+        }]
     },
     locPermission: {type: Boolean, default: false} // Da rimuovere
 });
