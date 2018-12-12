@@ -22,24 +22,24 @@ const notify = (idTelegram, message, role) => {
 }
 
 
-const sendNotifications = (persons) => {
+const sendNotifications = (persons, mission) => {
     for (let person of persons) {
         console.log(`Notifing: ${person} as ${person.role}`)
         switch(person.role){
             case 'pilot':
                 // Mando notifica da pilota e lo setto come notificato nella Missione
-                notify(person.idTelegram, `Richiesta di missione come *pilota*:\n${this.mission}`, person.role)
-                queries.Mission.Pilot.setAsNotified(this.mission._id, person._id)
+                notify(person.idTelegram, `Richiesta di missione come *pilota*:\n${mission}`, person.role)
+                queries.Mission.Pilot.setAsNotified(mission._id, person._id)
                 break;
             case 'crew':
                 // Mando la notifica da crew e lo setto come notificato nella Missione
-                notify(person.idTelegram, `Richiesta di missione come *membro dell'equipaggio*:\n${this.mission}`, person.role)
-                queries.Mission.Pilot.setAsNotified(this.mission._id, person._id)
+                notify(person.idTelegram, `Richiesta di missione come *membro dell'equipaggio*:\n${mission}`, person.role)
+                queries.Mission.Pilot.setAsNotified(mission._id, person._id)
                 break;
             case 'maintainer':
                 // Mando la notifica da manutentore e lo setto come notificato nella Missione
-                notify(person.idTelegram, `Richiesta di missione come *manutentore*:\n${this.mission}`, person.role)
-                queries.Mission.Pilot.setAsNotified(this.mission._id, person._id)
+                notify(person.idTelegram, `Richiesta di missione come *manutentore*:\n${mission}`, person.role)
+                queries.Mission.Pilot.setAsNotified(mission._id, person._id)
                 break;
         }
     }
@@ -133,7 +133,7 @@ const onOrganizedMission = (bot, mission) => {
         'missions.pilot.accepted.date': {$ne: mission.date}
     }
     let pilots = await queries.Personnel.find(selection, '')
-    sendNotifications(pilots)
+    sendNotifications(pilots, mission)
 
     // NOTIFICA CREW
     selection = {
@@ -142,7 +142,7 @@ const onOrganizedMission = (bot, mission) => {
         'missions.crew.accepted.date': {$ne: mission.date}
     }
     let crew = await queries.Personnel.find(selection, '')
-    sendNotifications(crew)
+    sendNotifications(crew, mission)
 
     // NOTIFICA MANUTENTORI
     selection = {
@@ -151,7 +151,7 @@ const onOrganizedMission = (bot, mission) => {
         'missions.maintainer.accepted.date': {$ne: mission.date}
     }
     let maintainers = await queries.Personnel.find(selection, '')
-    sendNotifications(maintainers)
+    sendNotifications(maintainers, mission)
 }
 
 module.exports = onOrganizedMission
