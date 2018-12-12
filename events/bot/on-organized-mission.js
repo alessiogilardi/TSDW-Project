@@ -123,7 +123,7 @@ const onOrganizedMission = (bot, mission) => {
     })
     */
 
-    let selection
+    let selection = {}
 
     // NOTIFICA PILOTI
     selection = {
