@@ -17,7 +17,8 @@ const zip       = bf.zip
 const EventLog = queries.EventLog
 
 /**
- * 
+ * Funzione che gestisce l'evento MissionRequested, che viene richiamato quando c'è richiesta di
+ * una missione.
  * @param {Telegraf} bot 
  * @param {Array} missions Array di missioni, nel caso la missione duri più di un giorno
  */
@@ -26,6 +27,8 @@ const onMissionRequested = async (bot, missions) => {
     this.bot = bot
     var am         = await Personnel.findById(missions[0].AM, 'telegramData.idTelegram')
     var supervisor = await Personnel.findById(missions[0].supervisor, 'telegramData.idTelegram')
+
+    // TODO: la missione deve essere aggiunta alle requested missions del baseSup
 
     for (let mission of missions) {
         var message = `C'è una richiesta di missione:\n\n`+
@@ -47,7 +50,6 @@ const onMissionRequested = async (bot, missions) => {
             .markup(m => m.inlineKeyboard([
                 m.callbackButton(buttonText, buttonData)
         ])))
-		eventHandler = () => {
 		
 		let mEvent = { type: 'missionRequested', actor: mission.AM, subject: {type: 'Mission', _id: mission._id}, timestamp: new Date() }
 		EventLog.insert(mEvent)

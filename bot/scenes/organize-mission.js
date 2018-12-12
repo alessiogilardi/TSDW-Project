@@ -1,7 +1,7 @@
 /**
  * Scene per la procedura di Organizzazione di una Missione.
- * Un responsabile di base quando preme il Botton con action organizeMission 
- * entra in questa Scene dove dovrà inserire le informazioni mancanti sulla Missione.
+ * Un responsabile di base quando preme il Button con action organizeMission 
+ * entra in questa Scene dove dovrà inserire le informazioni mancanti sulla Missione (Droni).
  * L'AM deve essere notificato quando si viene iniziata questa procedura in modo da essere sicuro che
  * il baseSup abbia preso in carico la missione.
  * 
@@ -20,6 +20,11 @@ const zip           = bf.zip
 
 // TODO: quando scelgo i droni va messa la missione tra le waiting for QTB del drone
 // TODO: gestire meglio caso lista droni disponibili vuota
+/**
+ * Funzione che organizza la missione.
+ * Essa cerca i droni disponibili.
+ */
+
 const organizeMission = new WizardScene('organizeMission',
     async ctx => {
         ctx.reply('Sto ricercando i droni disponibili, attendi per favore...')
