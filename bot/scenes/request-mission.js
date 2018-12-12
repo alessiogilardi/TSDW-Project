@@ -172,7 +172,8 @@ const requestMission = new WizardScene('requestMission',
             ctx.reply('Ops, la difficoltà che hai inserito non è valida, inserisci un valore diverso.')
             return
         }
-        ctx.scene.state.command.mission.description.riskEvaluation.level = ctx.message.text
+        ctx.scene.state.command.mission.description.riskEvaluation.level = diff
+        ctx.scene.state.command.mission.droneType = ctx.scene.state.riskMatrix[scenario][diff]
 
         return ctx.scene.leave()
     })

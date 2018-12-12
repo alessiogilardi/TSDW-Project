@@ -34,6 +34,14 @@ const notify = (idTelegram, message, role) => {
  */
 const sendNotifications = (persons, mission) => {
     for (let person of persons) {
+        let roles = [person.roles.occupation.pilot, person.roles.occupation.crew, person.roles.occupation.maintainer]
+        console.log(`Notifing: ${person} as ${roles}`)
+        notify(person.telegramData.idTelegram, `Richiesta di missione come ${roles}:\n${mission}`)
+        // aggiornare tramite query specifiche il database
+    }
+
+    /*
+    for (let person of persons) {
         console.log(`Notifing: ${person} as ${person.role}`)
         switch(person.role){
             case 'pilot':
@@ -52,7 +60,7 @@ const sendNotifications = (persons, mission) => {
                 queries.Mission.Pilot.setAsNotified(mission._id, person._id)
                 break;
         }
-    }
+    }*/
 }
 
 // Le query ritornano membri del personale (piloti, crew, manutentori) che
@@ -139,17 +147,27 @@ const onOrganizedMission = (bot, mission) => {
 
     let selection = {}
 
-    // NOTIFICA PILOTI
+    // Vengono cercati tutti i membri del personale che ricoprono almeno uno dei ruoli pilota, crew, manutentore
     selection = {
         base: mission.base,
-        'roles.occupation.pilot': true, 
-        'pilot.droneTypes': {$all: [mission.drones[0].type]},
-        'missions.pilot.accepted.date': {$ne: mission.date}
+        $or: [{'roles.occupation.pilot': true}, {'roles.occupation.crew': true,}, {'roles.occupation.maintainer': true}],
+        'missions.accepted.date': {$ne: mission.date}
     }
-    let pilots = await queries.Personnel.find(selection, '')
-    sendNotifications(pilots, mission)
+    let queryResult = await queries.Personnel.find(selection, '') // tutto il personale che può svolgere la missione
 
-    // NOTIFICA CREW
+    // Filtro il personale trovato per eliminare il ruolo di pilota a chi non soddisfa i requisiti sul tipo di drone pilotabile
+    let personnel = []
+    for (let person of queryResult) {
+        // Se la persona è un pilota e non soddisfa i requisiti sul tipo di drone gli viene rimosso il ruolo di pilota per questa missione
+        if (person.roles.occupation.pilot == true && !person.pilot.droneTypes.includes(mission.droneType))
+            person.roles.occupation.pilot = false
+        // Se la persona ha ancora almeno un ruolo, viene notificata
+        if (person.roles.occupation.pilot || person.roles.occupation.crew || person.roles.occupation.maintainer)
+            personnel.push(person)
+    }
+    sendNotifications(personnel, mission)
+
+    /*// NOTIFICA CREW
     selection = {
         base: mission.base,
         'roles.occupation.crew': true,
@@ -165,7 +183,7 @@ const onOrganizedMission = (bot, mission) => {
         'missions.maintainer.accepted.date': {$ne: mission.date}
     }
     let maintainers = await queries.Personnel.find(selection, '')
-    sendNotifications(maintainers, mission)
+    sendNotifications(maintainers, mission)*/
 }
 
 module.exports = onOrganizedMission
