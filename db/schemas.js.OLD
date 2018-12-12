@@ -80,7 +80,7 @@ exports.personnelSchema = new Schema({
     missions: {
         supervisor: {
             completed: [{type: ObjectId, default: [], ref: 'mission'}],
-            pending: [{type: ObjectId, default: [], ref: 'mission'}] // requested, organized, started, copleted
+            pending: [{type: ObjectId, default: [], ref: 'mission'}]
         },
         pilot: {
             completed: [{type: ObjectId, default: [], ref: 'mission'}],
