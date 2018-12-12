@@ -8,20 +8,23 @@
 
 const queries = require('../../db/queries')
 const Telegraf = require('telegraf')
+const bf        = require('../../bot/bot-functions')
+const zip       = bf.zip
 
 // TODO: recuperare anche le ore di volo dei piloti
 
 /**
  * Funzione che notifica il personale, mediante un messaggio Telegram e attraverso un messaggio.
- * @param {*} idTelegram 
- * @param {*} message 
- * @param {*} role 
+ * @param {String} idTelegram 
+ * @param {String} message 
+ * @param {Array}  roles Possibili ruoli che la persona può ricoprire nella missione
  */
-const notify = (idTelegram, message, role) => {
+const notify = (idTelegram, message, roles) => {
     this.bot.telegram.sendMessage(idTelegram, message, Telegraf.Extra
         .markdown()
         .markup( m => m.inlineKeyboard([
-            m.callbackButton('Accetta', JSON.stringify({action: 'acceptMission', cbMessage: 'Missione accettata', data: {mission: {_id: this.mission._id, date: this.mission.date}, role: role}})),
+            //m.callbackButton('Accetta', JSON.stringify({action: 'acceptMission', cbMessage: 'Missione accettata', data: {mission: {_id: this.mission._id, date: this.mission.date}, role: role}})),
+            m.callbackButton('Accetta', `${zip['acceptMission']}:${mission._id}:${roles.join(',')}`),
             m.callbackButton('Rifiuta', JSON.stringify({action: 'declineMission'}))
     ])))
 }
