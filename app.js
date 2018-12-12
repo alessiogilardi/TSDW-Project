@@ -108,6 +108,16 @@ router.on('acceptMission', async ctx => {
 	 * 		--> aggiungo in personnel.accepted
 	 * 4. Man mano che le persone accettano controllo quanti hanno
 	 * 	  accettato finora e nel caso notifico il baseSup
+	 * 		Se:
+	 * 			- La missione dura meno di 3h:
+	 * 				1. Ci sono almeno 3 persone
+	 * 				2. Almeno 2 possono fare i piloti
+	 * 					--> Notifico il baseSup della missione per la scelta del Team
+	 * 			- La missione dura più di 3h
+	 * 				1. Ci sono almeno 4 persone
+	 * 				2. Almeno 2 possono fare i piloti
+	 * 				3. Almeno 1 può fare il manutentore
+	 * 					--> Notifico il baseSup della missione per la scelta del Team
 	 * 
 	 * NOTA: il baseSup sceglierà i ruoli che ognuno avrà nella
 	 * 		 missione a sua discrezione
@@ -117,26 +127,22 @@ router.on('acceptMission', async ctx => {
 	const roles 	= ctx.state.data[1].split(',') // Ruoli che può ricoprire nella missione
 	const person 	= ctx.session.userData //.telegramData.idTelegram
 	
-	const aMission 	= await Mission.findById(missionId, '')
+	let aMission 	= await Mission.findById(missionId, '')
 
-	await Personnel.updateById(person._id, {$push: {'accepted.idMission': aMission._id, date: aMission.date, roles: roles}})
-	await Mission.updateById(aMission._id, {$pull: {'personnel.notified': person._id}})
-	await Mission.updateById(aMission._id, {$push: {'personnel.accepted': person._id}})
+	await Personnel.updateById(person._id, { $push: { 'accepted.idMission': aMission._id, date: aMission.date, roles: roles } })
+	await Mission.updateById(aMission._id, { $pull: { 'personnel.notified': person._id } })
+	await Mission.updateById(aMission._id, { $push: { 'personnel.accepted': person._id } })
 
-	/**
-	 * Controllo le Persone che hanno accettato la missione finora, se:
-	 * 	- La missione dura meno di 3h:
-	 * 		1. Ci sono almeno 3 persone
-	 * 		2. Almeno 2 possono fare i piloti
-	 * 			--> Notifico il baseSup della missione per la scelta del Team
-	 * 	- La missione dura più di 3h
-	 * 		1. Ci sono almeno 4 persone
-	 * 		2. Almeno 2 possono fare i piloti
-	 * 		3. Almeno 1 può fare il manutentore
-	 * 			--> Notifico il baseSup della missione per la scelta del Team
-	 * 
-	 */
-	
+	// Cerco le persone che hanno accettato
+	let aMission = await Mission.findById(missionId, '')
+	let accepted = aMission.personnel.accepted
+	if (aMission.description.duration.expected < 3) {
+		
+	} else {
+
+	}
+
+
 })
 
 router.on('declineMission', ctx => {
