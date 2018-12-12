@@ -54,7 +54,6 @@ const onMissionRequested = async (bot, missions) => {
 		let mEvent = { type: 'missionRequested', actor: mission.AM, subject: {type: 'Mission', _id: mission._id}, timestamp: new Date() }
 		EventLog.insert(mEvent)
   
-}
     }
 }
 
