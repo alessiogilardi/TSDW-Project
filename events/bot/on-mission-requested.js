@@ -25,8 +25,8 @@ const EventLog = queries.EventLog
 const onMissionRequested = async (bot, missions) => {
     if (bot === undefined || bot === null) throw new Error('Missing Telegram Bot')
     this.bot = bot
-    var am         = await Personnel.findById(missions[0].AM, 'telegramData.idTelegram')
-    var supervisor = await Personnel.findById(missions[0].supervisor, 'telegramData.idTelegram')
+    let am         = await Personnel.findById(missions[0].AM, 'telegramData.idTelegram')
+    let supervisor = await Personnel.findById(missions[0].supervisor, 'telegramData.idTelegram')
 
     // TODO: la missione deve essere aggiunta alle requested missions del baseSup
 
@@ -37,9 +37,9 @@ const onMissionRequested = async (bot, missions) => {
         `Difficoltà: ${mission.description.riskEvaluation.level}\n`
 
         // Definisco il bottone da mandare al Responsabile di Base
-        var buttonMessage = 'Vuoi iniziare ad organizzare la missione?'
-        var buttonText    = 'Organizza'
-        var buttonData    = zip['organizeMission'] + ':' + mission._id + ':' + am.telegramData.idTelegram
+        let buttonMessage = 'Vuoi iniziare ad organizzare la missione?'
+        let buttonText    = 'Organizza'
+        let buttonData    = zip['organizeMission'] + ':' + mission._id + ':' + am.telegramData.idTelegram
 
         await this.bot.telegram.sendMessage(supervisor.telegramData.idTelegram, message)
         await this.bot.telegram.sendLocation(supervisor.telegramData.idTelegram, mission.location.latitude, mission.location.longitude)
@@ -50,10 +50,12 @@ const onMissionRequested = async (bot, missions) => {
             .markup(m => m.inlineKeyboard([
                 m.callbackButton(buttonText, buttonData)
         ])))
-		
+        
+        // Aggiungo la missione a quelle richieste al BaseSup
+        Personnel.updateById(supervisor._id, { $push: { 'missions.supervisor.requested': mission._id } })
+
 		let mEvent = { type: 'missionRequested', actor: mission.AM, subject: {type: 'Mission', _id: mission._id}, timestamp: new Date() }
 		EventLog.insert(mEvent)
-  
     }
 }
 
