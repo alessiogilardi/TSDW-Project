@@ -12,6 +12,10 @@ const eventRegister  = require('./events/event-register')
 const router		 = require('./bot/router')
 const { enter, leave } = Stage
 
+const queries = require('./db/queries')
+const Personnel = queries.Personnel
+const Mission = queries.Mission
+
 const backtick = '\`';
 
 // TODO: completare la notifica del supervisore quando è pronto un Team.
@@ -93,31 +97,47 @@ router.on('organizeMission', ctx => {
 	ctx.scene.enter('organizeMission', { mission: { _id: ctx.state.data[0] } })
 })
 
-router.on('acceptMission', ctx => {
+router.on('acceptMission', async ctx => {
 	/**
-	 * 1. Ricevo _id della missione accetttata tramite callbackMessage
+	 * 1. Ricevo _id della missione accetttata tramite callbackButton
 	 * 2. Aggiungo la missione a quelle accettate in
-	 *  	--> missions.pilot.accepted se pilota o pilota/crew
-	 * 		--> missions.crew.accepted 
-	 *		--> ...
+	 *  	--> missions.accepted
 	 * 3. Aggiungo il Personale che ha accettato alla missione
 	 *    seguendo regole simili a quelle sopra
-	 * 		--> rimuovo da pilots.notified
-	 * 		--> pilots.accepted
-	 * 		--> stesso per crew e maintainers
+	 * 		--> rimuovo da personnel.notified
+	 * 		--> aggiungo in personnel.accepted
 	 * 4. Man mano che le persone accettano controllo quanti hanno
 	 * 	  accettato finora e nel caso notifico il baseSup
 	 * 
 	 * NOTA: il baseSup sceglierà i ruoli che ognuno avrà nella
 	 * 		 missione a sua discrezione
 	 */
-	const data		= ctx.state.data
-	const missionId = ctx.state.data[0]
-	const role 		= ctx.state.dat[1]
-
 	
+	const missionId = ctx.state.data[0]
+	const roles 	= ctx.state.data[1].split(',') // Ruoli che può ricoprire nella missione
+	const person 	= ctx.session.userData //.telegramData.idTelegram
+	
+	const aMission 	= await Mission.findById(missionId, '')
 
+	await Personnel.updateById(person._id, {$push: {'accepted.idMission': aMission._id, date: aMission.date, roles: roles}})
+	await Mission.updateById(aMission._id, {$pull: {'personnel.notified': person._id}})
+	await Mission.updateById(aMission._id, {$push: {'personnel.accepted': person._id}})
 
+	/**
+	 * Controllo le Persone che hanno accettato la missione finora, se:
+	 * 	- La missione dura meno di 3h:
+	 * 		1. Ci sono almeno 3 persone
+	 * 		2. Almeno 2 possono fare i piloti
+	 * 			--> Notifico il baseSup della missione con per la scelta del Team
+	 * 	- La missione dura più di 3h
+	 * 		1. Ci sono almeno 4 persone
+	 * 		2. Almeno 2 possono fare i piloti
+	 * 		3. Almeno 1 può fare il manutentore
+	 * 
+	 */
+	// Controllo le Persone che hanno accettato la missione finora, se:
+	 
+	//
 })
 
 router.on('declineMission', ctx => {
