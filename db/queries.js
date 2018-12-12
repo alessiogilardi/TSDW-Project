@@ -555,19 +555,18 @@ exports.Mission = Mission = {
             })
         })
     },
-    
+
     update: (selection, newValues) => {
         return new Promise((resolve, reject) => {
             models.Mission.updateOne(selection, newValues, err => {
                 if (err) {
                     console.log(err)
-                    reject(err)
-                } else {
-                    // Emetto l'evento update
-                    eventEmitters.db.Mission.emit('update')
-                    console.log(`Updated Mission selected by: ${JSON.stringify(selection)}`)
-                    resolve()
+                    return reject(err)
                 }
+                // Emetto l'evento update
+                eventEmitters.db.Mission.emit('update')
+                console.log(`Updated Mission selected by: ${JSON.stringify(selection)}`)
+                resolve()
             })
         })
     },
@@ -588,7 +587,7 @@ exports.Mission = Mission = {
         .select(projection)
         .exec()
     },
-
+/*
     // pilots, crew, maintainers sono array
     // Quando viene scelto un team la missione passa a running
     addTeam: (aMissionId, chiefPilotId, coPilotId, crewIds, maintainersIds) => {
@@ -606,12 +605,9 @@ exports.Mission = Mission = {
         maintainersIds.forEach(id => Personnel.updateById(id, {$push: {'missions.maintainer.pending': aMissionId}}))
         Mission.setStatus(aMissionId, 2)
     },
-
-    // TODO: la missione passa a completata, nel personale crew e maintainer la missione passa a completed
-    complete: aMissionId => {
-
-    },
-
+*/
+   
+/*
     findByIdSync: (aId, projection) => {
         var ret = null;
         models.Mission.findOne()
@@ -625,6 +621,7 @@ exports.Mission = Mission = {
             deasync.runLoopOnce();
         return ret;
     }
+    */
 };
 
 exports.Logbook = Logbook = {
