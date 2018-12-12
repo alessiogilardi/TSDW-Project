@@ -51,6 +51,8 @@ const command = {
 
 
 /**
+ * Funzione che richiede una nuova missione e fa partire l'iter corrispondente.
+ * 
  * Si richiedono:
  *  - Data della missione
  *  - Base di partenza
