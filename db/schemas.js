@@ -202,7 +202,10 @@ exports.missionsSchema = new Schema({
     },
     personnel: {
         notified: [{type: ObjectId, ref: 'personnel', default: []}], // Elenco delle persone che soo state notificate
-        accepted: [{type: ObjectId, ref: 'personnel', default: []}]  // Elenco delle persone che hanno accettato la missione
+        accepted: [{ // Elenco delle persone che hanno accettato la missione
+            _id: {type: ObjectId, ref: 'personnel', default: []},
+            roles:  [{type: String, enum: ['pilot', 'crew', 'maintainer']}] // Ruoli che può ricoprire nella missione
+        }]
     },
     description: {
         duration: { /* Durata della missione, può differire dai tempi di volo */
