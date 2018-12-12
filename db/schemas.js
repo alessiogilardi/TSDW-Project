@@ -8,15 +8,12 @@
  * - Mission
  * - Logbook
  * - QTB
+ * - EventLog
 **/
 
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 const ObjectId = mongoose.Schema.Types.ObjectId
-
-const eventTypes = ['comandoBot', 'notifica'] // TO DELETE
-//exports.scenarios = scenarios = ['a1', 'a2', 'a3', 'a4', 'b1', 'b2', 'c']
-//exports.riskLevel = riskLevel = {min: 1, max: 4}
 
 exports.droneTypes = droneTypes = ['VL', 'L', 'CRO']
 
