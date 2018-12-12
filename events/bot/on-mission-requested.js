@@ -17,7 +17,8 @@ const zip       = bf.zip
 const EventLog = queries.EventLog
 
 /**
- * 
+ * Funzione che gestisce l'evento MissionRequested, che viene richiamato quando c'è richiesta di
+ * una missione.
  * @param {Telegraf} bot 
  * @param {Array} missions Array di missioni, nel caso la missione duri più di un giorno
  */
