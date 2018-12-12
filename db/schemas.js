@@ -15,7 +15,7 @@ const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 const ObjectId = mongoose.Schema.Types.ObjectId
 
-exports.droneTypes = droneTypes = ['VL', 'L', 'CRO']
+exports.droneTypes = droneTypes = ['vl/l', 'cro']
 
 
 exports.airOperatorSchema = new Schema({
@@ -172,6 +172,7 @@ exports.missionsSchema = new Schema({
         latitude:   Number,
         longitude:  Number
     },
+    droneType: {type: String, enum: droneType},
     status: {
         requested: { // la missione è richietsa dall'AM ad un BaseSup
             value: {type: Boolean, default: false},
