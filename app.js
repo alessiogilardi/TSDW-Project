@@ -96,12 +96,8 @@ router.on('organizeMission', ctx => {
 	ctx.scene.enter('organizeMission', { mission: { _id: ctx.state.data[0] } })
 })
 
-router.on('acceptMission', async ctx => {
-	
-	
+router.on('acceptMission', ctx => {
 	acceptMission(bot, ctx)
-
-
 })
 
 router.on('declineMission', ctx => {
