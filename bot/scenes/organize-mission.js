@@ -1,7 +1,7 @@
 /**
  * Scene per la procedura di Organizzazione di una Missione.
- * Un responsabile di base quando preme il Botton con action organizeMission 
- * entra in questa Scene dove dovrà inserire le informazioni mancanti sulla Missione.
+ * Un responsabile di base quando preme il Button con action organizeMission 
+ * entra in questa Scene dove dovrà inserire le informazioni mancanti sulla Missione (Droni).
  * L'AM deve essere notificato quando si viene iniziata questa procedura in modo da essere sicuro che
  * il baseSup abbia preso in carico la missione.
  * 
