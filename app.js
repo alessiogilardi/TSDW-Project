@@ -135,9 +135,7 @@ router.on('acceptMission', async ctx => {
 	 * 		3. Almeno 1 può fare il manutentore
 	 * 
 	 */
-	// Controllo le Persone che hanno accettato la missione finora, se:
-	 
-	//
+	
 })
 
 router.on('declineMission', ctx => {
