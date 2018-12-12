@@ -128,11 +128,12 @@ router.on('acceptMission', async ctx => {
 	 * 	- La missione dura meno di 3h:
 	 * 		1. Ci sono almeno 3 persone
 	 * 		2. Almeno 2 possono fare i piloti
-	 * 			--> Notifico il baseSup della missione con per la scelta del Team
+	 * 			--> Notifico il baseSup della missione per la scelta del Team
 	 * 	- La missione dura più di 3h
 	 * 		1. Ci sono almeno 4 persone
 	 * 		2. Almeno 2 possono fare i piloti
 	 * 		3. Almeno 1 può fare il manutentore
+	 * 			--> Notifico il baseSup della missione per la scelta del Team
 	 * 
 	 */
 	
