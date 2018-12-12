@@ -163,20 +163,20 @@ exports.batterySchema = new Schema({
 });
 
 exports.missionsSchema = new Schema({
-    id: ObjectId,
-    date: Date, // Giorno in cui viene effettuata la missione
-    base: {type: ObjectId, ref: 'base'},
+    id:         ObjectId,
+    date:       Date, // Giorno in cui viene effettuata la missione
+    base:       {type: ObjectId, ref: 'base'},
     supervisor: {type: ObjectId, ref: 'personnel'},
-    AM: {type: ObjectId, ref: 'personnel'}, // Campo usato per semplificare il sistema di notifica
+    AM:         {type: ObjectId, ref: 'personnel'}, // AM che ha richiesto la missione
     location: {
-        latitude: Number,
-        longitude: Number
+        latitude:   Number,
+        longitude:  Number
     },
     status: {
-        requested: { // la missione è richietsa dall'AM ad un BAseSup
+        requested: { // la missione è richietsa dall'AM ad un BaseSup
             value: {type: Boolean, default: false},
             timestamp: {type: Date, default: Date.now},
-            timeout: Date // Tempo entro il quale il BaseSup deve rispondere, se non risponde va notificato l'AM
+            //timeout: Date // Tempo entro il quale il BaseSup deve rispondere, se non risponde va notificato l'AM
         },
         waitingForTeam: { // Il baseSup ha preso in carico la missione, l'AM è notificato e si attende che le persone diano disponibilità 
             value: {type: Boolean, default: false},
@@ -199,52 +199,38 @@ exports.missionsSchema = new Schema({
             timestamp: {type: Date, default: Date.now}
         }
     },
-    pilots: {
-        notified: [{type: ObjectId, ref: 'personnel', default: []}],
-        accepted: [{type: ObjectId, ref: 'personnel', default: []}], /* Nome del campo da rivedere */
-        chosen: [{type: ObjectId, ref: 'personnel', default: []}], /* Nome del campo da rivedere */
-        declined: [{type: ObjectId, ref: 'personnel', default: []}]
-    },
-    crew: {
-        notified: [{type: ObjectId, ref: 'personnel', default: []}],
-        accepted: [{type: ObjectId, ref: 'personnel', default: []}], /* Nome del campo da rivedere */
-        chosen: [{type: ObjectId, ref: 'personnel', default: []}], /* Nome del campo da rivedere */
-        declined: [{type: ObjectId, ref: 'personnel', default: []}]
-    },
-    maintainers: {
-        notified: [{type: ObjectId, ref: 'personnel', default: []}],
-        accepted: [{type: ObjectId, ref: 'personnel', default: []}], /* Nome del campo da rivedere */
-        chosen: [{type: ObjectId, ref: 'personnel', default: []}], /* Nome del campo da rivedere */
-        declined: [{type: ObjectId, ref: 'personnel', default: []}]
+    personnel: {
+        notified: [{type: ObjectId, ref: 'personnel', default: []}], // Elenco delle persone che soo state notificate
+        accepted: [{type: ObjectId, ref: 'personnel', default: []}]  // Elenco delle persone che hanno accettato la missione
     },
     description: {
         duration: { /* Durata della missione, può differire dai tempi di volo */
-            expected: Number,
-            effective: Number
+            expected:   Number,
+            effective:  Number
         },
         //rank: {type: Number, min: 1, max: 5}, /* Difficoltà della missione (0 -> 5) */
         riskEvaluation: {
-            scenario: String,
-            level: Number
+            scenario:   String,
+            level:      Number
         },
         flightPlan: String, /* Presumibilemente sarà un riferimento ad un documento come il Logbook */
         notes: String
     },
     drones:[{
-        _id: {type: ObjectId, ref: 'drone'},
-        type: {type: String, enum: droneTypes}
+        _id:    {type: ObjectId, ref: 'drone'},
+        type:   {type: String, enum: droneTypes}
     }],
     teams: [{
         pilots: {
-            chief: {type: ObjectId, ref: 'personnel', default: undefined},
-            co: {type: ObjectId, ref: 'personnel', default: undefined}
+            chief:  {type: ObjectId, ref: 'personnel', default: undefined},
+            co:     {type: ObjectId, ref: 'personnel', default: undefined}
         },
-        crew: [{type: ObjectId, ref: 'personnel', default: []}],
-        maintainers: [{type: ObjectId, ref: 'personnel', default: []}],
-        timestamp: {type: Date, default: Date.now} // Timestamp della creazione del team
+        crew:           [{type: ObjectId, ref: 'personnel', default: []}],
+        maintainers:    [{type: ObjectId, ref: 'personnel', default: []}],
+        timestamp:      {type: Date, default: Date.now} // Timestamp della creazione del team
     }],
-    logbooks: [{type: ObjectId, default: [], ref: 'logbook'}],
-    qtb: [{type: ObjectId, default: [], ref: 'qtb'}]
+    logbooks:   [{type: ObjectId, default: [], ref: 'logbook'}],
+    qtb:        [{type: ObjectId, default: [], ref: 'qtb'}]
 });
 
 exports.logbooksSchema = new Schema({
@@ -270,11 +256,11 @@ exports.qtbSchema = new Schema({
 
 
 exports.eventLogSchema = new Schema({
-    type: String, // Tipo di evento, es: missionRequested
-    actor: ObjectId, // Chi compie l'evento
+    type:   String, // Tipo di evento, es: missionRequested
+    actor:  ObjectId, // Chi compie l'evento
     subject: { // Chi subisce l'evento
-        type: {type: String, enum: ['Mission', 'Personnel', 'Drone', 'Logbook', 'Qtb']},
-        _id: ObjectId
+        type:   {type: String, enum: ['Mission', 'Personnel', 'Drone', 'Logbook', 'Qtb']},
+        _id:    ObjectId
     }, 
     timestamp: {type: Date, default: Date.now}
 })
