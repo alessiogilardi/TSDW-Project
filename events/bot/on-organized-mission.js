@@ -20,10 +20,13 @@ const notify = (idTelegram, message, role) => {
             m.callbackButton('Rifiuta', JSON.stringify({action: 'declineMission'}))
     ])))
 }
-/**
-* Funzione che notifica il personale.
-*/
 
+/**
+ * Funzione che notifica il personale.
+ * 
+ * @param {*} persons 
+ * @param {*} mission 
+ */
 const sendNotifications = (persons, mission) => {
     for (let person of persons) {
         console.log(`Notifing: ${person} as ${person.role}`)
