@@ -543,7 +543,7 @@ exports.Mission = Mission = {
                 if (err) return reject(err)
                 console.log(`Inserted Mission with id: ${mission._id}`)
                 // Viene aggiunta la missione alle pending missions del Supervisor
-                Personnel.updateById(mission.supervisor, {$push: {'missions.supervisor.pending': mission._id}})
+                // Personnel.updateById(mission.supervisor, {$push: {'missions.supervisor.pending': mission._id}})
 
                 // Setto i droni come non disponibili e aggiungo la missione alle waitingForQtb del drone
                 // mission.drones.forEach(drone => Drone.updateById(drone._id, {'state.availability': 1, $push: {'missions.waitingForQtb': {idMission: mission._id, date: new Date(mission.date)}}}))
