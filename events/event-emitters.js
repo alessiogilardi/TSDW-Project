@@ -2,20 +2,21 @@
  * Modulo che contiene gli EventEmitters per varie entità.
  * Eventi per il db e per il bot.
  */
-const events = require('events')
+const events       = require('events')
+const EventEmitter = events.EventEmitter
 
 const emitters = {
     db: {
-        AirOperator: new events.EventEmitter(),
-        Base:        new events.EventEmitter(),
-        Personnel:   new events.EventEmitter(),
-        Drone:       new events.EventEmitter(),
-        Battery:     new events.EventEmitter(),
-        Mission:     new events.EventEmitter(),
-        Logbook:     new events.EventEmitter(),
-        Qtb:         new events.EventEmitter()
+        AirOperator: new EventEmitter(),
+        Base:        new EventEmitter(),
+        Personnel:   new EventEmitter(),
+        Drone:       new EventEmitter(),
+        Battery:     new EventEmitter(),
+        Mission:     new EventEmitter(),
+        Logbook:     new EventEmitter(),
+        Qtb:         new EventEmitter()
     },
-    bot: new events.EventEmitter()
+    bot: new EventEmitter()
 }
 
 module.exports = emitters
