@@ -31,7 +31,7 @@ const onMissionRequested = async (bot, missions) => {
     // TODO: la missione deve essere aggiunta alle requested missions del baseSup
 
     for (let mission of missions) {
-        var message = `C'è una richiesta di missione:\n\n`+
+        let message = `C'è una richiesta di missione:\n\n`+
         `Data: ${utils.Date.format(mission.date, 'DD MMM YYYY')}\n` +
         `Scenario: ${mission.description.riskEvaluation.scenario}\n` +
         `Difficoltà: ${mission.description.riskEvaluation.level}\n`
