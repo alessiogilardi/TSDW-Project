@@ -1,6 +1,6 @@
 
 
-const queries   = require('./db/queries')
+const queries   = require('../../db/queries')
 const Personnel = queries.Personnel
 const Mission   = queries.Mission
 
@@ -38,22 +38,31 @@ const Mission   = queries.Mission
   * 	--> IMPORTANTE: gestire questa cosa con una Scene e cancellare i messaggi mandati in questa Scene quando si esce
   */
 
- const notify = async (telegramId, message) => {
+const notify = async (idTelegram, message, mission) => {
+	this.bot.telegram
+	.sendMessage(idTelegram, message, Telegraf.Extra
+		.markdown()
+		.markup( m => m.inlineKeyboard([
+			m.callbackButton('Accetta', `${zip['showTeam']}:${mission._id}`)
+	])))
+}
 
- }
+const generateMessage = async accepted => {
+	let acceptedIds = []
+	for (let person of accepted) {
+		acceptedIds.push(person._id)
+	}
+	const personnel = await Personnel.find({ _id: {$in: acceptedIds}})
+	let tmp = []
+	for (let i in personnel) {
+		tmp.push(`${personnel[i].name}\t${personnel[i].surname}\t[${accpeted[i].roles.join(',')}]`)
+	}
+	return 'C\è un numero di persone sufficiente per formare un Team\n' +
+			tmp.join('\n')
+}
 
-const acceptMission = async (bot, ctx) => {
-    const missionId = ctx.state.data[0]
-	const roles 	= ctx.state.data[1].split(',') // Ruoli che può ricoprire nella missione
-	const person 	= ctx.session.userData
-	
-	const aMission 	= await Mission.findById(missionId, '')
-
-	await Personnel.updateById(person._id, { $push: { 'accepted.idMission': aMission._id, date: aMission.date, roles: roles } })
-	await Mission.updateById(aMission._id, { $pull: { 'personnel.notified': person._id } })
-	await Mission.updateById(aMission._id, { $push: { 'personnel.accepted': person._id } })
-
-	// Cerco le persone che hanno accettato
+// Controlla che ci siano abbastanza persone per un team
+const checkForTeam = async missionId => {
 	const aMission = await Mission.findById(missionId, '')
 	const accepted = aMission.personnel.accepted
 	if (accepted.length < 3) {
@@ -67,7 +76,9 @@ const acceptMission = async (bot, ctx) => {
 				pilotCount++
 		}
 		if (pilotCount >= 2) {
-			// TODO: Notifico il BaseSup
+			const message 	 = await generateMessage(accepted)
+			const supervisor = await Personnel.findById(aMission.supervisor)
+			notify(supervisor.telegramData.idTelegram, message, aMission)
 		}
 		return
 	}
@@ -97,11 +108,28 @@ const acceptMission = async (bot, ctx) => {
 	if (pilotCount >= 2 && 
 		maintCount >= 1 && 
 		pilotCount + maintCount + pilotAndMaintCount >= 3) {
-		// TODO: Notifico il baseSup
+		const message 	 = await generateMessage(accepted)
+		const supervisor = await Personnel.findById(aMission.supervisor)
+		notify(supervisor.telegramData.idTelegram, message, aMission)
 	}
 
+}
 
+const acceptMission = async bot => {
+	if (bot === undefined || bot === null) throw new Error('Missing Telegram Bot')
+	this.bot = bot
+	
+    const missionId = ctx.state.data[0]
+	const roles 	= ctx.state.data[1].split(',') // Ruoli che può ricoprire nella missione
+	const person 	= ctx.session.userData
+	
+	const aMission 	= await Mission.findById(missionId, '')
 
+	await Personnel.updateById(person._id, { $push: { 'accepted.idMission': aMission._id, date: aMission.date, roles: roles } })
+	await Mission.updateById(aMission._id, { $pull: { 'personnel.notified': person._id } })
+	await Mission.updateById(aMission._id, { $push: { 'personnel.accepted': person._id } })
+
+	checkForTeam(missionId)
 }
 
 module.exports = acceptMission
