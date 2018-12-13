@@ -432,11 +432,11 @@ exports.Drone = Drone = {
     /**
      * Funzione che esegue l'operazione di update selezionando il Drone per numero di targa.
      */
-    updateByNumber: (aNumber, newValues) => { return rone.update({number: aNumber}, newValues) },
+    updateByNumber: (aNumber, newValues) => { return Drone.update({ number: aNumber }, newValues) },
     /**
      * Funzione che esegue l'operazione di update selezionando il Drone per id.
      */
-    updateById: (aId, newValues) => { return Drone.update({_id: aId}, newValues) },
+    updateById: (aId, newValues) => { return Drone.update({ _id: aId }, newValues) },
     
     /**
      * Funzione che ricercaa un Drone in base all'id.
@@ -459,9 +459,8 @@ exports.Drone = Drone = {
      * @param {String} aType il tipo di drone da cercare
      * @param {String} selection parametri di reicerca del drone
      * @param {String} aType attributi da restituire
-     * @param {Function} aType funzione di callback a cui è passato il drone recuperato
      */
-    findByType: (aType, selection, projection/*, callback*/) => {
+    findByType: (aType, selection, projection) => {
         return models.Drone.find(selection)
         .where('type').equals(aType)
         .select(projection)
