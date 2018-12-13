@@ -1,18 +1,7 @@
 require('dotenv').config()
 const WizardScene   = require('telegraf/scenes/wizard/index')
-const moment        = require('moment')
 const Composer      = require('telegraf/composer')
-const utmObj        = require('utm-latlng');
 const queries       = require('../../db/queries')
-const schemas       = require('../../db/schemas')
-const ee            = require('../../events/event-emitters')
-const utils         = require('../../utils')
-
-const utm     = new utmObj()
-const Base    = queries.Base
-const Mission = queries.Mission
-
-// TODO: gestire errori ed eccezioni, gestire in questi casi l'uscita dalla Scene
 
 // Modello da seguire:
 const command = {
@@ -21,24 +10,6 @@ const command = {
     searching: undefined,
     base: undefined
 }
-
-/**
- * Funzione che richiede una nuova missione e fa partire l'iter corrispondente.
- * 
- * Si richiedono:
- *  1. Data della missione
- *  2. Base di partenza
- *  3. Location di inizio della missione
- *  4. Descrizione
- *      - Durata prevista -> usata per generare più missioni e aggiungere Manutentori
- *      - Valutazione di rischio
- * 
- * Azioni da eseguire in seguito:
- *  - Settare a true il campo Instantiated della missione
- *  - Aggiungere il timestamp a tale campo
- *  - Inserire l'evento nel eventsLog
- *  - Notificare il baseSup con i parametri della Missione
- */
 
 const listDrones = new WizardScene('listDrones',
     async ctx => {
@@ -58,7 +29,7 @@ const listDrones = new WizardScene('listDrones',
         ctx.wizard.next()
     },
     new Composer()
-    .on('text', ctx => {
+    .on('text', async ctx => {
         let choice = ctx.message.text
         if (!['1','2','3','4'].includes(choice)) {
             ctx.reply('Il filtro inserito non è valido, per favore reinseriscilo')
@@ -86,4 +57,4 @@ const listDrones = new WizardScene('listDrones',
     }
 })
 
-module.exports = requestMission
+module.exports = listDrones

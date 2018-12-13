@@ -7,6 +7,7 @@ const bf 			 	= require('./bot/bot-functions.js')
 const Stage 		 	= require('telegraf/stage')
 const organizeMission 	= require('./bot/scenes/organize-mission')
 const requestMission 	= require('./bot/scenes/request-mission')
+const listDrones        = require('./bot/scenes/list-drones')
 const showTeam 			= require('./bot/scenes/show-team')
 const acceptMission 	= require('./bot/actions/accept-mission')
 const eventEmitters	 	= require('./events/event-emitters')
@@ -30,7 +31,7 @@ const backtick = '\`';
 
 // TODO: definire la possibilità che sia droni che piloti siano occupati in un altra missione per cui è inutile notificarli
 
-const stage = new Stage([organizeMission, requestMission, showTeam])
+const stage = new Stage([organizeMission, requestMission, showTeam, listDrones])
 stage.command('cancel', leave())
 
 const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN);
@@ -64,6 +65,14 @@ bot.command(['requestMission', 'requestmission'], ctx => {
 	}
 	ctx.scene.enter('requestMission');
 });
+
+bot.command(['listDrones', 'listdrones'], ctx => {
+	if (!ctx.session.userData.commands.includes('/listDrones')) {
+		ctx.reply('Mi spiace, non hai i diritti per eseguire questo comando.')
+		return
+	}
+	ctx.scene.enter('listDrones');
+})
 
 
 //////////// DEGUGGING DA CANCELLARE ////////////////////

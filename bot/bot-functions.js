@@ -33,7 +33,8 @@ const roleToOperation = {
 	AM:     ['/requestMission'],
 	BS:     ['/createMission', '/acceptMission', '/addChiefPilot', '/addCoPilot', '/addCrew', '/addQtb'],
 	pilot:  ['/addLogbook'],
-	crew:   ['/accept', '/refuse'] // Usabili anche dai piloti e manutentori
+    crew:   ['/accept', '/refuse'], // Usabili anche dai piloti e manutentori
+    maintainer: ['/listDrones']
 };
 
 /**
@@ -51,6 +52,8 @@ const getPermissions = aPerson => {
         commands = commands.concat(roleToOperation.pilot);
     if (aPerson.roles.occupation.pilot || aPerson.roles.occupation.crew || aPerson.roles.occupation.maintainer)
         commands = commands.concat(roleToOperation.crew);
+    if (aPerson.roles.occupation.maintainer || aPerson.roles.command.base.supervisor)   // listDrones può essere eseguito da bs e maintainer
+        commands = commands.concat(roleToOperation.maintainer)
     
     return commands;
 };
