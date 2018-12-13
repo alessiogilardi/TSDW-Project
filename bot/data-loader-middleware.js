@@ -5,16 +5,15 @@
  */
 const bf = require('./bot-functions.js')
 
-const middleware = () => (ctx, next) => {
-    if (ctx.session.dataLoaded && ctx.session.isValid)
+const middleware = () => async (ctx, next) => {
+    if (ctx.session.dataLoaded && ctx.session.isValid) {
         return next()
-    bf.loadData(ctx.message.chat.id)
-    .then(data => {
-        ctx.session.userData    = data
-        ctx.session.dataLoaded  = true
-        ctx.session.isValid     = true
-        return next()
-    })
+    }
+    const data = await bf.loadData(ctx.message.chat.id)
+    ctx.session.userData    = data
+    ctx.session.dataLoaded  = true
+    ctx.session.isValid     = true
+    return next()
 }
 
 module.exports = middleware
