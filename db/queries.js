@@ -230,8 +230,8 @@ exports.Personnel = Personnel = {
      */
     insert: async aPersonnel => {
         return new Promise(async (resolve, reject) => {
-            var airOperator = await AirOperator.findByName(aPersonnel.airOperator, '_id')
-            var base        = await Base.findByName(aPersonnel.base, '_id')
+            const airOperator = await AirOperator.findByName(aPersonnel.airOperator, '_id')
+            const base        = await Base.findByName(aPersonnel.base, '_id')
 
             aPersonnel._id          = mongoose.Types.ObjectId();
             aPersonnel.airOperator  = airOperator._id;
@@ -281,27 +281,17 @@ exports.Personnel = Personnel = {
      * @param {} selection parametro usato per la selezione del documento su cui eseguire l'update
      * @param {} newValues parametro con i nuovi valori da inserire
      */
-    /*
-    update: (selection, newValues) => {
-        return models.Personnel.updateOne(selection, newValues, err => {
-            if (err) return console.log(err)
-            // Emetto evento update
-            eventEmitters.db.Personnel.emit('update')
-            console.log(`Updated Personnel selected by: ${JSON.stringify(selection)}`)
-        }).exec()
-    },*/
     update: (selection, newValues) => {
         return new Promise((resolve, reject) => {
             models.Personnel.updateOne(selection, newValues, err => {
                 if (err) { 
                     console.log(err)
-                    reject(err)
-                } else {
-                    // Emetto evento update
-                    eventEmitters.db.Personnel.emit('update')
-                    console.log(`Updated Personnel selected by: ${JSON.stringify(selection)}`)
-                    resolve()
+                    return reject(err)
                 }
+                // Emetto evento update
+                eventEmitters.db.Personnel.emit('update')
+                console.log(`Updated Personnel selected by: ${JSON.stringify(selection)}`)
+                resolve()
             })
         })
     },
