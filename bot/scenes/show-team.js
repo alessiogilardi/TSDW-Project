@@ -87,7 +87,42 @@ const showTeam = new WizardScene('showTeam',
         return ctx.scene.leave()
     })
     ).leave(ctx => {
-        // Inserisco i dati nel DB
+        /**
+         *  1. Creo un Team
+         *  2. Lo inserisco nella missione di riferimento
+         *  3. La missione passa a team created
+         *  4. Notifico chi è stato aggiunto alla missione
+         *  5. Notifico l'AM della creazione del Team ???
+         */
+        const chosen  = ctx.scene.state.personnel.chosen
+        const mission = ctx.scene.state.mission
+        let team = {
+            pilots: {
+                chief:  undefined,
+                co:     undefined
+            },
+            crew:           [],
+            maintainers:    [],
+            timestamp:      new Date()
+        }
+        let pilotCount = 1
+        for (let person of chosen) {
+            if (person.role === 'pilot') { 
+                if (pilotCount === 1) { team.pilots.chief = person._id }
+                if (pilotCount === 2) { team.pilots.co    = person._id }
+                pilotCount++
+            }
+            if (person.role === 'crew')       { team.crew.push(person._id) }
+            if (person.role === 'maintainer') {team.maintainers.push(person._id)}
+        }
+
+        ;(async () => {
+            await Mission.updateById(mission._id, {
+                $push: { teams: team }, 
+                teamCreated: { value: true, timestamp: team.timestamp }})
+            const mission = await Mission.findById(mission._id)
+            ee.bot.emit('teamCreated', mission)
+        })()
     })
 
 module.exports = showTeam
