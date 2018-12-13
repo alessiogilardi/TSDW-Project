@@ -41,14 +41,14 @@ const listDrones = new WizardScene('listDrones',
         let selection = {
             '1': {base: ctx.scene.state.command.base},
             '2': {base: ctx.scene.state.command.base, 'missions.waitingForQtb.date': today},
-            '3': {base: ctx.scene.state.command.base, $ne: {'missions.waitingForQtb.date': today}},
+            '3': {base: ctx.scene.state.command.base, 'missions.waitingForQtb.date': {$ne: today}},
             '4': {base: ctx.scene.state.command.base, $and: [{'state.maintenance.start': {$gte: today}}, {'state.maintenance.end': {$lte: today}}]}
         }
 
         let drones = await queries.Drone.find(selection[choice], '')
         ctx.reply('Ecco i risultati:\n'+JSON.stringify(drones))
 
-        return ctx.wizard.next()
+        return ctx.scene.leave()
     })
 ).leave(ctx => {
     if (ctx.message.text === '/cancel') {
