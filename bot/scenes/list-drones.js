@@ -37,11 +37,12 @@ const listDrones = new WizardScene('listDrones',
         }
 
         // Selezione della query, che dipende dalla scelta del manutentore
+        let today = new Date().setHours(0, 0, 0, 0)                      // data di oggi senza ore, minuti, secondi e millisecondi
         let selection = {
             '1': {base: ctx.scene.state.command.base},
-            '2': {base: ctx.scene.state.command.base, 'state.availability': 1},
-            '3': {base: ctx.scene.state.command.base, 'state.availability': 0},
-            '4': {base: ctx.scene.state.command.base, 'state.availability': 2}
+            '2': {base: ctx.scene.state.command.base, 'missions.waitingForQtb.date': today},
+            '3': {base: ctx.scene.state.command.base, $ne: {'missions.waitingForQtb.date': today}},
+            '4': {base: ctx.scene.state.command.base, $and: [{'state.maintenance.start': {$gte: today}}, {'state.maintenance.end': {$lte: today}}]}
         }
 
         let drones = await queries.Drone.find(selection[choice], '')
