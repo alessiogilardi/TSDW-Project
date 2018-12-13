@@ -1,4 +1,4 @@
-const commands = ['/requestmission', '/createmission', '/acceptmission', '/addchiefpilot', '/addcopilot', '/addcrew', '/addqtb', '/addlogbook', '/accept', '/refuse']
+const commands = ['/requestmission', '/createmission', '/acceptmission', '/addchiefpilot', '/addcopilot', '/addcrew', '/addqtb', '/addlogbook', '/accept', '/refuse', '/listDrones']
 const middleware = () => (ctx, next) => {
     if (ctx.updateType === 'message' && 
     ctx.updateSubType === 'text' && 
