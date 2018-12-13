@@ -74,7 +74,7 @@ const organizeMission = new WizardScene('organizeMission',
             ctx.scene.state.drones.chosen.push(ctx.scene.state.drones.loaded[parts[1]])
         }
     })
-    .command('/end', ctx => { // Comando che termina l'inserimento dei droni
+    .command('end', ctx => { // Comando che termina l'inserimento dei droni
         if (ctx.scene.state.drones.loaded.length > 0 && ctx.scene.state.drones.chosen.length === 0) {
             return ctx.reply('Scegli almeno un drone.')
         }
@@ -87,7 +87,6 @@ const organizeMission = new WizardScene('organizeMission',
     console.log(ctx.scene.state.drones.chosen)
     console.log('Leaving organizeMission')
 
-    // TODO: CONTINUA QUI
     if (ctx.scene.state.drones.chosen > 0) {
         drones = []
         for (let drone in ctx.scene.state.drones.chosen) {
@@ -97,7 +96,7 @@ const organizeMission = new WizardScene('organizeMission',
         ctx.scene.state.mission.status.waitingForTeam.timestamp = new Date()
         Mission.updateById(ctx.scene.state.mission._id, {$push: {drones: drones}})
         for (let drone in drones) {
-            Drone.updateById(drone._id, {$push: {'missions.waitingForQtb': { idMission: ctx.scene.state.mission._id, date: ctx.scene.state.mission.date }}})
+            Drone.updateById(drone._id, { $push: { 'missions.waitingForQtb': { idMission: ctx.scene.state.mission._id, date: ctx.scene.state.mission.date } } })
         }
         ee.bot.emit('missionOrganized', ctx.scene.state.mission)
     }
