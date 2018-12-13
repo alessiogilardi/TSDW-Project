@@ -50,15 +50,13 @@ const notify = async (idTelegram, message, mission) => {
 }
 
 const generateMessage = async accepted => {
-	let acceptedIds = []
-	for (let person of accepted) {
-		acceptedIds.push(person._id)
-	}
-	const personnel = await Personnel.find({ _id: {$in: acceptedIds}})
 	let tmp = []
-	for (let i in personnel) {
-		tmp.push(`${personnel[i].name}\t${personnel[i].surname}\t[${accpeted[i].roles.join(',')}]`)
+	for (let person of accepted) {
+		let p = await Personnel.findById(person._id)
+		p.roles = person.roles // Setto i ruoli che ha in questa missone
+		tmp.push(`${p.name}\t${p.surname}\t[${p.roles.join(',')}]`)
 	}
+
 	return 'C\'è un numero di persone sufficiente per formare un Team\n' +
 			tmp.join('\n')
 }
