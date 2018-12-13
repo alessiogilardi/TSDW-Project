@@ -1,8 +1,10 @@
 
 
 const queries   = require('../../db/queries')
+const bf 		= require('../bot-functions')
 const Personnel = queries.Personnel
 const Mission   = queries.Mission
+const zip 		= bf.zip
 
 /**
  * 1. Ricevo _id della missione accetttata tramite callbackButton
@@ -28,15 +30,15 @@ const Mission   = queries.Mission
  * 		 missione a sua discrezione
  */
 
- /**
-  * CONSIDERAZIONE:
-  * Se ogni volta che ho un team pronto notifico il BaseSup con tutti quelli che hanno accettato
-  * invio un sacco di messaggi e richio anche di reinviare messaggi già mandati.
-  * 
-  * Sarebbe meglio dire al BaseSup che è pronto un team con tot membri e loro dati,
-  * e dargli la possibilità di premere un bottone per vedere chi sono e eventulmente formare un team con quelli che hanno accettato.
-  * 	--> IMPORTANTE: gestire questa cosa con una Scene e cancellare i messaggi mandati in questa Scene quando si esce
-  */
+/**
+ * CONSIDERAZIONE:
+ * Se ogni volta che ho un team pronto notifico il BaseSup con tutti quelli che hanno accettato
+ * invio un sacco di messaggi e richio anche di reinviare messaggi già mandati.
+ * 
+ * Sarebbe meglio dire al BaseSup che è pronto un team con tot membri e loro dati,
+ * e dargli la possibilità di premere un bottone per vedere chi sono e eventulmente formare un team con quelli che hanno accettato.
+ * 	--> IMPORTANTE: gestire questa cosa con una Scene e cancellare i messaggi mandati in questa Scene quando si esce
+ */
 
 const notify = async (idTelegram, message, mission) => {
 	this.bot.telegram
@@ -57,7 +59,7 @@ const generateMessage = async accepted => {
 	for (let i in personnel) {
 		tmp.push(`${personnel[i].name}\t${personnel[i].surname}\t[${accpeted[i].roles.join(',')}]`)
 	}
-	return 'C\è un numero di persone sufficiente per formare un Team\n' +
+	return 'C\'è un numero di persone sufficiente per formare un Team\n' +
 			tmp.join('\n')
 }
 
