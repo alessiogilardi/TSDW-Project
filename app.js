@@ -97,7 +97,7 @@ router.on('organizeMission', ctx => {
 })
 
 router.on('acceptMission', ctx => {
-	acceptMission(bot, ctx)
+	acceptMission(bot)
 })
 
 router.on('declineMission', ctx => {
