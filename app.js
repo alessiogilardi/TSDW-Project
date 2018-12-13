@@ -16,7 +16,6 @@ const { enter, leave } 	= Stage
 
 
 
-
 const backtick = '\`';
 
 // TODO: completare la notifica del supervisore quando è pronto un Team.
