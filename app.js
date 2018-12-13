@@ -54,16 +54,6 @@ bot.help(ctx => ctx.reply(`Command list:\n${ctx.session.userData.commands.join('
 // TODO: action -> delete non funziona -> Da verificare il tipo di action
 // bot.action('delete', ctx => bf.resetBotStarted(ctx.message.from.id))
 
-/*
-bot.command(['createMission', 'createmission'], ctx => {
-	if (!ctx.session.userData.commands.includes('/createMission')) {
-		ctx.reply('Mi spiace, non hai i diritti per eseguire questo comando.')
-		return
-	}
-	ctx.scene.enter('createMission');
-});
-*/
-
 // Chiamo la funzione per il timeout delle missioni
 bf.checkTimeout()
 
