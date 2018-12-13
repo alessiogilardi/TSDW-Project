@@ -86,8 +86,8 @@ const showTeam = new WizardScene('showTeam',
         }
         return ctx.scene.leave()
     })
-    .leave(ctx => {
+    ).leave(ctx => {
         // Inserisco i dati nel DB
-    }))
+    })
 
 module.exports = showTeam
