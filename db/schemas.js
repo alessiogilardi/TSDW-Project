@@ -172,7 +172,7 @@ exports.missionsSchema = new Schema({
         latitude:   Number,
         longitude:  Number
     },
-    droneType: {type: String, enum: droneType},
+    droneType: {type: String, enum: droneTypes},
     status: {
         requested: { // la missione è richietsa dall'AM ad un BaseSup
             value: {type: Boolean, default: false},

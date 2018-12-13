@@ -122,7 +122,7 @@ const sendNotifications = (persons, mission) => {
  * @param {*} bot 
  * @param {*} mission 
  */
-const onOrganizedMission = (bot, mission) => {
+const onOrganizedMission = async (bot, mission) => {
     // TODO: la missione deve essere aggiunta alle organized missions del baseSup
 
     if (bot === null || bot === undefined) throw new Error('Missing Telegram Bot')
