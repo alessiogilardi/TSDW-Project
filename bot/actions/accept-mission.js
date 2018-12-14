@@ -119,7 +119,7 @@ const acceptMission = async bot => {
 	if (bot === undefined || bot === null) throw new Error('Missing Telegram Bot')
 	this.bot = bot
 	
-    const missionId = ctx.state.data[0]
+	const missionId = ctx.state.data[0]
 	const roles 	= ctx.state.data[1].split(',') // Ruoli che può ricoprire nella missione
 	const person 	= ctx.session.userData
 	
