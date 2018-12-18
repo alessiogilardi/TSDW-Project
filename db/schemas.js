@@ -235,12 +235,12 @@ exports.missionsSchema = new Schema({
         timestamp:      {type: Date, default: Date.now} // Timestamp della creazione del team
     }],
     logbooks:   [{type: ObjectId, default: [], ref: 'logbook'}],
-    qtb:        [{type: ObjectId, default: [], ref: 'qtb'}]
+    qtbs:       [{type: ObjectId, default: [], ref: 'qtb'}]
 });
 
 exports.logbooksSchema = new Schema({
     _id: ObjectId,
-    date: Date,
+    //date: Date,
     documentRef: String,
     pilot: {type: ObjectId, ref: 'personnel'},
     mission: {type: ObjectId, ref: 'mission'},
