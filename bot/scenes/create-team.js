@@ -95,7 +95,6 @@ const showTeam = new WizardScene('showTeam',
          *  5. Notifico l'AM della creazione del Team ???
          */
         const chosen  = ctx.scene.state.personnel.chosen
-        const mission = ctx.scene.state.mission
         let team = {
             pilots: {
                 chief:  undefined,
@@ -113,14 +112,14 @@ const showTeam = new WizardScene('showTeam',
                 pilotCount++
             }
             if (person.role === 'crew')       { team.crew.push(person._id) }
-            if (person.role === 'maintainer') {team.maintainers.push(person._id)}
+            if (person.role === 'maintainer') { team.maintainers.push(person._id) }
         }
 
         ;(async () => {
-            await Mission.updateById(mission._id, {
+            await Mission.updateById(ctx.scene.state.mission._id, {
                 $push: { teams: team }, 
                 teamCreated: { value: true, timestamp: team.timestamp }})
-            const mission = await Mission.findById(mission._id)
+            const mission = await Mission.findById(ctx.scene.state.mission._id)
             ee.bot.emit('teamCreated', mission)
         })()
     })

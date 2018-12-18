@@ -8,7 +8,7 @@ const Stage 		 	= require('telegraf/stage')
 const organizeMission 	= require('./bot/scenes/organize-mission')
 const requestMission 	= require('./bot/scenes/request-mission')
 const listDrones        = require('./bot/scenes/list-drones')
-const showTeam 			= require('./bot/scenes/show-team')
+const createTeam 			= require('./bot/scenes/create-team')
 const acceptMission 	= require('./bot/actions/accept-mission')
 const eventEmitters	 	= require('./events/event-emitters')
 const eventRegister  	= require('./events/event-register')
@@ -30,7 +30,7 @@ const backtick = '\`';
 
 // TODO: definire la possibilità che sia droni che piloti siano occupati in un altra missione per cui è inutile notificarli
 
-const stage = new Stage([organizeMission, requestMission, showTeam, listDrones])
+const stage = new Stage([organizeMission, requestMission, createTeam, listDrones])
 stage.command('cancel', leave())
 
 const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN);
@@ -104,8 +104,8 @@ router.on('declineMission', ctx => {
 	const data = ctx.state.data
 })
 
-router.on('showTeam', ctx => {
-	ctx.scene.enter('showTeam', { mission: { _id: ctx.state.data[0] }})
+router.on('createTeam', ctx => {
+	ctx.scene.enter('createTeam', { mission: { _id: ctx.state.data[0] }})
 })
 
 bot.on('callback_query', router)

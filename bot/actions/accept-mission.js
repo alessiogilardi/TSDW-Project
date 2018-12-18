@@ -45,7 +45,7 @@ const notify = async (idTelegram, message, mission) => {
 	.sendMessage(idTelegram, message, Telegraf.Extra
 		.markdown()
 		.markup( m => m.inlineKeyboard([
-			m.callbackButton('Accetta', `${zip['showTeam']}:${mission._id}`)
+			m.callbackButton('Accetta', `${zip['createTeam']}:${mission._id}`)
 	])))
 }
 
