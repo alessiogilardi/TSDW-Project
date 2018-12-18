@@ -27,12 +27,30 @@ const onTeamCreated = (bot, mission, team) => {
         toNotify.push(p)
     }
 
-    for (let p of toNotify) {
-        const person     = await Personnel.findById(p)
-        const idTelegram = person.telegramData.idTelegram
-        notify(bot, idTelegram, `Sei stato aggiunto alla missione del ${utils.Date.format(mission.date, 'DD MMM YYYY')}`)
-    }
+    ;(async () => {
+        for (let p of toNotify) {
+            const person     = await Personnel.findById(p)
+            const idTelegram = person.telegramData.idTelegram
+            notify(bot, idTelegram, `Sei stato aggiunto alla missione del giorno ${utils.Date.format(mission.date, 'DD MMM YYYY')}`)
+        }
+    })()    
 
     // TODO: CONTINUA QUI CON PUNTI 2 E 3
 
+    // Cerco tra quelli che avevano accettato e che non sono in toNotify
+    let refused = [] // Non aggiunti alla missione
+    for (let p of mission.personnel.accepted) {
+        if (!toNotify.includes(p._id)) { refused.push(p._id) }
+    }
+
+    ;(async () => {
+        for (let p of refused) {
+            const person     = await Personnel.findById(p)
+            const idTelegram = person.telegramData.idTelegram
+            notify(bot, idTelegram, `__NON__ sei stato aggiunto alla missione del giorno ${utils.Date.format(mission.date, 'DD MMM YYYY')}`)
+        }
+    })() 
+
 }
+
+module.exports = onTeamCreated
