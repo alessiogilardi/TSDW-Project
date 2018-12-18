@@ -91,8 +91,10 @@ const showTeam = new WizardScene('showTeam',
          *  1. Creo un Team
          *  2. Lo inserisco nella missione di riferimento
          *  3. La missione passa a team created
-         *  4. Notifico chi è stato aggiunto alla missione
-         *  5. Notifico l'AM della creazione del Team ???
+         *  4. Emetto l'evento teamCreated:
+         *      1. Notifico chi è stato aggiunto alla missione
+         *      2. Avviso chi non è stato scelto
+         *      2. Notifico l'AM della creazione del Team ???
          */
         const chosen  = ctx.scene.state.personnel.chosen
         let team = {
@@ -120,7 +122,8 @@ const showTeam = new WizardScene('showTeam',
                 $push: { teams: team }, 
                 teamCreated: { value: true, timestamp: team.timestamp }})
             const mission = await Mission.findById(ctx.scene.state.mission._id)
-            ee.bot.emit('teamCreated', mission)
+            ctx.reply('Team creato!')
+            ee.bot.emit('teamCreated', mission, team)
         })()
     })
 
