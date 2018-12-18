@@ -1,9 +1,5 @@
 /**
- * Modulo che contiente gli eventi e le procedure scatenate nel momento in cui
- * una missione è inserita nel database.
- * 
- * Vengono cercati i vari membri del personale, in base ai parametri della missione e vengono poi notificati,
- * vengono loro mandati dei Button con cui possono accettare o declinare.
+ *
  */
 
 const queries   = require('../../db/queries')
