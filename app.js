@@ -8,7 +8,7 @@ const Stage 		 	= require('telegraf/stage')
 const organizeMission 	= require('./bot/scenes/organize-mission')
 const requestMission 	= require('./bot/scenes/request-mission')
 const listDrones        = require('./bot/scenes/list-drones')
-const createTeam 			= require('./bot/scenes/create-team')
+const createTeam 		= require('./bot/scenes/create-team')
 const acceptMission 	= require('./bot/actions/accept-mission')
 const eventEmitters	 	= require('./events/event-emitters')
 const eventRegister  	= require('./events/event-register')
@@ -103,7 +103,7 @@ router.on('organizeMission', ctx => {
 })
 
 router.on('acceptMission', ctx => {
-	acceptMission(bot)
+	acceptMission(bot, ctx)
 })
 
 router.on('declineMission', ctx => {
