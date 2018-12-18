@@ -9,6 +9,7 @@ const mongoose      = require('mongoose');
 const models        = require('./models');
 const deasync       = require('deasync');
 const eventEmitters = require('../events/event-emitters');
+const bf            = require('../bot/bot-functions')
 
 // TODO: quando creo la missione devo anche settare i droni scelti come non disponibili
 // e aggiungere la missione alle loro waitingForQtb missions
@@ -615,19 +616,25 @@ exports.Mission = Mission = {
 
 exports.Logbook = Logbook = {
     insert: aLogbook => {
-        aLogbook._id = mongoose.Types.ObjectId();
-        new models.Logbook(aLogbook)
-        .save((err, logbook) => {
-            if (err) return console.log(err)
-            // Aggiungo il logbook alla missione
-            Mission.updateById(logbook.mission, {$push: {logbooks: logbook._id}});
-            // Aggiungo la missione di cui è stato inserito il logbook tra le missioni completate del pilota che lo ha inserito
-            Personnel.updateById(logbook.pilot, {$pull: {'missions.pilot.waitingForLogbook': logbook.mission}});
-            Personnel.updateById(logbook.pilot, {$push: {'missions.pilot.completed': logbook.mission}});
-            
-            eventEmitters.db.Logbook.emit('insert', logbook)
-            console.log(`Inserted Logbook with id: ${logbook._id}`)
-        });
+        return new Promise((resolve, reject) => {
+            aLogbook._id = mongoose.Types.ObjectId();
+            new models.Logbook(aLogbook)
+            .save((err, logbook) => {
+                if (err) return reject(err)
+                console.log(`Inserted Logbook with id: ${logbook._id}`)
+                // Aggiungo il logbook alla missione
+                Mission.updateById(logbook.mission, { $push: { logbooks: logbook._id } })
+                // Aggiungo la missione di cui è stato inserito il logbook tra le missioni completate del pilota che lo ha inserito
+                Personnel.updateById(logbook.pilot, { $pull: { 'missions.pilot.waitingForLogbook':   logbook.mission } })
+                Personnel.updateById(logbook.pilot, { $push: { 'missions.pilot.completed':           logbook.mission } })
+                
+                eventEmitters.db.Logbook.emit('insert', logbook)
+                
+                bf.checkMissionDocuments(logbook.mission)
+                resolve(logbook)
+            })
+
+        })   
     },
 
     update: (selection, newValues) => {
@@ -649,7 +656,7 @@ exports.Logbook = Logbook = {
             callback(logbook);
         });
     },
-
+/*
     findByIdSync: (aId, projection) => {
         var ret = null;
         models.Logbook.findOne()
@@ -662,7 +669,7 @@ exports.Logbook = Logbook = {
         while (ret == null)
             deasync.runLoopOnce();
         return ret;
-    }
+    }*/
 };
 
 exports.Qtb = Qtb = {
@@ -671,14 +678,16 @@ exports.Qtb = Qtb = {
         new models.Qtb(aQtb)
         .save((err, qtb) => {
             if (err) return console.log(err)
+            console.log(`Inserted Qtb with id: ${qtb._id}`)
 
             Mission.updateById(qtb.mission, {$push: {qtb: qtb._id}});
             Drone.updateById(qtb.drone, {$pull: {'missions.waitingForQtb': qtb.mission}});
             Drone.updateById(qtb.drone, {$push: {'missions.completed': qtb.mission}});
 
             eventEmitters.db.Qtb.emit('insert', qtb)
-            console.log(`Inserted Qtb with id: ${qtb._id}`)
-        });
+            bf.checkMissionDocuments(logbook.mission)
+            
+        })
     },
 
     update: (selection, newValues) => {
