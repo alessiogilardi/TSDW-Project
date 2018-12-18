@@ -2,44 +2,17 @@
  * Modulo che assegna ad ogni evento il modulo che lo gestisce
  */
 
-const ee = require('./event-emitters')
-//const onCreateMission   = require('./db/on-create-mission')
+const ee                 = require('./event-emitters')
 const onRequestMission   = require('./bot/on-mission-requested')
 const onMissionOrganized = require('./bot/on-mission-organized')
 const onTeamCreated      = require('./bot/on-team-created')
 
-/*
-const eventHandlers = {
-    Db: {
-        Mission: {
-            //insert: () => eventEmitters.Db.Mission.on('insert', mission => onCreateMission(this.bot, mission))
-            insert: () => eventEmitters.Db.Mission.on('insert', mission => {})
-        }
-    },
-    Bot: {
-        //requestMission: () => eventEmitters.Bot.on('requestMission', data => onRequestMission(this.bot, data)),
-        requestMission: () => eventEmitters.Bot.on('requestMission', aMission => onRequestMission(this.bot, aMission)),
-        acceptMission: () => eventEmitters.Bot.on('acceptMisson', (data, ctx) => onAcceptMission(data, ctx, this.bot))
-    }
-}
-*/
-
-
 const register = bot => {
     if (bot === null || bot === undefined) throw new Error('Missing Telegram Bot')
-    //this.bot = bot
 
     ee.bot.on('missionRequested', missions => onRequestMission(bot, missions))
     ee.bot.on('missionOrganized', mission  => onMissionOrganized(bot, mission))
     ee.bot.on('teamCreated', (mission, team) => onTeamCreated(bot, mission, team))
-
-
-    /*
-    eventHandlers.Db.Mission.insert()
-    eventHandlers.Bot.requestMission()
-    eventHandlers.Bot.acceptMission()
-    */
 }
-
 
 module.exports = register
