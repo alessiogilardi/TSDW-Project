@@ -5,8 +5,8 @@
 const ee = require('./event-emitters')
 //const onCreateMission   = require('./db/on-create-mission')
 const onRequestMission   = require('./bot/on-mission-requested')
-const onAcceptMission    = require('./bot/on-accept-mission')
 const onMissionOrganized = require('./bot/on-mission-organized')
+const onTeamCreated      = require('./bot/on-team-created')
 
 /*
 const eventHandlers = {
@@ -31,6 +31,7 @@ const register = bot => {
 
     ee.bot.on('missionRequested', missions => onRequestMission(bot, missions))
     ee.bot.on('missionOrganized', mission  => onMissionOrganized(bot, mission))
+    ee.bot.on('teamCreated', (mission, team) => onTeamCreated(bot, mission, team))
 
 
     /*
