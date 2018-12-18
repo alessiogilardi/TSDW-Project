@@ -85,8 +85,9 @@ exports.personnelSchema = new Schema({
             completed: [{type: ObjectId, default: [], ref: 'mission'}]
         },
         pilot: {
-            completed:         [{type: ObjectId, default: [], ref: 'mission'}],
-            waitingForLogbook: [{type: ObjectId, default: [], ref: 'mission'}]
+            completed:          [{type: ObjectId, default: [], ref: 'mission'}],
+            waitingForLogbook:  [{type: ObjectId, default: [], ref: 'mission'}],
+            running:            {type: ObjectId, default: undefined, ref: 'mission'} // Indica la missione in cui è attualmente impegnato
         },
         crew: {
             completed:  [{type: ObjectId, default: [], ref: 'mission'}],
