@@ -30,16 +30,6 @@ const zip 		= bf.zip
  * 		 missione a sua discrezione
  */
 
-/**
- * CONSIDERAZIONE:
- * Se ogni volta che ho un team pronto notifico il BaseSup con tutti quelli che hanno accettato
- * invio un sacco di messaggi e richio anche di reinviare messaggi già mandati.
- * 
- * Sarebbe meglio dire al BaseSup che è pronto un team con tot membri e loro dati,
- * e dargli la possibilità di premere un bottone per vedere chi sono e eventulmente formare un team con quelli che hanno accettato.
- * 	--> IMPORTANTE: gestire questa cosa con una Scene e cancellare i messaggi mandati in questa Scene quando si esce
- */
-
 const notify = async (idTelegram, message, mission) => {
 	this.bot.telegram
 	.sendMessage(idTelegram, message, Telegraf.Extra
