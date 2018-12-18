@@ -1,12 +1,14 @@
 import { Personnel } from '../../db/queries'
 import utils from '../../utils'
+import { EventLog } from '../../db/queries'
 
 /**
  *  Event handler che gestisce le operazioni successive alla creazione di un Team
  * 
  *  1. Notifico chi è stato aggiunto alla missione
- *  2. Avviso chi non è stato scelto
- *  3. Inserisco l'evento nell'Event Log
+ *  2. Aggiungo la missione alle suw waitingFor
+ *  3. Avviso chi non è stato scelto
+ *  4. Inserisco l'evento nell'Event Log
  */
 
 const notify = (bot, idTelegram, message) => {
@@ -35,22 +37,18 @@ const onTeamCreated = (bot, mission, team) => {
         }
     })()    
 
-    // TODO: CONTINUA QUI CON PUNTI 2 E 3
-
-    // Cerco tra quelli che avevano accettato e che non sono in toNotify
-    let refused = [] // Non aggiunti alla missione
-    for (let p of mission.personnel.accepted) {
-        if (!toNotify.includes(p._id)) { refused.push(p._id) }
-    }
-
+    // Cerco tra quelli che avevano accettato e che non sono stati inseriti nel team
     ;(async () => {
-        for (let p of refused) {
-            const person     = await Personnel.findById(p)
-            const idTelegram = person.telegramData.idTelegram
-            notify(bot, idTelegram, `__NON__ sei stato aggiunto alla missione del giorno ${utils.Date.format(mission.date, 'DD MMM YYYY')}`)
+        for (let p of mission.personnel.accepted) {
+            if (!toNotify.includes(p._id)) { 
+                const person     = await Personnel.findById(p)
+                const idTelegram = person.telegramData.idTelegram
+                notify(bot, idTelegram, `__NON__ sei stato aggiunto alla missione del giorno ${utils.Date.format(mission.date, 'DD MMM YYYY')}`)
+            }
         }
-    })() 
+    })()
 
+    EventLog.insert({ type: 'teamCreated', actor: mission.supervisor, subject: {type: 'Mission', _id: mission._id}, timestamp: new Date() })
 }
 
 module.exports = onTeamCreated
