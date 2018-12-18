@@ -94,3 +94,18 @@ exports.checkTimeout = async () => {
         missions = []
     }, 60000)
 }
+
+/**
+ * Funzione che controlla se una missione ha tutta la documentazione 
+ * e nel caso la fa passare da WaitingForDocuments a Completed
+ *  1. Controlla se ha 2 Logbook
+ *  2. Controlla se ha tanti Qtb quanti Droni
+ *  3. Se sono entrambe vere la missione è completata (Aggiungere timestamp)
+ */
+exports.checkMissionDocuments = async aMissionId => {
+    const mission = await Mission.findById(aMissionId)
+    if (mission.logbooks.length === 2 && mission.qtbs.length === mission.drones.length) {
+        Mission.updateById(mission._id, { 'status.waitingForDocuments.value': false, 'status.completed.value': true, 'status.completed.timestamp': new Date()})
+    }
+
+}
