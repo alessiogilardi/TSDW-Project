@@ -19,14 +19,19 @@ const { enter, leave } 	= Stage
 
 const backtick = '\`';
 
-// TODO: completare la notifica del supervisore quando è pronto un Team.
-// TODO: aggiungere comando per creare un team una volta che ci sono sufficienti persone
+/**
+ * TODO: definire una funzione che gira periodicamente e controlla quali sono le missioni che ci sono quel giorno:
+ * 1. Controllo tra tutte le missioni quali sono quelle che ci sono quel giorno
+ * 2. Setto le missioni trovate come Started o richiedo all baseSup di settarle come Started
+ * 3. Setto la missione come running per baseSup, pilot, crew e maintainer
+ * 		-> Il 3 può essere inutile visto che c'è il campo Accepted che tiene anche la data della missione
+ * 4. Setto il campo Personnel.missions.pilot.waitingForLogbook
+ */
+
 
 // TODO: potrebbe essere possibile creare un middleware che controlla l'input,
 // se è un comando allora verifica che l'utente sia autorizzato a lanciarlo altrimeni restituisce errore
 
-// TODO: scelgo tra i piloti quelli adatti alla missione e scelgo il personale, poi il supervisore
-// deciderà se assegnare un pilota alla crew, ma non potrà assegnare membri della crew ai piloti
 
 // TODO: definire la possibilità che sia droni che piloti siano occupati in un altra missione per cui è inutile notificarli
 
