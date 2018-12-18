@@ -10,10 +10,9 @@ const requestMission 	= require('./bot/scenes/request-mission')
 const listDrones        = require('./bot/scenes/list-drones')
 const createTeam 		= require('./bot/scenes/create-team')
 const acceptMission 	= require('./bot/actions/accept-mission')
-const eventEmitters	 	= require('./events/event-emitters')
 const eventRegister  	= require('./events/event-register')
 const router		 	= require('./bot/router')
-const { enter, leave } 	= Stage
+const { leave } 		= Stage
 
 
 
