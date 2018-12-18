@@ -85,6 +85,12 @@ bot.hears(['A','a'], ctx => {
         m.callbackButton(buttonText, buttonData)
 	])))
 })
+/*
+bot.hears(['b', 'B'], ctx => {
+	let sendMsg = bot.telegram.sendMessage
+	sendMsg(33017299, 'Message')
+})
+*/
 ////////////////////////////////////////////////////////
 
 router.on('organizeMission', ctx => {
