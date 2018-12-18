@@ -115,7 +115,7 @@ const checkForTeam = async missionId => {
 
 }
 
-const acceptMission = async bot => {
+const acceptMission = async (bot, ctx)=> {
 	if (bot === undefined || bot === null) throw new Error('Missing Telegram Bot')
 	this.bot = bot
 	
