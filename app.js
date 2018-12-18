@@ -2,7 +2,7 @@ require('dotenv').config()
 const db 			 	= require('./db/db-connect.js')
 const Telegraf 		 	= require('telegraf')
 const session 		 	= require('telegraf/session')
-const dataLoader	 	= require('./bot/data-loader-middleware')
+const dataLoader	 	= require('./bot/middlewares/data-loader')
 const bf 			 	= require('./bot/bot-functions.js')
 const Stage 		 	= require('telegraf/stage')
 const organizeMission 	= require('./bot/scenes/organize-mission')
@@ -26,6 +26,13 @@ const backtick = '\`';
  * 		-> Il 3 può essere inutile visto che c'è il campo Accepted che tiene anche la data della missione
  * 4. Setto il campo Personnel.missions.pilot.waitingForLogbook
  */
+
+ // TODO: definire una funzione che fa passare le missioni started a waitingForDocuments e setta il timestamp
+
+ // TODO: rivedere in Mission.waitingForDocuments e dividere per logBook e Qtb altrimenti non so quando mettere
+ // la missione come completed, si potrebbe anche controllare ogni volta che inserisco un Logbook o Qtb se ho 2 logbook 
+ // e Qtb pari al numero di droni in quella missione
+ // TODO: rivedere Mission.logbooks
 
 
 // TODO: potrebbe essere possibile creare un middleware che controlla l'input,
