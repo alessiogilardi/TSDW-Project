@@ -52,7 +52,6 @@ const listDrones = new WizardScene('listDrones',
     })
 ).leave(ctx => {
     if (ctx.message.text === '/cancel') {
-        ctx.reply('Richiesta missione annullata.')
         delete ctx.scene.state.command
         return
     }
