@@ -1,4 +1,3 @@
-//import { Personnel } from '../../db/queries'
 import { Mission, Logbook } from '../../db/queries'
 import { Composer } from 'telegraf'
 
@@ -16,6 +15,15 @@ const addLogbook = new WizardScene('addLogbook',
         
         for (let i in missions) {
             // Invio un Button per ogni missione
+            const message       = `Missione del ${missions[i].date}`
+            const buttonText    = 'Aggiungi Logbook'
+            const buttonData    = `${'addLogbook'}:${i}`
+            await ctx.reply(message, Telegraf.Extra
+                .markdown()
+                .markup(m => m.inlineKeyboard([
+                    m.callbackButton(buttonText, buttonData)
+                ])
+            ))
         }
 
         return ctx.wizard.next()
@@ -25,7 +33,7 @@ const addLogbook = new WizardScene('addLogbook',
     })
     .on('callback_query', async ctx => {
         const parts = ctx.callbackQuery.data.split(':')
-        if (parts[0] !== 'addToTeam') { return }
+        if (parts[0] !== 'addLogbook') { return }
 
         ctx.scene.state.currentMission = ctx.scene.state.missions[parts[1]]
         await ctx.editMessageReplyMarkup({})
@@ -54,3 +62,5 @@ const addLogbook = new WizardScene('addLogbook',
 ).leave(ctx => {
 
 })
+
+module.exports = addLogbook
