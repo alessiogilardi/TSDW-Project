@@ -6,7 +6,7 @@
 const bf = require('../bot-functions')
 
 const middleware = () => async (ctx, next) => {
-    if (ctx.message.chat === undefined) {
+    if (!ctx.message.chat) {
         return next()
     }
     if (ctx.session.dataLoaded && ctx.session.isValid) {
