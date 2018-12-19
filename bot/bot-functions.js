@@ -30,10 +30,10 @@ exports.zip = zip = {
  * Comandi consentiti ad un certo ruolo
  */
 const roleToOperation = {
-	AM:     ['/requestMission'],
-	BS:     ['/createMission', '/acceptMission', '/addChiefPilot', '/addCoPilot', '/addCrew', '/addQtb'],
-	pilot:  ['/addLogbook'],
-    crew:   ['/accept', '/refuse'], // Usabili anche dai piloti e manutentori
+	AM:         ['/requestMission'],
+	BS:         ['/createMission', '/acceptMission', '/addChiefPilot', '/addCoPilot', '/addCrew', '/addQtb'],
+	pilot:      ['/addLogbook'],
+    crew:       ['/accept', '/refuse'], // Usabili anche dai piloti e manutentori
     maintainer: ['/listDrones']
 };
 
