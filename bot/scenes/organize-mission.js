@@ -30,8 +30,8 @@ const organizeMission = new WizardScene('organizeMission',
         ctx.reply('Sto ricercando i droni disponibili, attendi per favore...')
         ctx.scene.state.mission = await Mission.findById(ctx.scene.state.mission._id, '')
 
-        let mission = ctx.scene.state.mission
-        let drones  = await Drone
+        const mission = ctx.scene.state.mission
+        const drones  = await Drone
         .find({ base: mission.base,
             'state.availability': { $ne: 2 }, 
             'missions.waitingForQtb.date': { $ne: mission.date } })
@@ -45,10 +45,10 @@ const organizeMission = new WizardScene('organizeMission',
         await ctx.reply('Droni disponibili:')
         let index = 0
         for (let drone of drones) {
-            let message = `Targa: ${drone.number}\nTaglia: ${drone.type}`
-            let buttonText = 'Aggiungi'
-            let buttonData = `${zip['addDroneToMission']}:${index++}`
-            ctx.reply(message, Telegraf.Extra
+            const message = `Targa: ${drone.number}\nTaglia: ${drone.type}`
+            const buttonText = 'Aggiungi'
+            const buttonData = `${zip['addDroneToMission']}:${index++}`
+            await ctx.reply(message, Telegraf.Extra
                 .markdown()
                 .markup(m => m.inlineKeyboard([
                     m.callbackButton(buttonText, buttonData)
@@ -90,12 +90,12 @@ const organizeMission = new WizardScene('organizeMission',
     if (ctx.scene.state.drones.chosen > 0) {
         const mission = ctx.scene.state.mission
         let drones = []
-        for (let drone in ctx.scene.state.drones.chosen) {
+        for (let drone of ctx.scene.state.drones.chosen) {
             drones.push({ _id: drone._id, type: drone.type })
         }
         //mission.status.waitingForTeam = { value: true, timestamp: new Date() }
         Mission.updateById(mission._id, { $push: { drones: drones }, 'mission.status.waitingForTeam.value': true, 'mission.status.waitingForTeam.timestamp': new Date() })
-        for (let drone in drones) {
+        for (let drone of drones) {
             Drone.updateById(drone._id, { $push: { 'missions.waitingForQtb': { idMission: mission._id, date: mission.date } } })
         }
         ee.bot.emit('missionOrganized', mission)
