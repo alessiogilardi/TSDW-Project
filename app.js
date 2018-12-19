@@ -84,6 +84,14 @@ bot.command(['listDrones', 'listdrones'], ctx => {
 	ctx.scene.enter('listDrones');
 })
 
+bot.command(['addLogbook', 'addlogbook'], ctx => {
+	if (!ctx.session.userData.commands.includes('/addLogbook')) {
+		ctx.reply('Mi spiace, non hai i diritti per eseguire questo comando.')
+		return
+	}
+	ctx.scene.enter('addLogbook')
+})
+
 
 //////////// DEGUGGING DA CANCELLARE ////////////////////
 bot.hears(['A','a'], ctx => {
