@@ -1,8 +1,8 @@
-require('dotenv').config()
 const Telegraf      = require('telegraf')
 const WizardScene   = require('telegraf/scenes/wizard/index')
 const Composer      = require('telegraf/composer')
 const queries       = require('../../db/queries')
+const utils         = require('../../utils.js')
 
 // Modello da seguire:
 const command = {
@@ -40,9 +40,9 @@ const listDrones = new WizardScene('listDrones',
         let today = new Date().setHours(0, 0, 0, 0)                          // data di oggi senza ore, minuti, secondi e millisecondi
         let selection = {
             '1': {base: ctx.scene.state.command.base,
-                $or: [
-                    {'missions.waitingForQtb.date': today},                  // vedo se c'è una missione oggi
-                    {'missions.waitingForQtb': {$size: 0}}                   // se questo array ha 0 elementi, il drone è per forza disponibile
+                $and: [
+                    {'missions.waitingForQtb.date': today}//,                  // vedo se c'è una missione oggi
+                    //{'missions.waitingForQtb': {$size: {$gt: 0}}}            // se questo array ha 0 elementi, il drone è per forza disponibile
             ]},
             '2': {base: ctx.scene.state.command.base,
                 $or: [{
@@ -63,22 +63,22 @@ const listDrones = new WizardScene('listDrones',
             let message = `Targa: ${drone.number}\nTipo: ${drone.type}`
             // Il messaggio dipende dalla scelta del manutentore
             switch (choice) {
-                case 1:
+                case '1':
                     await ctx.reply(message)
                     break
-                case 2:
+                case '2':
                     await ctx.reply(message, Telegraf.Extra
                         .markdown()
                         .markup(m => m.inlineKeyboard([
-                            m.callbackButton('Inizia manutenzione', `{o:m,id:${drone._id}}`)  //o:m vuol dire che va messo in manutenzione
+                            m.callbackButton('Inizia manutenzione', `m:${drone._id}`)  //m vuol dire che va messo in manutenzione
                         ])
                     ))
                     break
-                case 3:
+                case '3':
                     await ctx.reply(message, Telegraf.Extra
                         .markdown()
                         .markup(m => m.inlineKeyboard([
-                            m.callbackButton('Fine manutenzione', `{o:a,id:${drone._id}}`)    //o:a vuol dire che va messo disponibile
+                            m.callbackButton('Fine manutenzione', `a:${drone._id}`)    //a vuol dire che va messo disponibile
                         ])
                     ))
                     break
@@ -93,8 +93,21 @@ const listDrones = new WizardScene('listDrones',
         }
         return next()
     })
-    .on('callback_query', ctx => {
-        
+    .on('callback_query', async ctx => {
+        let today = new Date().toISOString()
+        today = utils.Date.parse(today)
+        const parts = ctx.callbackQuery.data.split(':')
+        switch (parts[0]) {
+            case 'm':
+                let end = utils.Date.parse('2999-12-31')
+                await queries.Drone.updateById(parts[1], {$push: {'state.maintenances': {'start': today, 'end': end}}})
+                await ctx.answerCbQuery('Drone ora in manutenzione')
+                break
+            case 'a':
+                await ctx.answerCbQuery('Drone ora disponibile')
+                break
+        }
+        ctx.editMessageReplyMarkup({})
     })
     .command('end', ctx => {
         return ctx.scene.leave()
