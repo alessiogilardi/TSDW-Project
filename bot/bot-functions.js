@@ -2,6 +2,7 @@ const queries   = require('../db/queries.js')
 const timers    = require('timers')
 const Personnel = queries.Personnel
 const Mission   = queries.Mission
+const utils     = require('../utils.js')
 
 /**
  * Dizionario usato per de-comprimere i nomi delle actions per evitare il limite di 64 byte
@@ -34,7 +35,7 @@ const roleToOperation = {
 	BS:         ['/createMission', '/acceptMission', '/addChiefPilot', '/addCoPilot', '/addCrew', '/addQtb'],
 	pilot:      ['/addLogbook'],
     crew:       ['/accept', '/refuse'], // Usabili anche dai piloti e manutentori
-    maintainer: ['/manageDrones']
+    maintainer: ['/manageDrones'] // Usabile anche dal base supervisor
 };
 
 /**
@@ -92,6 +93,40 @@ exports.checkTimeout = async () => {
             }
         }
         missions = []
+    }, 60000)
+}
+
+/**
+ * Funzione che gira periodicamente e controlla quali sono le missioni che ci sono quel giorno:
+ * 1. Controllo tra tutte le missioni quali sono quelle che ci sono quel giorno                             v
+ * 2. Setto le missioni trovate come Started o richiedo all baseSup di settarle come Started                v
+ * 3. Setto la missione come running per baseSup, pilot, crew e maintainer
+ * 		-> Il 3 può essere inutile visto che c'è il campo Accepted che tiene anche la data della missione
+ * 4. Setto il campo Personnel.missions.pilot.waitingForLogbook                                             v
+ * 5. Setto ogni drone delle missioni di oggi come 'in missione' (availability = 1)                         v
+ */ // IL PUNTO 3 PER ORA NON E' IMPLEMENTATO, PRIMA SI DECIDE SE GESTIRLO O NO
+exports.checkTodaysMissions = async () => {
+    timers.setInterval(async () => {
+        // Cerco le missioni di oggi con il team già creato
+        let today = utils.Date.parse(new Date().setHours(0, 0, 0, 0))
+        let todaysMissions = await queries.Mission.find({date: today, 'status.teamCreated.value': true}, '')
+        // Queste missioni vengono settate come 'started'
+        // Il controllo serve per evitare che venga eseguita la query sempre, così non viene emesso l'evento di modifica ogni volta
+        if (todaysMissions.length > 0) {
+            await queries.Mission.update({date: today, 'status.teamCreated': true},
+                                         {$set: {'status.teamCreated.value': false,
+                                                 'status.started.value': true,
+                                                 'status.started.timestamp': Date.now()}})
+        }
+        // Per ogni missione di oggi
+        for (let mission of todaysMissions) {
+            // Setto i droni come 'in missione'
+            for (let drone of mission.drones)
+                await queries.Drone.updateById(drone._id, {$set: {'state.availability': 1}})
+            // Setto il campo Personnel.missions.pilot.waitingForLogbook del chief pilot
+            for (let team of mission.teams)
+                await queries.Personnel.updateById(team.pilots.chief, {$push: {'missions.pilot.waitingForLogbook': mission._id}})
+        }
     }, 60000)
 }
 

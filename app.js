@@ -66,8 +66,9 @@ bot.help(ctx => ctx.reply(`Command list:\n${ctx.session.userData.commands.join('
 // TODO: action -> delete non funziona -> Da verificare il tipo di action
 // bot.action('delete', ctx => bf.resetBotStarted(ctx.message.from.id))
 
-// Chiamo la funzione per il timeout delle missioni
-bf.checkTimeout()
+// CHIAMATA DELLE FUNZIONI PERIODICHE
+bf.checkTimeout() // Funzione per il controllo del timeout dell'organizzazione delle missioni
+bf.checkTodaysMissions() // Funzione per il controllo delle missioni odierne
 
 bot.command(['requestMission', 'requestmission'], ctx => {
 	if (!ctx.session.userData.commands.includes('/requestMission')) {
