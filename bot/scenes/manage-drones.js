@@ -12,15 +12,16 @@ const command = {
     base: undefined
 }
 
-const listDrones = new WizardScene('listDrones',
+const listDrones = new WizardScene('manageDrones',
     async ctx => {
         ctx.scene.state.command = command
 
-        ctx.scene.state.command.name      = 'listDrones'
+        ctx.scene.state.command.name      = 'manageDrones'
         ctx.scene.state.command.searching = false
         ctx.scene.state.command.error     = false
         ctx.scene.state.command.base      = ctx.session.userData.person.base
         
+        await ctx.reply('Esci in un qualunque momento usando il comando /end')
         await ctx.reply('Seleziona un filtro per la ricerca:\n'+
                         '1) Droni in missione\n'+
                         '2) Droni disponibili\n'+
@@ -39,21 +40,9 @@ const listDrones = new WizardScene('listDrones',
         // Selezione della query, che dipende dalla scelta del manutentore
         let today = new Date().setHours(0, 0, 0, 0)                          // data di oggi senza ore, minuti, secondi e millisecondi
         let selection = {
-            '1': {base: ctx.scene.state.command.base,
-                $and: [
-                    {'missions.waitingForQtb.date': today}//,                  // vedo se c'è una missione oggi
-                    //{'missions.waitingForQtb': {$size: {$gt: 0}}}            // se questo array ha 0 elementi, il drone è per forza disponibile
-            ]},
-            '2': {base: ctx.scene.state.command.base,
-                $or: [{
-                    $and: [
-                        {'missions.waitingForQtb.date': {$ne: today}},       // vedo se non c'è una missione oggi
-                        {'state.maintenances.end': {$lt: today}}             // vedo se tutte le manutenzioni sono finite
-                    ]},
-                    {'missions.waitingForQtb': {$size: 0}}                   // se questo array ha 0 elementi, il drone è per forza disponibile
-            ]}, // cosa succede se il campo waiting esiste ma non esiste il campo maintenances?
-            '3': {base: ctx.scene.state.command.base,
-                'state.maintenances.end': {$not: {$lt: today}}}              // vedo se c'è almeno una manutenzione non finita
+            '1': {'state.availability': 1},
+            '2': {'state.availability': 0},
+            '3': {'state.availability': 2}
         }
 
         let drones = await queries.Drone.find(selection[choice], '')
@@ -70,15 +59,16 @@ const listDrones = new WizardScene('listDrones',
                     await ctx.reply(message, Telegraf.Extra
                         .markdown()
                         .markup(m => m.inlineKeyboard([
-                            m.callbackButton('Inizia manutenzione', `m:${drone._id}`)  //m vuol dire che va messo in manutenzione
+                            m.callbackButton('Inizia manutenzione', `m:${drone._id}`)               //m vuol dire che va messo in manutenzione
                         ])
                     ))
                     break
                 case '3':
+                    let lastMaint = drone.state.maintenances[drone.state.maintenances.length - 1]._id
                     await ctx.reply(message, Telegraf.Extra
                         .markdown()
                         .markup(m => m.inlineKeyboard([
-                            m.callbackButton('Fine manutenzione', `a:${drone._id}`)    //a vuol dire che va messo disponibile
+                            m.callbackButton('Fine manutenzione', `a:${drone._id}:${lastMaint}`)    //a vuol dire che va messo disponibile
                         ])
                     ))
                     break
@@ -100,10 +90,13 @@ const listDrones = new WizardScene('listDrones',
         switch (parts[0]) {
             case 'm':
                 let end = utils.Date.parse('2999-12-31')
-                await queries.Drone.updateById(parts[1], {$push: {'state.maintenances': {'start': today, 'end': end}}})
+                await queries.Drone.updateById(parts[1],
+                    {$set: {'state.availability': 2}, $push: {'state.maintenances': {'start': today, 'end': end}}})
                 await ctx.answerCbQuery('Drone ora in manutenzione')
                 break
             case 'a':
+                await queries.Drone.updateById(parts[1], {$set: {'state.availability': 0}})
+                await queries.Drone.update({'state.maintenances._id': parts[2]}, {$set: {'state.maintenances.$.end': today}})
                 await ctx.answerCbQuery('Drone ora disponibile')
                 break
         }

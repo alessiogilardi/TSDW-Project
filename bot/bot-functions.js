@@ -34,7 +34,7 @@ const roleToOperation = {
 	BS:         ['/createMission', '/acceptMission', '/addChiefPilot', '/addCoPilot', '/addCrew', '/addQtb'],
 	pilot:      ['/addLogbook'],
     crew:       ['/accept', '/refuse'], // Usabili anche dai piloti e manutentori
-    maintainer: ['/listDrones']
+    maintainer: ['/manageDrones']
 };
 
 /**
