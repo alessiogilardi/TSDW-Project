@@ -1,6 +1,6 @@
-import { Personnel } from '../../db/queries'
-import utils from '../../utils'
-import { EventLog } from '../../db/queries'
+const { Personnel } = require('../../db/queries')
+const { EventLog }  = require('../../db/queries')
+const utils         = require('../../utils')
 
 /**
  *  Event handler che gestisce le operazioni successive alla creazione di un Team
