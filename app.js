@@ -9,6 +9,7 @@ const organizeMission 	= require('./bot/scenes/organize-mission')
 const requestMission 	= require('./bot/scenes/request-mission')
 const manageDrones      = require('./bot/scenes/manage-drones')
 const createTeam 		= require('./bot/scenes/create-team')
+const addLogbook 		= require('./bot/scenes/add-logbook')
 const acceptMission 	= require('./bot/actions/accept-mission')
 const eventRegister  	= require('./events/event-register')
 const router		 	= require('./bot/router')
@@ -41,7 +42,7 @@ const backtick = '\`';
 
 // TODO: definire la possibilità che sia droni che piloti siano occupati in un altra missione per cui è inutile notificarli
 
-const stage = new Stage([organizeMission, requestMission, createTeam, manageDrones])
+const stage = new Stage([organizeMission, requestMission, createTeam, manageDrones, addLogbook])
 stage.command('cancel', leave())
 
 const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN);

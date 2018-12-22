@@ -1,5 +1,6 @@
-import { Mission, Logbook } from '../../db/queries'
-import { Composer } from 'telegraf'
+const { Mission, Logbook } = require('../../db/queries')
+const WizardScene   = require('telegraf/scenes/wizard/index')
+const Composer      = require('telegraf/composer')
 
 /**
  * Scene che gestisce l'inserimento di LogBook per le Missioni in cui manca
@@ -13,7 +14,7 @@ const addLogbook = new WizardScene('addLogbook',
         ctx.scene.state.missions    = await Mission.find({ _id: { $in: person.missions.pilot.waitingForLogbook } })
         ctx.scene.state.currentMission = undefined
         
-        for (let i in missions) {
+        for (let i in ctx.scene.state.missions) {
             // Invio un Button per ogni missione
             const message       = `Missione del ${missions[i].date}`
             const buttonText    = 'Aggiungi Logbook'
