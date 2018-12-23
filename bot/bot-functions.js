@@ -1,7 +1,5 @@
-const queries   = require('../db/queries.js')
+const { Mission, Personnel, Drone } = require('../db/queries.js')
 const timers    = require('timers')
-const Personnel = queries.Personnel
-const Mission   = queries.Mission
 const utils     = require('../utils.js')
 
 /**
@@ -109,11 +107,11 @@ exports.checkTodaysMissions = async () => {
     timers.setInterval(async () => {
         // Cerco le missioni di oggi con il team già creato
         let today = utils.Date.parse(new Date().setHours(0, 0, 0, 0))
-        let todaysMissions = await queries.Mission.find({date: today, 'status.teamCreated.value': true}, '')
+        let todaysMissions = await Mission.find({date: today, 'status.teamCreated.value': true}, '')
         // Queste missioni vengono settate come 'started'
         // Il controllo serve per evitare che venga eseguita la query sempre, così non viene emesso l'evento di modifica ogni volta
         if (todaysMissions.length > 0) {
-            await queries.Mission.update({date: today, 'status.teamCreated': true},
+            await Mission.update({date: today, 'status.teamCreated': true},
                                          {$set: {'status.teamCreated.value': false,
                                                  'status.started.value': true,
                                                  'status.started.timestamp': Date.now()}})
@@ -122,10 +120,10 @@ exports.checkTodaysMissions = async () => {
         for (let mission of todaysMissions) {
             // Setto i droni come 'in missione'
             for (let drone of mission.drones)
-                await queries.Drone.updateById(drone._id, {$set: {'state.availability': 1}})
+                await Drone.updateById(drone._id, {$set: {'state.availability': 1}})
             // Setto il campo Personnel.missions.pilot.waitingForLogbook del chief pilot
             for (let team of mission.teams)
-                await queries.Personnel.updateById(team.pilots.chief, {$push: {'missions.pilot.waitingForLogbook': mission._id}})
+                await Personnel.updateById(team.pilots.chief, {$push: {'missions.pilot.waitingForLogbook': mission._id}})
         }
     }, 60000)
 }
