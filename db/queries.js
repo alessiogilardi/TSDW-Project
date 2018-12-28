@@ -104,10 +104,10 @@ exports.AirOperator = AirOperator = {
  */
 exports.Base = Base = {
     /**
-     * Funzione che inserisce un Base.
-     * L'Operatore Aereo a cui la base appartiene è recuperato da una query in base al nome 
+     * Funzione che inserisce una Base.
+     * L'Operatore Aereo a cui la base appartiene è recuperato mediante una query in base al nome 
      * dell'Operatore.
-     * Quando la query viene eseguita aggiungo la Base alla lista delle basi dell'Operatore Aereo.
+     * Quando la query viene eseguita viene aggiunta la Base alla lista delle basi dell'Operatore Aereo.
      * 
      * @param {Base} aBase
      */

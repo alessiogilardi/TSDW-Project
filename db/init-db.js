@@ -12,7 +12,9 @@ const AirOperator = queries.AirOperator
 const Personnel   = queries.Personnel
 const Drone       = queries.Drone
 const Base        = queries.Base
-
+/**
+ * Funzione che si occupa dell'inizializzazione del database
+ */
 const init = async () => {
     await db.connect(process.env.DB_ADDRESS, process.env.DB_PORT, process.env.DB_NAME)
 

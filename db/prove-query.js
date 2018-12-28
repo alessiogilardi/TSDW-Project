@@ -1,3 +1,6 @@
+/**
+ * Modulo che contiene query di prova
+ */
 var db = require('./db-connect').connect()
 const queries = require('./queries')
 /*

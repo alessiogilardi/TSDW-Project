@@ -1,5 +1,5 @@
 /**
- * Dati per inizialiare il db
+ * Dati utilizzati per inizializzare il db
  */
 
 const schemas = require('./schemas')
