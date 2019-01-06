@@ -10,6 +10,7 @@ const requestMission 	= require('./bot/scenes/request-mission')
 const manageDrones      = require('./bot/scenes/manage-drones')
 const createTeam 		= require('./bot/scenes/create-team')
 const addLogbook 		= require('./bot/scenes/add-logbook')
+const addQtb			= require('./bot/scenes/add-qtb')
 const acceptMission 	= require('./bot/actions/accept-mission')
 const eventRegister  	= require('./events/event-register')
 const router		 	= require('./bot/router')
@@ -42,7 +43,7 @@ const backtick = '\`';
 
 // TODO: definire la possibilità che sia droni che piloti siano occupati in un altra missione per cui è inutile notificarli
 
-const stage = new Stage([organizeMission, requestMission, createTeam, manageDrones, addLogbook])
+const stage = new Stage([organizeMission, requestMission, createTeam, manageDrones, addLogbook, addQtb])
 stage.command('cancel', leave())
 
 const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN);
@@ -92,6 +93,14 @@ bot.command(['addLogbook', 'addlogbook'], ctx => {
 		return
 	}
 	ctx.scene.enter('addLogbook')
+})
+
+bot.command(['addQtb', 'addqtb'], ctx => {
+	if (!ctx.session.userData.commands.includes('/addQtb')) {
+		ctx.reply('Mi spiace, non hai i diritti per eseguire questo comando.')
+		return
+	}
+	ctx.scene.enter('addQtb')
 })
 
 
