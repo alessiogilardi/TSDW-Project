@@ -37,6 +37,8 @@ const addQtb = new WizardScene('addQtb',
         return ctx.wizard.next()
     },
     new Composer((ctx, next) => {
+        // TODO: devo scartare gli input non validi
+
         return next()
     })
     .on('callback_query', async ctx => {

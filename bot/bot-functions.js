@@ -133,7 +133,9 @@ exports.checkTodaysMissions = async () => {
  * e nel caso la fa passare da WaitingForDocuments a Completed
  *  1. Controlla se ha 2 Logbook
  *  2. Controlla se ha tanti Qtb quanti Droni
- *  3. Se sono entrambe vere la missione è completata (Aggiungere timestamp)
+ *  3. Se sono entrambe vere la missione è completata (Aggiunge un timestamp)
+ * 
+ *  @param {String} aMissionId Id della missione da controllare
  */
 exports.checkMissionDocuments = async aMissionId => {
     const mission = await Mission.findById(aMissionId)

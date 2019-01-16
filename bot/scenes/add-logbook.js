@@ -30,6 +30,7 @@ const addLogbook = new WizardScene('addLogbook',
         return ctx.wizard.next()
     },
     new Composer((ctx, next) => {
+        // TODO: devo scartare gli input non validi
         return next()
     })
     .on('callback_query', async ctx => {
@@ -54,6 +55,7 @@ const addLogbook = new WizardScene('addLogbook',
          * La funzione Logbook.insert():
          *  1. Inserisce automaticamente il Logbook nella missione
          *  2. Setta come completata la missione nei dati del pilota
+         *  3. Lancia la funzione di controllo che verifica se tutta la documentazione è stata inserita
          */
         Logbook.insert(logbook)   
     })
