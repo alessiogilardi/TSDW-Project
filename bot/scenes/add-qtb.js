@@ -64,28 +64,49 @@ const addQtb = new WizardScene('addQtb',
     new Composer()
     .on('text', ctx => {
         // Parsing dei voli: i voli sono separati da ','
-        let flights = ctx.message.text.split(',')
-        // Per ogni volo individuo gli istanti di inizio e fine
-        let instants = []
-        for (let flight of flights) {
-            // Trovo l'inizio e la fine, che sono separati da '-'
-            let start = flight.split('-')[0]
-            let end   = flight.split('-')[1]
-            // Aggiorno start ed end assegnando loro un oggetto Date. Questo è creato a partire dalla data della missione a cui vengono
-            // aggiunti ore (per esempio start.split('.')[0]) e minuti (start.split('.')[1]) trovati sopra
-            start = ctx.scene.state.currMissionDate.setHours(start.split('.')[0], start.split('.')[1])
-            end   = ctx.scene.state.currMissionDate.setHours(end.split('.')[0], end.split('.')[1])
-            instants.push({'flightStart': start, 'flightEnd': end})
+        ctx.scene.state.flights = ctx.message.text.split(',')
+        await ctx.reply('Inserisci l\'id del pilota per ogni volo, separati da virgole')
+        return ctx.wizard.next()
+    }),
+    new Composer()
+    .on('text', ctx => {
+        // Parsing dei piloti per ogni volo
+        let pilots = ctx.message.text.split(',')
+        // Se il numero di piloti non coincide con il numero di voli: errore
+        if (pilots.length !== ctx.scene.state.flights.length) {
+            ctx.reply('Il numero di piloti non coincide con il numero di voli.\n'+
+                      'Per favore reinserisci i piloti')
+            return
+        }
+        // Inserisco i dati di ogni volo in un array di json, che viene poi inserito nel db
+        let flightsData = []
+        let flights = ctx.scene.state.flights
+        for (let i = 0; i < flights.length; i++) {
+            // Trovo l'inizio e la fine, che sono separati da '-'. Start: start_end[0]; end: start_end[1]
+            let start_end = flights[i].split('-')
+            // Inserisco i dati del volo come stringhe: inizio, fine e pilota
+            flightsData.push({'flightStart': start_end[0], 'flightEnd': start_end[1], 'batteryCode': undefined, 'pilotId': pilots[i], 'notes': undefined})
         }
 
         /**
          * 1. Inserisco il qtb nel database
          * 2. Aggiorno lo stato della missione per quel drone, che passa da waitingForQtb a completed
          * 3. Inserisco il qtb appena inserito nell'array qtbs della relativa missione
+         * (I punti 2 e 3 vengono fatti in automatico dalla qury di insert del Qtb)
+         * 4. Aggiorno le ore di volo dei piloti sulla base delle durate dei voli contenute nell'array flightsData (da fare)
          */
+        let qtb = {
+            '_id': undefined,
+            'date': ctx.scene.state.curMissionDate,
+            'drone': ctx.scene.state.currentDrone,
+            'mission': ctx.scene.state.currentMission,
+            'flights': flightsData
+        }
+        await Qtb.insert(qtb)
+        return ctx.scene.leave()
     })
 ).leave(ctx => {
-
+    ctx.message.reply('Fine procedura inserimento qtb')
 })
 
-module.exports = addLogbook
+module.exports = addQtb
