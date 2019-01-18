@@ -75,7 +75,8 @@ exports.personnelSchema = new Schema({
             //maxMissionRank: {type: Number, default: null, min: 1, max: 5},
             expiring: {type: Date, default: null}
         },
-        droneTypes: [{type: String, default: [], enum: droneTypes}]
+        droneTypes: [{type: String, default: [], enum: droneTypes}],
+        flightTime: {type: Number, default: 0}
     },
     missions: {
         supervisor: {

@@ -1,4 +1,4 @@
-const { Mission, Drone, Qtb } = require('../../db/queries')
+const { Mission, Drone, Qtb, Personnel } = require('../../db/queries')
 const WizardScene   = require('telegraf/scenes/wizard/index')
 const Composer      = require('telegraf/composer')
 
@@ -65,6 +65,16 @@ const addQtb = new WizardScene('addQtb',
     .on('text', ctx => {
         // Parsing dei voli: i voli sono separati da ','
         ctx.scene.state.flights = ctx.message.text.split(',')
+        // Controllo che i valori delle date siano corretti
+        for (let date of ctx.scene.state.flights) {
+            date = date.split('.') // divido ore e minuti
+            // Se le ore sono fuori dall'intervallo [0;24) c'è un errore
+            // Se i minuti sono fuori dall'intervallo [0;60) c'è un errore
+            if ((date[0] < 0 || date[0] >= 24) || (date[1] < 0 || date[1] >= 60)) {
+                ctx.reply('Una o più date sono sbagliate\nPer favore, reinseriscile')
+                return
+            }
+        }
         await ctx.reply('Inserisci l\'id del pilota per ogni volo, separati da virgole')
         return ctx.wizard.next()
     }),
@@ -78,14 +88,44 @@ const addQtb = new WizardScene('addQtb',
                       'Per favore reinserisci i piloti')
             return
         }
+
         // Inserisco i dati di ogni volo in un array di json, che viene poi inserito nel db
         let flightsData = []
         let flights = ctx.scene.state.flights
-        for (let i = 0; i < flights.length; i++) {
-            // Trovo l'inizio e la fine, che sono separati da '-'. Start: start_end[0]; end: start_end[1]
+        for (let i = 0; i < flights.length; i++) { // itero contemporaneamente sui voli e sui piloti
+            // Trovo l'inizio e la fine, che sono separati da '-'. start: start_end[0]; end: start_end[1]
             let start_end = flights[i].split('-')
+            let start = start_end[0]
+            let end   = start_end[1]
             // Inserisco i dati del volo come stringhe: inizio, fine e pilota
-            flightsData.push({'flightStart': start_end[0], 'flightEnd': start_end[1], 'batteryCode': undefined, 'pilotId': pilots[i], 'notes': undefined})
+            flightsData.push({'flightStart': start, 'flightEnd': end, 'batteryCode': undefined, 'pilotId': pilots[i], 'notes': undefined})
+            // Calcolo la durata effettiva del volo
+            // Divido da start ed end le ore e i minuti (divisi dal carattere '.')
+            start = start.split('.') // ore: start[0]; minuti: start[1]
+            end   = end.split('.')   // ore:   end[0]; minuti:   end[1]
+            // Ci sono 4 situazioni possibili: end ha ore e minuti maggiori di ore e minuti di start, end ha i minuti minori,
+            // end ha le ore minori, end ha ore e minuti minori
+            // Esempi:
+            // 16:00 - 18:20         => semplice: faccio la differenza tra le ore e tra i minuti (2:20)
+            // 16:50 - 17:20         => trasformo 17:20 in 16:80 (tolgo 1h e aggiungo 60 minuti)
+            // 23:50 - 01:55         => trasformo 01:55 in 25:55 (aggiungo 24h)
+            // 23:50 - 01:30         => trasformo 01:30 in 24:90 (aggiungo 24h, quindi tolgo 1h e aggiungo 60 minuti) (combinazione dei due casi sopra)
+            // Quindi, se le ore di end sono minori, aggiungo 24h
+            if (end[0] < start[0])
+                end[0] += 24
+            // Se i minuti di end sono minori, tolgo 1h e aggiungo 60 minuti
+            if (end[1] < start[1]) {
+                end[0]--
+                end[1] += 60
+            }
+            // Calcolo la differenza e la inserisco in flightsTime
+            let diff = [0, 0]
+            diff[0] = end[0] - start[0] // differenza delle ore
+            diff[1] = end[1] - start[1] // differenza dei minuti
+            // Trasformo ore e minuti (base 60) in un valore decimale (base 10) di ore di volo totali
+            let flightTime = diff[0] + diff[1] / 60
+            // Aggiorno ore di volo del pilota attuale
+            Personnel.updateById(pilots[i], {$inc: {'pilot.flightTime': flightTime}}) // $inc incrementa il valore attuale del campo della quantità flightTime. Se il campo non eiste, lo crea e assegna quel valore
         }
 
         /**
@@ -93,7 +133,6 @@ const addQtb = new WizardScene('addQtb',
          * 2. Aggiorno lo stato della missione per quel drone, che passa da waitingForQtb a completed
          * 3. Inserisco il qtb appena inserito nell'array qtbs della relativa missione
          * (I punti 2 e 3 vengono fatti in automatico dalla qury di insert del Qtb)
-         * 4. Aggiorno le ore di volo dei piloti sulla base delle durate dei voli contenute nell'array flightsData (da fare)
          */
         let qtb = {
             '_id': undefined,
@@ -103,6 +142,7 @@ const addQtb = new WizardScene('addQtb',
             'flights': flightsData
         }
         await Qtb.insert(qtb)
+
         return ctx.scene.leave()
     })
 ).leave(ctx => {
