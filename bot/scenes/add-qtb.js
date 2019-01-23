@@ -141,7 +141,10 @@ const addQtb = new WizardScene('addQtb',
             'mission': ctx.scene.state.currentMission,
             'flights': flightsData
         }
-        await Qtb.insert(qtb)
+        let newQtb = await Qtb.insert(qtb)
+
+        let mEvent = { type: 'addQtb', actor: ctx.session.userData.person._id, subject: {type: 'Qtb', _id: newQtb._id}, timestamp: new Date() }
+		EventLog.insert(mEvent)
 
         return ctx.scene.leave()
     })
