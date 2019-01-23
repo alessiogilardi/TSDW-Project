@@ -248,15 +248,15 @@ exports.logbooksSchema = new Schema({
 })
 
 exports.qtbSchema = new Schema({
-    _id: ObjectId,
-    date: Date,
-    drone:  {type: ObjectId, ref: 'drone'},
-    mission:  {type: ObjectId, ref: 'mission'},
+    _id:    ObjectId,
+    date:   Date,
+    drone:   { type: ObjectId, ref: 'drone' },
+    mission: { type: ObjectId, ref: 'mission' },
     flights: [{
-        flightStart: Date,
-        flightEnd: Date,
-        batteryCode: String,
-        notes: String
+        flightStart: String,
+        flightEnd:   String,
+        pilotId:     { type: ObjectId, ref: 'personnel' },
+        notes:       String
     }]
 })
 
