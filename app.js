@@ -14,8 +14,8 @@ const addQtb			= require('./bot/scenes/add-qtb')
 const acceptMission 	= require('./bot/actions/accept-mission')
 const eventRegister  	= require('./events/event-register')
 const router		 	= require('./bot/router')
+const deadlineCheck		= require('./bot/missions-deadline-check')
 const { leave } 		= Stage
-
 
 
 const backtick = '\`';
@@ -70,14 +70,15 @@ bot.help(ctx => ctx.reply(`Command list:\n${ctx.session.userData.commands.join('
 // CHIAMATA DELLE FUNZIONI PERIODICHE
 bf.checkTimeout() // Funzione per il controllo del timeout dell'organizzazione delle missioni
 bf.checkTodaysMissions() // Funzione per il controllo delle missioni odierne
+deadlineCheck(bot) // Funzione che controlla le missioni e notifica la base più vicina se il personale non ha risposto in tempo
 
 bot.command(['requestMission', 'requestmission'], ctx => {
 	if (!ctx.session.userData.commands.includes('/requestMission')) {
 		ctx.reply('Mi spiace, non hai i diritti per eseguire questo comando.')
 		return
 	}
-	ctx.scene.enter('requestMission');
-});
+	ctx.scene.enter('requestMission')
+})
 
 bot.command(['manageDrones', 'managedrones'], ctx => {
 	if (!ctx.session.userData.commands.includes('/manageDrones')) {
