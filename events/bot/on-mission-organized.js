@@ -12,7 +12,7 @@ const Mission   = queries.Mission
 // TODO: recuperare anche le ore di volo dei piloti
 
 /**
- * Funzione che notifica il personale, mediante un messaggio Telegram e attraverso un messaggio.
+ * Funzione che notifica il personale, mediante un messaggio Telegram.
  * @param {String} idTelegram 
  * @param {String} message 
  * @param {Array}  roles Possibili ruoli che la persona può ricoprire nella missione
@@ -32,7 +32,8 @@ const notify = (idTelegram, message, roles) => {
  * @param {Personnel} persons 
  * @param {Mission}   mission 
  */
-const sendNotifications = (persons, mission) => {
+// TODO: formatta output Missione
+const sendNotifications = async (persons, mission) => {
     const r = ['pilot', 'crew', 'maintainer']
     for (let person of persons) {
         let roles = [person.roles.occupation.pilot, person.roles.occupation.crew, person.roles.occupation.maintainer]
@@ -43,74 +44,9 @@ const sendNotifications = (persons, mission) => {
         roles = tmp
         console.log(`Notifing: ${person} as ${roles}`)
         notify(person.telegramData.idTelegram, `Richiesta di missione come ${roles.join(',')}:\n${mission}`)
-        // TODO: scrivere query per aggiungere ogni persona a personnel.notified della tabella missions
         Mission.updateById(mission._id, { $push: { 'personnel.notified': person._id } })
-
     }
-
-    /*
-    for (let person of persons) {
-        console.log(`Notifing: ${person} as ${person.role}`)
-        switch(person.role){
-            case 'pilot':
-                // Mando notifica da pilota e lo setto come notificato nella Missione
-                notify(person.idTelegram, `Richiesta di missione come *pilota*:\n${mission}`, person.role)
-                queries.Mission.Pilot.setAsNotified(mission._id, person._id)
-                break;
-            case 'crew':
-                // Mando la notifica da crew e lo setto come notificato nella Missione
-                notify(person.idTelegram, `Richiesta di missione come *membro dell'equipaggio*:\n${mission}`, person.role)
-                queries.Mission.Pilot.setAsNotified(mission._id, person._id)
-                break;
-            case 'maintainer':
-                // Mando la notifica da manutentore e lo setto come notificato nella Missione
-                notify(person.idTelegram, `Richiesta di missione come *manutentore*:\n${mission}`, person.role)
-                queries.Mission.Pilot.setAsNotified(mission._id, person._id)
-                break;
-        }
-    }*/
 }
-
-// Le query ritornano membri del personale (piloti, crew, manutentori) che
-// appartengono alla base in questione, hanno effetivamente quel quolo nella base, e non hanno acettato missioni
-// nello stesso giorno della missione che si sta creando.
-// In più per i piloti: vengono notificati solo colore che rispettano i paramtri della missione
-/*const find = {
-    pilots: {
-        query: () => {
-            return {
-                base: this.mission.base,
-                'roles.occupation.pilot': true,
-                'pilot.license.maxMissionRank': {$gte: this.mission.description.rank}, 
-                'pilot.droneTypes': {$all: [this.mission.drones[0].type]},
-                'missions.pilot.accepted.date': {$ne: this.ctx.session.command.params.date}
-            }
-        },
-        projection: '_id telegramData.idTelegram'
-    },
-    crew: {
-        query: () => {
-            return {
-                base: this.mission.base,
-                'roles.occupation.crew': true,
-                _id: {$nin: Array.from(this.toNotify, person => person._id)},
-                'missions.crew.accepted.date': {$ne: this.ctx.session.command.params.date}
-            }
-        },
-        projection: '_id telegramData.idTelegram'
-    },
-    maintainers: {
-        query: () => {
-            return {
-                _id: {$nin: Array.from(this.toNotify, person => person._id)},
-                base: this.mission.base,
-                'roles.occupation.maintainer': true,
-                'missions.maintainer.accepted.date': {$ne: this.ctx.session.command.params.date}
-            }
-        },
-        projection: '_id telegramData.idTelegram'
-    }
-}*/
 
 /**
  * Funzione che si occupa di chiamare altre funzioni per la notifica del personale. 
@@ -118,40 +54,10 @@ const sendNotifications = (persons, mission) => {
  * @param {*} bot 
  * @param {*} mission 
  */
-const onOrganizedMission = async (bot, mission) => {
-    // TODO: la missione deve essere aggiunta alle organized missions del baseSup
-
+const onMissionOrganized = async (bot, mission) => {
     if (bot === null || bot === undefined) throw new Error('Missing Telegram Bot')
     if (mission === null || mission === undefined) throw new Error('Missing a valid Mission')
-
-    /* ---OLD---
     this.bot = bot
-    this.ctx = this.bot.ctx
-    this.mission = mission
-    this.toNotify = []
-
-    queries.Personnel.find(find.pilots.query(), find.pilots.projection, pilots => {
-        if (pilots !== undefined) {
-            pilots.forEach(pilot => this.toNotify.push({_id: pilot._id, idTelegram: pilot.telegramData.idTelegram, role: 'Pilot'}))            
-
-        }
-        queries.Personnel.find(find.crew.query(), find.crew.projection, crew => {
-            if (crew !== undefined)
-                crew.forEach(crewMember => this.toNotify.push({_id: crewMember._id, idTelegram: crewMember.telegramData.idTelegram, role: 'Crew'}))
-            
-            // Se la missione dura più di 3h notifico anche i manutentori
-            if (this.mission.description.duration.expected >= 3){
-                queries.Personnel.find(find.maintainers.query(), find.maintainers.projection, maintainers => {
-                    if (maintainers !== undefined)
-                        maintainers.forEach(maintainer => this.toNotify.push({_id: maintainer._id, idTelegram: maintainer.telegramData.idTelegram, role: 'Maintainer'}))
-                    sendNotifications()
-                })
-            } else {
-                sendNotifications()
-            }
-        })
-    })
-    */
 
     // Vengono cercati tutti i membri del personale che ricoprono almeno uno dei ruoli pilota, crew, manutentore
     const selection = {
@@ -173,23 +79,8 @@ const onOrganizedMission = async (bot, mission) => {
     }
     sendNotifications(personnel, mission)
 
-    /*// NOTIFICA CREW
-    selection = {
-        base: mission.base,
-        'roles.occupation.crew': true,
-        'missions.crew.accepted.date': {$ne: mission.date}
-    }
-    let crew = await queries.Personnel.find(selection, '')
-    sendNotifications(crew, mission)
-
-    // NOTIFICA MANUTENTORI
-    selection = {
-        base: mission.base,
-        'roles.occupation.maintainer': true,
-        'missions.maintainer.accepted.date': {$ne: mission.date}
-    }
-    let maintainers = await queries.Personnel.find(selection, '')
-    sendNotifications(maintainers, mission)*/
+    // Aggiungo la missione a quelle organizzate dal BaseSup
+    Personnel.updateById(mission.supervisor, { $push: { 'missions.supervisor.organized': mission._id } })
 }
 
-module.exports = onOrganizedMission
+module.exports = onMissionOrganized
