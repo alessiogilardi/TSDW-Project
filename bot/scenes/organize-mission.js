@@ -97,13 +97,8 @@ const organizeMission = new WizardScene('organizeMission',
         for (let drone of ctx.scene.state.drones.chosen) {
             drones.push({ _id: drone._id, type: drone.type })
         }
-<<<<<<< HEAD
-        console.log(drones)
-        Mission.updateById(mission._id, { $push: { 'drones': { $each: drones } }, $set: { 'status.waitingForTeam.value': true }, $set: { 'status.waitingForTeam.timestamp': new Date() } })
-=======
         //mission.status.waitingForTeam = { value: true, timestamp: new Date() }
         Mission.updateById(mission._id, { $push: { 'drones': { $each: drones } }, $set: { 'status.waitingForTeam.value': true, 'status.waitingForTeam.timestamp': new Date() } })
->>>>>>> e10efe8dc5d71496fd0daa98eeb055addc8c9b46
         for (let drone of drones) {
             Drone.updateById(drone._id, { $push: { 'missions.waitingForQtb': { idMission: mission._id, date: mission.date } } })
         }
