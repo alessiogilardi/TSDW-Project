@@ -112,13 +112,14 @@ const acceptMission = async (bot, ctx)=> {
 	const missionId = ctx.state.data[0]
 	let roles 	= ctx.state.data[1].split(',') // Ruoli che può ricoprire nella missione
 	for (let i in roles) {
-		roles[i] = bf.unZip(roles[i])
+		roles[i] = bf.unZip[roles[i]]
 	}
 	const person 	= ctx.session.userData
-	
 	const aMission 	= await Mission.findById(missionId, '')
 
-	await Personnel.updateById(person._id, { $push: { 'accepted.idMission': aMission._id, date: aMission.date, roles: roles } })
+	console.log(ctx)
+
+	await Personnel.updateById(person._id, { $push: { 'missions.accepted': { idMission: aMission._id, date: aMission.date, roles: roles} } })
 	await Mission.updateById(aMission._id, { $pull: { 'personnel.notified': person._id } })
 	await Mission.updateById(aMission._id, { $push: { 'personnel.accepted': person._id } })
 
