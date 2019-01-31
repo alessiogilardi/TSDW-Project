@@ -68,7 +68,7 @@ bot.help(ctx => ctx.reply(`Command list:\n${ctx.session.userData.commands.join('
 // bot.action('delete', ctx => bf.resetBotStarted(ctx.message.from.id))
 
 // CHIAMATA DELLE FUNZIONI PERIODICHE
-bf.checkTimeout() // Funzione per il controllo del timeout dell'organizzazione delle missioni
+bf.checkTimeout(bot) // Funzione per il controllo del timeout dell'organizzazione delle missioni
 bf.checkTodaysMissions() // Funzione per il controllo delle missioni odierne
 deadlineCheck(bot) // Funzione che controlla le missioni e notifica la base più vicina se il personale non ha risposto in tempo
 

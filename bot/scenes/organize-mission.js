@@ -81,6 +81,7 @@ const organizeMission = new WizardScene('organizeMission',
         if (ctx.scene.state.drones.loaded.length > 0 && ctx.scene.state.drones.chosen.length === 0) {
             return ctx.reply('Scegli almeno un drone.')
         }
+        ctx.reply('Fine procedura inserimento droni')
         ctx.scene.leave()
     })
 ).leave(ctx => {
