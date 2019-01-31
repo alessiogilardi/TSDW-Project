@@ -81,11 +81,11 @@ exports.resetBotStarted = idTelegram => Personnel.updateByIdTelegram(idTelegram,
  */
 exports.checkTimeout = async () => {
     timers.setInterval(async () => {
-        let now = new Date().getMinutes()
+        let now = new Date().getTime()
         let missions = await Mission.find({'status.requested.value': true, 'status.waitingForTeam.value': false}, 'status.requested.timestamp')
         for (let m of missions) {
-            let missionDate = new Date(m.status.requested.timestamp).getMinutes()
-            if (now - missionDate == 1) { // DEBUG: cambiare in 15 minuti
+            let missionDate = new Date(m.status.requested.timestamp).getTime()
+            if (now - missionDate == 1 * 60000) { // DEBUG: cambiare in 15 minuti
                 // invio notifica all'AM
                 console.log(m)
             }
