@@ -54,7 +54,7 @@ const addQtb = new WizardScene('addQtb',
         return ctx.wizard.next()
     }),
     new Composer()
-    .on('text', ctx => {
+    .on('text', async ctx => {
         ctx.scene.state.protocolNumber = ctx.message.text
         await ctx.reply('Inserisci gli istanti di inizio e fine di ogni volo\n'+
                         'Esempio: 12.00-14.00,16.00-18.00 per indicare due voli dalle 12 alle 14 e dalle 16 alle 18')
