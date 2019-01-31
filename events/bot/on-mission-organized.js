@@ -83,6 +83,10 @@ const onMissionOrganized = async (bot, mission) => {
 
     // Aggiungo la missione a quelle organizzate dal BaseSup
     Personnel.updateById(mission.supervisor, { $push: { 'missions.supervisor.organized': mission._id } })
+
+    // Inserisco l'evento nel Event Log
+    let mEvent = { type: 'missionOrganized', actor: mission.supervisor, subject: {type: 'Mission', _id: mission._id}, timestamp: new Date() }
+	EventLog.insert(mEvent)
 }
 
 module.exports = onMissionOrganized

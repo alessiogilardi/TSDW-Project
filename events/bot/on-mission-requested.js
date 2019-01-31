@@ -28,7 +28,6 @@ const onMissionRequested = async (bot, missions) => {
     let am         = await Personnel.findById(missions[0].AM, 'telegramData.idTelegram')
     let supervisor = await Personnel.findById(missions[0].supervisor, 'telegramData.idTelegram')
 
-    // TODO: la missione deve essere aggiunta alle requested missions del baseSup
 
     for (let mission of missions) {
         let message = `C'è una richiesta di missione:\n\n`+
