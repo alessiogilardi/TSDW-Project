@@ -6,6 +6,7 @@ const utils     = require('../utils.js')
  * Dizionario usato per de-comprimere i nomi delle actions per evitare il limite di 64 byte
  * Nel caso si può aumentare la compressione dei nomi delle action
  */
+/*
 exports.unZip = unZip = {
     orgMiss:    'organizeMission',
     accMiss:    'acceptMission',
@@ -13,16 +14,30 @@ exports.unZip = unZip = {
     aDrn2Msn:   'addDroneToMission',
     creTm:      'createTeam'
 }
+*/
+exports.unZip = unZip = {
+    '1': 'organizeMission',
+    '2': 'acceptMission',
+    '3': 'declineMission',
+    '4': 'addDroneToMission',
+    '5': 'createTeam',
+    '6': 'pilot',
+    '7': 'crew',
+    '8': 'maintainer'
+}
 /**
  * Dizionario usato per comprimenre i nomi delle actions per evitare il limite di 64 byte
  * Nel caso si può aumentare la compressione dei nomi delle action
  */
 exports.zip = zip = {
-    organizeMission:    'orgMiss',
-    acceptMission:      'accMiss',
-    declineMission:     'decMiss',
-    addDroneToMission:  'aDrn2Msn',
-    createTeam:         'creTm'
+    organizeMission:    '1',
+    acceptMission:      '2',
+    declineMission:     '3',
+    addDroneToMission:  '4',
+    createTeam:         '5',
+    pilot:              '6',
+    crew:               '7',
+    maintainer:         '8'
 }
 
 /**

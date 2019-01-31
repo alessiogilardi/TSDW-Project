@@ -18,6 +18,13 @@ const Mission   = queries.Mission
  * @param {Array}  roles Possibili ruoli che la persona può ricoprire nella missione
  */
 const notify = (idTelegram, message, roles, missionId) => {
+    for (let i in roles) {
+        roles[i] = zip[roles[i]];
+    }
+    let buttonPayload = `${zip['acceptMission']}:${missionId}:${roles.join(',')}`
+    console.log('Print buttonPayload: ')
+    console.log(buttonPayload)
+    console.log(Buffer.byteLength(buttonPayload, 'utf8') + " bytes")
     this.bot.telegram.sendMessage(idTelegram, message, Telegraf.Extra
         .markdown()
         .markup( m => m.inlineKeyboard([
@@ -42,8 +49,9 @@ const sendNotifications = async (persons, mission) => {
             if (roles[i]) { tmp.push(r[i]) }
         }
         roles = tmp
-        console.log(`Notifing: ${person} as ${roles}`)
-        notify(person.telegramData.idTelegram, `Richiesta di missione come ${roles.join(',')}:\n${mission}`, roles, mission._id)
+        console.log(`Notifing: ${person.name} ${person.surname} as ${roles}`)
+        let message = `Richiesta di missione come ${roles.join(',')}:\n${mission}`
+        notify(person.telegramData.idTelegram, message, roles, mission._id)
         Mission.updateById(mission._id, { $push: { 'personnel.notified': person._id } })
     }
 }

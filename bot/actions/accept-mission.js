@@ -110,7 +110,10 @@ const acceptMission = async (bot, ctx)=> {
 	this.bot = bot
 	
 	const missionId = ctx.state.data[0]
-	const roles 	= ctx.state.data[1].split(',') // Ruoli che può ricoprire nella missione
+	let roles 	= ctx.state.data[1].split(',') // Ruoli che può ricoprire nella missione
+	for (let i in roles) {
+		roles[i] = bf.unZip(roles[i])
+	}
 	const person 	= ctx.session.userData
 	
 	const aMission 	= await Mission.findById(missionId, '')
