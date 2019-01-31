@@ -6,13 +6,16 @@
 const bf = require('../bot-functions')
 
 const middleware = () => async (ctx, next) => {
+    /*
     if (!ctx.message) {
         return next()
     }
+    */
     if (ctx.session.dataLoaded && ctx.session.isValid) {
         return next()
     }
-    const data = await bf.loadData(ctx.message.chat.id)
+    const telegramId = bf.getTelegramId(ctx)
+    const data = await bf.loadData(telegramId)
     ctx.session.userData    = data
     ctx.session.dataLoaded  = true
     ctx.session.isValid     = true
