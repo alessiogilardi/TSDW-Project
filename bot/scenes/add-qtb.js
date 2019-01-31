@@ -62,7 +62,7 @@ const addQtb = new WizardScene('addQtb',
         return ctx.wizard.next()
     }),
     new Composer()
-    .on('text', ctx => {
+    .on('text', async ctx => {
         // Parsing dei voli: i voli sono separati da ','
         ctx.scene.state.flights = ctx.message.text.split(',')
         // Controllo che i valori delle date siano corretti
@@ -79,7 +79,7 @@ const addQtb = new WizardScene('addQtb',
         return ctx.wizard.next()
     }),
     new Composer()
-    .on('text', ctx => {
+    .on('text', async ctx => {
         // Parsing dei piloti per ogni volo
         let pilots = ctx.message.text.split(',')
         // Se il numero di piloti non coincide con il numero di voli: errore
