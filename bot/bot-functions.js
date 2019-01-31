@@ -106,7 +106,7 @@ exports.checkTimeout = async () => {
 exports.checkTodaysMissions = async () => {
     timers.setInterval(async () => {
         // Cerco le missioni di oggi con il team già creato
-        let today = utils.Date.parse(new Date().setHours(0, 0, 0, 0))
+        let today = new Date().setHours(0, 0, 0, 0)
         let todaysMissions = await Mission.find({date: today, 'status.teamCreated.value': true}, '')
         // Queste missioni vengono settate come 'started'
         // Il controllo serve per evitare che venga eseguita la query sempre, così non viene emesso l'evento di modifica ogni volta

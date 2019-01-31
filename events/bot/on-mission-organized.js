@@ -59,6 +59,8 @@ const onMissionOrganized = async (bot, mission) => {
     if (mission === null || mission === undefined) throw new Error('Missing a valid Mission')
     this.bot = bot
 
+    console.log('QUIIIIII')
+
     // Vengono cercati tutti i membri del personale che ricoprono almeno uno dei ruoli pilota, crew, manutentore
     const selection = {
         base: mission.base,

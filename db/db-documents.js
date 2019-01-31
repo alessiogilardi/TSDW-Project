@@ -142,8 +142,8 @@ exports.Personnel = [{
     roles: {
         command: {
             airOperator: {
-                AM: true,
-                SM: true
+                AM: false,
+                SM: false
             },
             base: {
                 supervisor: true
@@ -157,7 +157,7 @@ exports.Personnel = [{
     pilot: {
         license: {
             id: 'lic-id-02',
-            type: 'type',
+            type: 'vl/l',
             maxMissionRank: 4,
             expiring: new Date()
         },
@@ -249,7 +249,7 @@ exports.Personnel = [{
     pilot: {
         license: {
             id: 'lic-id-02',
-            type: 'type',
+            type: 'vl/l',
             maxMissionRank: 4,
             expiring: new Date()
         },
