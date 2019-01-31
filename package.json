@@ -6,11 +6,11 @@
     "dotenv": "^6.2.0",
     "fs": "0.0.1-security",
     "lzutf8": "^0.5.5",
-    "moment": "^2.23.0",
-    "mongodb": "^3.1.9",
-    "mongoose": "^5.3.16",
-    "npm": "^6.5.0",
-    "telegraf": "^3.25.5",
+    "moment": "^2.24.0",
+    "mongodb": "^3.1.13",
+    "mongoose": "^5.4.8",
+    "npm": "^6.7.0",
+    "telegraf": "^3.27.0",
     "utm-latlng": "^1.0.5"
   }
 }
