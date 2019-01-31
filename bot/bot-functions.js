@@ -81,6 +81,15 @@ exports.loadData = async idTelegram => {
 }
 
 /**
+ * Funzione che ritorna il telegramId dell'utente
+ * 
+ * @param {Context} ctx Contesto del bot
+ */
+exports.getTelegramId = ctx => {
+    return ctx[ctx.updateType].from.id
+}
+
+/**
  * Funzione che setta il bot come startato da una persona.
  * La persona ha già usato il comando /start.
  */
