@@ -79,7 +79,7 @@ exports.resetBotStarted = idTelegram => Personnel.updateByIdTelegram(idTelegram,
 /**
  * Funzione che controlla le missioni non istanziate ogni minuto e notifica l'AM dopo 15 minuti che non viene istanziata
  */
-exports.checkTimeout = async () => {
+exports.checkTimeout = async (bot) => {
     timers.setInterval(async () => {
         let now = new Date().getTime()
         let missions = await Mission.find({'status.requested.value': true, 'status.waitingForTeam.value': false}, 'status.requested.timestamp')
@@ -87,7 +87,8 @@ exports.checkTimeout = async () => {
             let missionDate = new Date(m.status.requested.timestamp).getTime()
             if (now - missionDate == 1 * 60000) { // DEBUG: cambiare in 15 minuti
                 // invio notifica all'AM
-                console.log(m)
+                let am = await Personnel.find({'roles.command.airOperator.AM': true}, 'telegramData.idTelegram')
+                bot.sendMessage(am.telegramData.idTelegram, 'Una missione non è ancora stata accettata dal responsabile di base')
             }
         }
         missions = []
