@@ -5,6 +5,7 @@
 const queries   = require('../../db/queries')
 const Telegraf  = require('telegraf')
 const bf        = require('../../bot/bot-functions')
+const utils     = require('../../utils')
 const zip       = bf.zip
 const Personnel = queries.Personnel
 const Mission   = queries.Mission
@@ -25,6 +26,7 @@ const notify = (idTelegram, message, roles, missionId) => {
     console.log('Print buttonPayload: ')
     console.log(buttonPayload)
     console.log(Buffer.byteLength(buttonPayload, 'utf8') + " bytes")
+    console.log(message)
     this.bot.telegram.sendMessage(idTelegram, message, Telegraf.Extra
         .markdown()
         .markup( m => m.inlineKeyboard([
@@ -39,7 +41,6 @@ const notify = (idTelegram, message, roles, missionId) => {
  * @param {Personnel} persons 
  * @param {Mission}   mission 
  */
-// TODO: formatta output Missione
 const sendNotifications = async (persons, mission) => {
     const r = ['pilot', 'crew', 'maintainer']
     for (let person of persons) {
@@ -50,7 +51,8 @@ const sendNotifications = async (persons, mission) => {
         }
         roles = tmp
         console.log(`Notifing: ${person.name} ${person.surname} as ${roles}`)
-        let message = `Richiesta di missione come ${roles.join(',')}:\n${mission}`
+
+        let message = `Richiesta di missione come ${roles.join(', ')}:\n${utils.Date.format(mission.date, 'DD MMM YYYY')}\nScenario: ${mission.description.riskEvaluation.scenario}\nLivello: ${mission.description.riskEvaluation.level}`
         notify(person.telegramData.idTelegram, message, roles, mission._id)
         Mission.updateById(mission._id, { $push: { 'personnel.notified': person._id } })
     }
