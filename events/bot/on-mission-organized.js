@@ -17,12 +17,12 @@ const Mission   = queries.Mission
  * @param {String} message 
  * @param {Array}  roles Possibili ruoli che la persona può ricoprire nella missione
  */
-const notify = (idTelegram, message, roles) => {
+const notify = (idTelegram, message, roles, missionId) => {
     this.bot.telegram.sendMessage(idTelegram, message, Telegraf.Extra
         .markdown()
         .markup( m => m.inlineKeyboard([
-            m.callbackButton('Accetta', `${zip['acceptMission']}:${mission._id}:${roles.join(',')}`),
-            m.callbackButton('Rifiuta', `${zip['declineMission']}:${mission._id}`)
+            m.callbackButton('Accetta', `${zip['acceptMission']}:${missionId}:${roles.join(',')}`),
+            m.callbackButton('Rifiuta', `${zip['declineMission']}:${missionId}`)
     ])))
 }
 
@@ -43,7 +43,7 @@ const sendNotifications = async (persons, mission) => {
         }
         roles = tmp
         console.log(`Notifing: ${person} as ${roles}`)
-        notify(person.telegramData.idTelegram, `Richiesta di missione come ${roles.join(',')}:\n${mission}`)
+        notify(person.telegramData.idTelegram, `Richiesta di missione come ${roles.join(',')}:\n${mission}`, roles, mission._id)
         Mission.updateById(mission._id, { $push: { 'personnel.notified': person._id } })
     }
 }
@@ -58,8 +58,6 @@ const onMissionOrganized = async (bot, mission) => {
     if (bot === null || bot === undefined) throw new Error('Missing Telegram Bot')
     if (mission === null || mission === undefined) throw new Error('Missing a valid Mission')
     this.bot = bot
-
-    console.log('QUIIIIII')
 
     // Vengono cercati tutti i membri del personale che ricoprono almeno uno dei ruoli pilota, crew, manutentore
     const selection = {
