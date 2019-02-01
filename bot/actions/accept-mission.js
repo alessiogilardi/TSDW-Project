@@ -117,7 +117,7 @@ const acceptMission = async (bot, ctx)=> {
 	const person 	= ctx.session.userData
 	const aMission 	= await Mission.findById(missionId, '')
 
-	console.log(ctx)
+	//console.log(ctx)
 
 	await Personnel.updateById(person._id, { $push: { 'missions.accepted': { idMission: aMission._id, date: aMission.date, roles: roles} } })
 	await Mission.updateById(aMission._id, { $pull: { 'personnel.notified': person._id } })

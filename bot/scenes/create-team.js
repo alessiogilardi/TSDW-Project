@@ -19,7 +19,7 @@ const showTeam = new WizardScene('showTeam',
             ctx.scene.state.personnel.loaded.push(tmp)
         }
         await ctx.reply('Scegli tra queste persone chi aggiungere al team della missione.\n' +
-                        'Il primo Pilota che sceglirìerai sarà il Pilot in Chief.')
+                        'Il primo Pilota che sceglierai sarà il Pilot in Chief.')
         // Mostro le persone
         const personnel = ctx.scene.state.personnel.loaded
         for (let i in personnel) {

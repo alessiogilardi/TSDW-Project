@@ -1,7 +1,7 @@
 /**
  * Modulo middleware del bot.
  * Il modulo si occupa di verificare se i dati dell'utente sono già stati caricati in memoria e 
- * nel caso di eseguire una query al db per caricarli.
+ * nel caso negativo di eseguire una query al db per caricarli.
  */
 const bf = require('../bot-functions')
 

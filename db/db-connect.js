@@ -10,8 +10,8 @@ const mongoose = require('mongoose');
  * Funzione che esegue la connessione al DB
  * 
  * @param {*} dbAddress Indirizzo IP del DB
- * @param {*} dbPort Porta a cui connettersi
- * @param {*} dbName Node del DB
+ * @param {*} dbPort    Porta a cui connettersi
+ * @param {*} dbName    Node del DB
  * 
  * @returns {Promise}
  */

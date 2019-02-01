@@ -112,7 +112,7 @@ const missedDeadlines = async () => {
 
 const periodicTask = async bot => {
     this.bot = bot
-    let period = 60000
+    const period = 60000
     // per ogni missione trovo la base più vicina e notifico i piloti di quella base
     timers.setInterval(async () => {
         let missions = await missedDeadlines()

@@ -31,9 +31,7 @@ const backtick = '\`';
 
  // TODO: definire una funzione che fa passare le missioni started a waitingForDocuments e setta il timestamp
 
- // TODO: rivedere in Mission.waitingForDocuments e dividere per logBook e Qtb altrimenti non so quando mettere
- // la missione come completed, si potrebbe anche controllare ogni volta che inserisco un Logbook o Qtb se ho 2 logbook 
- // e Qtb pari al numero di droni in quella missione
+
  // TODO: rivedere Mission.logbooks
 
 
