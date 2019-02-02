@@ -132,6 +132,7 @@ router.on('organizeMission', ctx => {
 })
 
 router.on('acceptMission', ctx => {
+	ctx.deleteMessage()
 	acceptMission(bot, ctx)
 })
 
