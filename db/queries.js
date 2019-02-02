@@ -9,9 +9,6 @@ const models    = require('./models')
 const ee        = require('../events/event-emitters')
 const bf        = require('../bot/bot-functions')
 
-
-// TODO: quando completo la missione devo rilasciare personale e droni e renderli nuovamante disponibili
-
 /**
  * Funzioni relative all'Operatore Aereo
  */
@@ -76,27 +73,8 @@ exports.AirOperator = AirOperator = {
         return models.AirOperator.findOne()
         .where('name').equals(aName)
         .select(projection)
-        .exec(/*(err, doc) => {
-            if (err)
-                return console.log(err);
-            callback(doc);
-        }*/);
-    },
-/*
-    findByNameSync: (aName, projection) => {
-        var ret = null;
-        models.AirOperator.findOne()
-        .where('name').equals(aName)
-        .select(projection)
-        .exec((err, res) => {
-            ret = res;
-        });
-        while (ret == null)
-            deasync.runLoopOnce();
-        return ret;
+        .exec()
     }
-    */
-
 };
 
 /**
@@ -172,17 +150,6 @@ exports.Base = Base = {
      */
     updateById: (aId, newValues) => { return Base.update({_id: aId}, newValues) },
 
-    
-    /*
-    findByName: (name, projection, callback) => {
-        models.Base.findOne()
-        .where('name').equals(name)
-        .select(projection)
-        .exec((err, doc) => {
-            callback(doc);
-        });
-    },
-    */
     /**
      * Funzione che cerca una Base in base al nome.
      * @param {String} aName nome della Base da cercare
@@ -195,20 +162,6 @@ exports.Base = Base = {
             .select(projection)
             .exec()
     }
-/*
-    findByNameSync: (name, projection) =>  {
-        var ret = null;
-        models.Base.findOne()
-        .where('name').equals(name)
-        .select(projection)
-        .exec((err, doc) => {
-            ret = doc;
-        });
-        while (ret == null)
-            deasync.runLoopOnce();
-        return ret;
-    }
-    */
 };
 
 /**
