@@ -20,26 +20,7 @@ const { leave } 		= Stage
 
 const backtick = '\`';
 
-/**
- * TODO: definire una funzione che gira periodicamente e controlla quali sono le missioni che ci sono quel giorno:
- * 1. Controllo tra tutte le missioni quali sono quelle che ci sono quel giorno
- * 2. Setto le missioni trovate come Started o richiedo all baseSup di settarle come Started
- * 3. Setto la missione come running per baseSup, pilot, crew e maintainer
- * 		-> Il 3 può essere inutile visto che c'è il campo Accepted che tiene anche la data della missione
- * 4. Setto il campo Personnel.missions.pilot.waitingForLogbook
- */
-
  // TODO: definire una funzione che fa passare le missioni started a waitingForDocuments e setta il timestamp
-
-
- // TODO: rivedere Mission.logbooks
-
-
-// TODO: potrebbe essere possibile creare un middleware che controlla l'input,
-// se è un comando allora verifica che l'utente sia autorizzato a lanciarlo altrimeni restituisce errore
-
-
-// TODO: definire la possibilità che sia droni che piloti siano occupati in un altra missione per cui è inutile notificarli
 
 const stage = new Stage([organizeMission, requestMission, createTeam, manageDrones, addLogbook, addQtb])
 stage.command('cancel', leave())
@@ -137,6 +118,7 @@ router.on('acceptMission', ctx => {
 })
 
 router.on('declineMission', ctx => {
+	ctx.deleteMessage()
 	const data = ctx.state.data
 })
 
