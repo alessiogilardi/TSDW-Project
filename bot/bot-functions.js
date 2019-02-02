@@ -6,15 +6,6 @@ const utils     = require('../utils.js')
  * Dizionario usato per de-comprimere i nomi delle actions per evitare il limite di 64 byte
  * Nel caso si può aumentare la compressione dei nomi delle action
  */
-/*
-exports.unZip = unZip = {
-    orgMiss:    'organizeMission',
-    accMiss:    'acceptMission',
-    decMiss:    'declineMission',
-    aDrn2Msn:   'addDroneToMission',
-    creTm:      'createTeam'
-}
-*/
 exports.unZip = unZip = {
     '1': 'organizeMission',
     '2': 'acceptMission',
