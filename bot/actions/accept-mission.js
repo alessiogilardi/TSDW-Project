@@ -1,5 +1,3 @@
-
-
 const queries   = require('../../db/queries')
 const bf 		= require('../bot-functions')
 const Personnel = queries.Personnel
