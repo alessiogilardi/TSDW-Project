@@ -45,7 +45,7 @@ const organizeMission = new WizardScene('organizeMission',
         }
         
         ctx.scene.state.drones = { loaded: drones, chosen: [] }
-        await ctx.reply('Droni disponibili:')
+        await ctx.reply('Droni disponibili:\n(Inserisci il comando /end quando hai finito.)')
         let index = 0
         for (let drone of drones) {
             const message = `Targa: ${drone.number}\nTaglia: ${drone.type}`
@@ -81,7 +81,7 @@ const organizeMission = new WizardScene('organizeMission',
         if (ctx.scene.state.drones.loaded.length > 0 && ctx.scene.state.drones.chosen.length === 0) {
             return ctx.reply('Scegli almeno un drone.')
         }
-        ctx.reply('Fine procedura inserimento droni')
+        //ctx.reply('Fine procedura inserimento droni')
         ctx.scene.leave()
     })
 ).leave(ctx => {
@@ -89,6 +89,7 @@ const organizeMission = new WizardScene('organizeMission',
     // Setto waitingForQtb nelle missioni del drone -> FATTO da testare
     // Lo stato della missione avanza da requested passa waitingForStaff -> FATTO testare
     console.log('Leaving organizeMission')
+    ctx.reply('Fine della procedura.\nSto contattando il personale di Base, sarai notificato quando è pronto un team')
 
     if (ctx.scene.state.drones.chosen.length > 0) {
         const mission = ctx.scene.state.mission
