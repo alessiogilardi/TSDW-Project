@@ -1,10 +1,10 @@
+const Telegraf 		 	= require('telegraf')
 const { Mission, Base } = require('../db/queries')
-const moment = require('moment')
-const timers = require('timers')
+const moment            = require('moment')
+const timers            = require('timers')
+const utils             = require('../utils')
 
-
-
-const deadline = 120    // Tempo in minuti che deve passare da quando una missione è presa in carico per
+//const deadline = 120    // Tempo in minuti che deve passare da quando una missione è presa in carico per
                         // iniziare a notificare la base più vicina
 
 
@@ -29,8 +29,8 @@ const computeDistance = (base1, base2) => {
  * @param {ObjectId} baseId Id della base di cui trovare la più vicina
  */
 const findNearestBase = async baseId => {
-    const startBase = await Base.find({ _id: baseId })
-    const bases = await Base.find({ _id: { $neq: baseId } }, '')
+    const startBase = await Base.findById(baseId)
+    const bases     = await Base.find({ _id: { $ne: baseId } }, '')
 
     // Per ogni base ne calcolo la distanza dalla mia base
     let minIndex = -1
@@ -47,19 +47,25 @@ const findNearestBase = async baseId => {
 }
 
 /**
- * Funzione che manda un messaggio al membro del personale con due bottoni per accettare o rifiutare la missione.
- * @param {String} idTelegram 
- * @param {String} message 
- * @param {Array}  roles        Possibili ruoli che la persona può ricoprire nella missione
+ * Funzione che notifica il personale, mediante un messaggio Telegram.
+ * @param {String}   idTelegram 
+ * @param {String}   message 
+ * @param {Array}    roles      Possibili ruoli che la persona può ricoprire nella missione
+ * @param {ObjectId} missionId  _id della Missione
  */
-const sendMessage = (idTelegram, message, roles) => {
+const sendMessage = (idTelegram, message, roles, missionId) => {
+    for (let i in roles) {
+        roles[i] = zip[roles[i]];
+    }
+    
     this.bot.telegram.sendMessage(idTelegram, message, Telegraf.Extra
         .markdown()
         .markup( m => m.inlineKeyboard([
-            m.callbackButton('Accetta', `${zip['acceptMission']}:${mission._id}:${roles.join(',')}`),
-            m.callbackButton('Rifiuta', `${zip['declineMission']}:${mission._id}`)
+            m.callbackButton('Accetta', `${zip['acceptMission']}:${missionId}:${roles.join(',')}`),
+            m.callbackButton('Rifiuta', `${zip['declineMission']}:${missionId}`)
     ])))
 }
+
 
 /**
  * Funzione che notifica il personale.
@@ -67,7 +73,6 @@ const sendMessage = (idTelegram, message, roles) => {
  * @param {Personnel} persons 
  * @param {Mission}   mission 
  */
-// TODO: formatta output Missione
 const notifyPersonnel = async (persons, mission) => {
     const r = ['pilot', 'crew', 'maintainer']
     for (let person of persons) {
@@ -77,8 +82,10 @@ const notifyPersonnel = async (persons, mission) => {
             if (roles[i]) { tmp.push(r[i]) }
         }
         roles = tmp
-        console.log(`Notifing: ${person} as ${roles}`)
-        sendMessage(person.telegramData.idTelegram, `Richiesta di missione come ${roles.join(',')}:\n${mission}`)
+        console.log(`Notifing in nearest base: ${person.name} ${person.surname} as ${roles}`)
+
+        let message = `Richiesta di missione come ${roles.join(', ')}:\n${utils.Date.format(mission.date, 'DD MMM YYYY')}\nScenario: ${mission.description.riskEvaluation.scenario}\nLivello: ${mission.description.riskEvaluation.level}`
+        sendMessage(person.telegramData.idTelegram, message, roles, mission._id)
         Mission.updateById(mission._id, { $push: { 'personnel.notified': person._id } })
     }
 }
@@ -89,12 +96,16 @@ const notifyPersonnel = async (persons, mission) => {
  * @param {Mission} mission 
  */
 const notifyBase = async (base, mission) => {
+    // Sto notificando la base più vicina quindi non devo rifarlo, imposto notifiedNearestBase a true
+    Mission.updateById(mission._id, { $set: { 'notifiedNearestBase.value': true, 'sizenotifiedNearestBase.timestamp': new Date() }})
+
     // Vengono cercati tutti i membri del personale che ricoprono almeno uno dei ruoli pilota, crew, manutentore
     const selection = {
         base: base._id,
         $or: [{ 'roles.occupation.pilot': true }, { 'roles.occupation.crew': true }, { 'roles.occupation.maintainer': true }],
         'missions.accepted.date': {$ne: mission.date}
     }
+    
     const persons = await Personnel.find(selection, '') // tutto il personale che può svolgere la missione
     notifyPersonnel(persons, mission)
 }
@@ -104,14 +115,18 @@ const notifyBase = async (base, mission) => {
  * entro una deadline allora passa a notificare anche i membri della base più vicina
  */
 const missedDeadlines = async () => {
-    let tempDate = new moment().subtract(deadline, 'm').toDate()
-    const missions = await Mission.find({ 'status.waitingForTeam.value': true, 'status.teamCreated.value': false, 'status.waitingForTeam.timestamp': { $lt: tempDate } }, '')
+    let tempDate = new moment().subtract(this.deadline, 'm').toDate()
+    const missions = await Mission.find({ 'notifiedNearestBase.value': false, 'status.waitingForTeam.value': true, 'status.teamCreated.value': false, 'status.waitingForTeam.timestamp': { $lt: tempDate } }, '')
+
+    // DEBUG: 
+    // console.log('Numero missioni con team-deadline superata: ' + missions.length)
 
     return missions
 }
 
-const periodicTask = async bot => {
+const periodicTask = async (bot, deadline) => {
     this.bot = bot
+    this.deadline = deadline
     const period = 60000
     // per ogni missione trovo la base più vicina e notifico i piloti di quella base
     timers.setInterval(async () => {
