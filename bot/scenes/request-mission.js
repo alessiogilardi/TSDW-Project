@@ -119,7 +119,7 @@ const requestMission = new WizardScene('requestMission',
     }),
     new Composer()
     .on('text', ctx => { // Leggo la location in coordinate UTM
-        var coordinates = utils.stringToUTM(ctx.message.text) // Converto in coordinate UTM
+        let coordinates = utils.stringToUTM(ctx.message.text) // Converto in coordinate UTM
         if (coordinates === null) {
             ctx.reply('Mi spiace, le coordinate che hai inserito non sono valide, reinseriscile in formato UTM.')
             return
