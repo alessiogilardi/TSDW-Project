@@ -1,6 +1,6 @@
 /**
  * Modulo di interazione con il db.
- * Qui vengono tenute le funzioni che eseguono query al db.
+ * Qui vengono dichiarate le funzioni che eseguono query al db.
  * Le funzioni resituiscono una Promise del risultato.
  */
 
@@ -37,8 +37,8 @@ exports.AirOperator = AirOperator = {
 
     /**
      * Funzione che esegue l'update dell'Operatore Aereo.
-     * @param {} selection parametro usato per la selezione del documento di cui eseguire l'update
-     * @param {} newValues parametro con i nuovi valori da inserire
+     * @param {Object} selection parametro usato per la selezione del documento di cui eseguire l'update
+     * @param {Object} newValues parametro con i nuovi valori da inserire
      */
     update: (selection, newValues) => {
         return new Promise((resolve, reject) => {
@@ -55,21 +55,26 @@ exports.AirOperator = AirOperator = {
 
     /**
      * Funzione che esegue l'operazione di update selezionando l'Operatore Aereo per nome.
+     * @param   {String} aName     Nome dell'Operatore Aereo
+     * @param   {Object} newValues Nuovi valori
+     * @returns {Promise}
      */
-    updateByName: (aName, newValues) => AirOperator.update({name: aName}, newValues),
+    updateByName: (aName, newValues) => { return AirOperator.update({name: aName}, newValues) },
 
     /**
      * Funzione che esegue l'operazione di update selezionando l'Operatore Aereo per id.
+     * @param   {ObjectId}    aId         _id dell'Operatore Aereo
+     * @param   {Object}      newValues   Nuovi valori
+     * @returns {Promise}
      */
-    updateById: (aId, newValues) => AirOperator.update({_id: aId}, newValues),
+    updateById: (aId, newValues) => { return AirOperator.update({_id: aId}, newValues) },
 
     /**
      * Funzione che cerca un Operatore Aereo in base al nome.
-     * @param {String} aName nome dell'Operatore da cercare
-     * @param {String} projection attributi da cercare
-     * @param {Function} callback funzione di callback a cui è passato l'Operatore trovato
+     * @param {String} aName        Nome dell'Operatore da cercare
+     * @param {String} projection   Attributi da cercare
      */
-    findByName: (aName, projection/*, callback*/) => {
+    findByName: (aName, projection) => {
         return models.AirOperator.findOne()
         .where('name').equals(aName)
         .select(projection)
@@ -87,7 +92,8 @@ exports.Base = Base = {
      * dell'Operatore.
      * Quando la query viene eseguita viene aggiunta la Base alla lista delle basi dell'Operatore Aereo.
      * 
-     * @param {Base} aBase
+     * @param   {Base}      aBase
+     * @returns {Promise}
      */
     insert: async aBase => {
         return new Promise(async (resolve, reject) => {
@@ -107,27 +113,14 @@ exports.Base = Base = {
                 resolve(base)
             })
 
-        })/*
-        AirOperator.findByName(aBase.airOperator, '_id', aAirOperator => {
-            aBase._id = mongoose.Types.ObjectId();
-            aBase.airOperator = aAirOperator._id
-            new models.Base(aBase)
-            .save((err, base) => {
-                if (err)
-                    return console.log(err);
-                console.log('Inserted new base with _id: ' + base._id);
-                // Emetto l'evento insert
-                ee.db.Base.emit('insert', base)
-                // Quando la query viene eseguita, devo aggiungere l'id della base appena creata alla lista di basi dell'operatore aereo corrispondente
-                AirOperator.updateById(base.airOperator, {$push: {'bases': base._id}});
-            });
-        });*/
+        })
     },
 
     /**
      * Funzione che esegue l'update dela Base.
-     * @param {} selection parametro usato per la selezione del documento di cui eseguire l'update
-     * @param {} newValues parametro con i nuovi valori da inserire
+     * @param   {Object} selection Parametro usato per la selezione del documento di cui eseguire l'update
+     * @param   {Object} newValues Parametro con i nuovi valori da inserire
+     * @returns {Promise}
      */
     update: (selection, newValues) => {
         return new Promise((resolve, reject) =>
@@ -143,17 +136,24 @@ exports.Base = Base = {
 
     /**
      * Funzione che esegue l'operazione di update selezionando la Base per nome.
+     * @param   {String} aName        Nome della Base
+     * @param   {Object} newValues    Nuovi valori
+     * @returns {Promise}
      */
     updateByName: (aName, newValues) => { return Base.update({name: aName}, newValues) },
+
     /**
-     * Funzione che esegue l'operazione di update selezionando la Base per id.
+     * Funzione che esegue l'operazione di update selezionando la Base per _id.
+     * @param   {String} aId        Nome della Base
+     * @param   {Object} newValues  Nuovi valori
+     * @returns {Promise}
      */
     updateById: (aId, newValues) => { return Base.update({_id: aId}, newValues) },
 
     /**
      * Funzione che cerca una Base in base al nome.
-     * @param {String} aName nome della Base da cercare
-     * @param {String} projection attributi da cercare
+     * @param   {String} aName      nome della Base da cercare
+     * @param   {String} projection attributi da cercare
      * @returns {Promise}
      */
     findByName: (name, projection) => {
@@ -175,7 +175,7 @@ exports.Personnel = Personnel = {
      * Quando la query viene eseguita aggiorno la Base e l'Operatore Aereo in base ai ruili che quella
      * la Persona ricopre.
      * 
-     * @param {Personnel} aPersonnel
+     * @param   {Personnel} aPersonnel
      * @returns {Promise}
      */
     insert: async aPersonnel => {
@@ -228,8 +228,9 @@ exports.Personnel = Personnel = {
 
     /**
      * Funzione che esegue l'update del membro del Personale.
-     * @param {} selection parametro usato per la selezione del documento su cui eseguire l'update
-     * @param {} newValues parametro con i nuovi valori da inserire
+     * @param   {Object} selection parametro usato per la selezione del documento su cui eseguire l'update
+     * @param   {Object} newValues parametro con i nuovi valori da inserire
+     * @returns {Promise}
      */
     update: (selection, newValues) => {
         return new Promise((resolve, reject) => {
@@ -248,78 +249,76 @@ exports.Personnel = Personnel = {
 
     /**
      * Funzione che esegue l'operazione di update selezionando la Persona per CF.
+     * @param   {String}    aCf       CF della Persona
+     * @param   {Object}    newValues Nuovi valori
+     * @returns {Promise}
      */
-    updateByCf: (aCf, newValues) => {return Personnel.update({cf: aCf}, newValues) },
+    updateByCf: (aCf, newValues) => { return Personnel.update({cf: aCf}, newValues) },
     /**
      * Funzione che esegue l'operazione di update selezionando la Persona per id.
+     * @param   {ObjectId} aId       _id della persona
+     * @param   {Object}   newValues Nuovi valori
+     * @returns {Promise}
      */
     updateById: (aId, newValues) => { return Personnel.update({_id: aId}, newValues) },
     /**
      * Funzione che esegue l'operazione di update selezionando la Persona per idTelegram.
+     * @param   {Number} aIdTelegram idTelegram della persona
+     * @param   {Object} newValues   Nuovi valori
+     * @returns {Promise}
      */
-    updateByIdTelegram: (aIdTelegram, newValues) => {return Personnel.update({'telegramData.idTelegram': aIdTelegram}, newValues) },
+    updateByIdTelegram: (aIdTelegram, newValues) => { return Personnel.update({'telegramData.idTelegram': aIdTelegram}, newValues) },
 
     /**
      * Funzione che esegue la ricerca di membri del Personale e restituise i risultati
      * passandoli alla funzione di callback.
-     * @param {String} selection parametro per selezionare i ducumenti da recuperare
-     * @param {String} selection parametro per selezionare gli attributi da cercare
-     * @param {Function} callback funzione di callback a cui passare i risultati della ricerca
+     * @param   {Object} selection  parametro per selezionare i ducumenti da recuperare
+     * @param   {Object} projection parametro per selezionare gli attributi da cercare
+     * @returns {Promise}
      */
-    find: (selection, projection/*, callback*/) => {
+    find: (selection, projection) => {
         return models.Personnel.find(selection)
         .select(projection)
-        .exec(/*(err, personnel) => callback(personnel)*/)
+        .exec()
     },
 
     /**
      * Funzione che ricera una Persona in base all'id.
+     * @param   {ObjectId} aId          _id della persona
+     * @param   {Object}   projection   Attributi da cercare
+     * @returns {Promise}
      */
-    findById: (aId, projection/*, callback*/) => {
+    findById: (aId, projection) => {
         return models.Personnel.findOne()
         .where('_id').equals(aId)
         .select(projection)
-        .exec(/*(err, personnel) => {
-            callback(personnel);
-        }*/)
+        .exec()
     },
     /**
      * Funzione che ricera una Persona in base al CF.
+     * @param   {String} aCf        _id della persona
+     * @param   {Object} projection Attributi da cercare
+     * @returns {Promise}
      */
-    findByCf: (aCf, projection/*, callback*/) => {
+    findByCf: (aCf, projection) => {
         return models.Personnel.findOne()
         .where('cf').equals(aCf)
         .select(projection)
-        .exec(/*(err, personnel) => {
-            callback(personnel);
-        }*/)
+        .exec()
     },
     
     /**
      * Funzione che ricera una Persona in base all'idTelegram.
+     * @param   {Number} aIdTelegram idTelegram della persona da cercare
+     * @param   {Object} projection  Attributi da cercare
+     * @returns {Promise}
      */
-	findByIdTelegram: (aIdTelegram, projection/*, callback*/) => {
+	findByIdTelegram: (aIdTelegram, projection) => {
         return models.Personnel.findOne()
         .where('telegramData.idTelegram').equals(aIdTelegram)
         .select(projection)
-        .exec(/*(err, personnel) => {
-            callback(personnel);
-        }*/)
+        .exec()
     },
-/*
-    findByCfSync: (aCf, projection) => {
-        var ret = null;
-        models.Personnel.findOne()
-        .where('cf').equals(aCf)
-        .select(projection)
-        .exec((err, personnel) => {
-            ret = personnel;
-        });
-        while (ret == null)
-            deasync.runLoopOnce();
-        return ret;
-    }
-*/
 }
 
 /**
@@ -332,7 +331,7 @@ exports.Drone = Drone = {
      * in base al nome dell'Operatore e della Base.
      * Quando la query viene eseguita aggiorno la Base a cui il Drone appartiene.
      * 
-     * @param {Personnel} aPersonnel
+     * @param   {Drone}   aDrone
      * @returns {Promise}
      */
     insert: async aDrone => {
@@ -360,8 +359,8 @@ exports.Drone = Drone = {
 
     /**
      * Funzione che esegue l'update del Drone.
-     * @param {} selection parametro usato per la selezione del documento su cui eseguire l'update
-     * @param {} newValues parametro con i nuovi valori da inserire
+     * @param {Object} selection parametro usato per la selezione del documento su cui eseguire l'update
+     * @param {Object} newValues parametro con i nuovi valori da inserire
      */
     update: (selection, newValues) => {
         return new Promise((resolve, reject) =>
@@ -381,23 +380,29 @@ exports.Drone = Drone = {
 
     /**
      * Funzione che esegue l'operazione di update selezionando il Drone per numero di targa.
+     * @param {String} aNumber   Numero di targa del Drone
+     * @param {Object} newValues Nuovi valori
      */
     updateByNumber: (aNumber, newValues) => { return Drone.update({ number: aNumber }, newValues) },
     /**
      * Funzione che esegue l'operazione di update selezionando il Drone per id.
+     * 
      */
     updateById: (aId, newValues) => { return Drone.update({ _id: aId }, newValues) },
     
     /**
-     * Funzione che ricercaa un Drone in base all'id.
+     * Funzione che ricerca un Drone in base all'id.
      */
-    findById: (aId, projection/*, callback*/) => {
+    findById: (aId, projection) => {
         return models.Drone.findOne()
         .where('_id').equals(aId)
         .select(projection)
-        .exec(/*(err, doc) => callback(doc)*/)
+        .exec()
     },
 
+    /**
+     * Funzione generica di ricerca Droni (Recupera più Droni)
+     */
     find: (selection, projection) => {
         return models.Drone.find(selection)
         .select(projection)
@@ -406,59 +411,29 @@ exports.Drone = Drone = {
 
     /**
      * Funzione che ricercaa un drone in base al tipo e ai parametri inseriti in selection.
-     * @param {String} aType il tipo di drone da cercare
-     * @param {String} selection parametri di reicerca del drone
-     * @param {String} aType attributi da restituire
+     * @param {String} aType      Tipo di drone da cercare
+     * @param {Object} selection  parametri di reicerca del drone
+     * @param {Object} projection attributi da cercare
      */
     findByType: (aType, selection, projection) => {
         return models.Drone.find(selection)
         .where('type').equals(aType)
         .select(projection)
-        .exec(/*(err, doc) => {
-            callback(doc);
-        }*/)
+        .exec()
     },
-/*
-    findByTypeSync: (aType, projection = null) => {
-        var ret = null;
-        models.Drone.find()
-        .where('type').equals(aType)
-        .select(projection)
-        .exec((err, doc) => {
-            ret = doc;
-        });
-        while (ret == null)
-            deasync.runLoopOnce();
-        return ret;
-    },
-*/
+
     /**
      * Funzione che ricercaa un Drone in base al numero di targa.
      */
-    findByNumber: (aNumber, projection/*, callback*/) => {
+    findByNumber: (aNumber, projection) => {
         return models.Drone.findOne()
         .where('number').equals(aNumber)
         .select(projection)
-        .exec(/*(err, doc) => {
-            callback(doc);
-        }*/);
+        .exec()
     },
-/*
-    findByNumberSync: (aNumber, projection) =>  {
-        var ret = null;
-        models.Base.findOne()
-        .where('number').equals(aNumber)
-        .select(projection)
-        .exec((err, doc) => {
-            ret = doc;
-        });
-        while (ret == null)
-            deasync.runLoopOnce();
-        return ret;
-    }
-    */
-};
+}
 
+/*
 exports.Battery = Battery = {
     insert: aBattery => {
         aBattery._id = mongoose.Types.ObjectId()
@@ -472,7 +447,7 @@ exports.Battery = Battery = {
         })
     }
 }
-
+*/
 exports.Mission = Mission = {
     insert: aMission => {
         return new Promise((resolve, reject) => {
@@ -481,15 +456,10 @@ exports.Mission = Mission = {
             .save((err, mission) => {
                 if (err) return reject(err)
                 console.log(`Inserted Mission with id: ${mission._id}`)
-                // Viene aggiunta la missione alle pending missions del Supervisor
-                // Personnel.updateById(mission.supervisor, {$push: {'missions.supervisor.pending': mission._id}})
-
-                // Setto i droni come non disponibili e aggiungo la missione alle waitingForQtb del drone
-                // mission.drones.forEach(drone => Drone.updateById(drone._id, {'state.availability': 1, $push: {'missions.waitingForQtb': {idMission: mission._id, date: new Date(mission.date)}}}))
 
                 // Emetto l'evento missione inserita
                 ee.db.Mission.emit('insert', mission)
-                
+
                 resolve(aMission)
             })
         })
@@ -512,13 +482,11 @@ exports.Mission = Mission = {
 
     updateById: (aId, newValues) => { return Mission.update({_id: aId}, newValues) },
 
-    findById: (aId, projection/*, callback*/) => {
+    findById: (aId, projection) => {
         return models.Mission.findOne()
         .where('_id').equals(aId)
         .select(projection)
-        .exec(/*(err, mission) => {
-            callback(mission);
-        }*/)
+        .exec()
     },
 
     find: (selection, projection) => {
@@ -526,44 +494,19 @@ exports.Mission = Mission = {
         .select(projection)
         .exec()
     },
-/*
-    // pilots, crew, maintainers sono array
-    // Quando viene scelto un team la missione passa a running
-    addTeam: (aMissionId, chiefPilotId, coPilotId, crewIds, maintainersIds) => {
-        Mission.updateById(aMissionId, {$push: {teams: {
-            pilots: {
-                chief: chiefPilotId,
-                co: coPilotId
-            },
-            crew: crewIds,
-            maintainers: maintainersIds
-        }}})
-        Personnel.updateById(chiefPilotId, {$push: {'missions.pilot.waitingForLogbook': aMissionId}})
-        Personnel.updateById(coPilotId, {$push: {'missions.pilot.waitingForLogbook': aMissionId}})
-        crewIds.forEach(id => Personnel.updateById(id, {$push: {'missions.crew.pending': aMissionId}}))
-        maintainersIds.forEach(id => Personnel.updateById(id, {$push: {'missions.maintainer.pending': aMissionId}}))
-        Mission.setStatus(aMissionId, 2)
-    },
-*/
-   
-/*
-    findByIdSync: (aId, projection) => {
-        var ret = null;
-        models.Mission.findOne()
-        .where('_id').equals(aId)
-        .select(projection)
-        .exec((err, doc) => {
-            ret = doc;
-        });
-
-        while (ret == null)
-            deasync.runLoopOnce();
-        return ret;
-    }
-    */
 };
 
 exports.Logbook = Logbook = {
+    /**
+     * Funzione che inserisce un Logbook.
+     * Una volta inserito il Logbook viene aggiunto a quelli della missione,
+     * la missione è rimossa dalle waitingForLogbook del Pilota ed aggiunta 
+     * alle completed.
+     * Infine controllo se la Missione ha tutta la documentazione (Logbook + QTB)
+     * e in caso affermativo viene settata come completed.
+     * 
+     * @param {Logbook} aLogbook
+     */
     insert: aLogbook => {
         return new Promise((resolve, reject) => {
             aLogbook._id = mongoose.Types.ObjectId();
@@ -579,6 +522,7 @@ exports.Logbook = Logbook = {
                 
                 ee.db.Logbook.emit('insert', logbook)
                 
+                // Controllo se la Missione ha tutti i documenti e in caso affermativo la setta come completed
                 bf.checkMissionDocuments(logbook.mission)
                 resolve(logbook)
             })
@@ -587,38 +531,31 @@ exports.Logbook = Logbook = {
     },
 
     update: (selection, newValues) => {
-        models.Logbook.updateOne(selection, newValues, err => {
-            if (err) return console.log(err)
-
-            ee.db.Logbook.emit('update')
-            console.log(`Updated Logbook selected by: ${JSON.stringify(selection)}`)
-        });
+        return new Promise((resolve, reject) => {
+            models.Logbook.updateOne(selection, newValues, err => {
+                if (err) { 
+                    console.log(err)
+                    return reject(err)
+                }
+    
+                ee.db.Logbook.emit('update')
+                console.log(`Updated Logbook selected by: ${JSON.stringify(selection)}`)
+                resolve()
+            })
+        })
     },
 
-    updateById: (aId, newValues) => Logbook.update({_id: aId}, newValues),
+    updateById: (aId, newValues) => { return Logbook.update({ _id: aId }, newValues) },
 
-    findById: (aId, projection, callback) => {
-        models.Logbook.findOne()
+
+    findById: (aId, projection/*, callback*/) => {
+        return models.Logbook.findOne()
         .where('_id').equals(aId)
         .select(projection)
-        .exec((err, logbook) => {
+        .exec(/*(err, logbook) => {
             callback(logbook);
-        });
-    },
-/*
-    findByIdSync: (aId, projection) => {
-        var ret = null;
-        models.Logbook.findOne()
-        .where('_id').equals(aId)
-        .select(projection)
-        .exec((err, doc) => {
-            ret = doc;
-        });
-
-        while (ret == null)
-            deasync.runLoopOnce();
-        return ret;
-    }*/
+        }*/)
+    }
 };
 
 exports.Qtb = Qtb = {
@@ -653,13 +590,13 @@ exports.Qtb = Qtb = {
         models.Qtb.updateOne({_id: aId}, newValues, err => {});
     },
 */
-    findById: (aId, projection, callback) => {
-        models.Qtb.findOne()
+    findById: (aId, projection /*, callback*/) => {
+        return models.Qtb.findOne()
         .where('_id').equals(aId)
         .select(projection)
-        .exec((err, qtb) => {
+        .exec(/*(err, qtb) => {
             callback(qtb);
-        });
+        }*/)
     },
 /*
     findByIdSync: (aId, projection) => {
