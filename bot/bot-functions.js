@@ -77,7 +77,7 @@ exports.loadData = async idTelegram => {
  * @param {Context} ctx Contesto del bot
  */
 exports.getTelegramId = ctx => {
-    return ctx[ctx.updateType].from.id
+    return ctx.update[ctx.updateType].from.id
 }
 
 /**
