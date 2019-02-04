@@ -175,15 +175,19 @@ exports.missionsSchema = new Schema({
         longitude:  Number
     },
     droneType: {type: String, enum: droneTypes},
+    notifiedNearestBase: {
+        value:      {type: Boolean, default: false},
+        timestamp:  {type: Date, default: undefined}
+    },
     status: {
         requested: { // la missione è richietsa dall'AM ad un BaseSup
             value: {type: Boolean, default: false},
-            timestamp: {type: Date, default: Date.now},
+            timestamp: {type: Date, default: Date.now}
             //timeout: Date // Tempo entro il quale il BaseSup deve rispondere, se non risponde va notificato l'AM
         },
         waitingForTeam: { // Il baseSup ha preso in carico la missione, l'AM è notificato e si attende che le persone diano disponibilità 
             value: {type: Boolean, default: false},
-            timestamp: {type: Date, default: Date.now},
+            timestamp: {type: Date, default: Date.now}
         },
         teamCreated: { // Il team viene creato dal baseSup e l'AM viene notificato
             value: {type: Boolean, default: false},
@@ -203,10 +207,11 @@ exports.missionsSchema = new Schema({
         }
     },
     personnel: {
-        notified: [{type: ObjectId, ref: 'personnel', default: []}], // Elenco delle persone che soo state notificate
+        notified: [{type: ObjectId, ref: 'personnel', default: []}], // Elenco delle persone che sono state notificate
         accepted: [{ // Elenco delle persone che hanno accettato la missione
-            _id: {type: ObjectId, ref: 'personnel', default: []},
-            roles:  [{type: String, enum: ['pilot', 'crew', 'maintainer']}] // Ruoli che può ricoprire nella missione
+            _id: {type: ObjectId, ref: 'personnel'},
+            roles:  [{type: String, enum: ['pilot', 'crew', 'maintainer']}], // Ruoli che può ricoprire nella missione
+            timestamp: {type: Date, default: Date.now}
         }]
     },
     description: {
