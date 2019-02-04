@@ -49,7 +49,7 @@ bot.help(ctx => ctx.reply(`Command list:\n${ctx.session.userData.commands.join('
 // CHIAMATA DELLE FUNZIONI PERIODICHE
 bf.checkTimeout(bot) // Funzione per il controllo del timeout dell'organizzazione delle missioni
 bf.checkTodaysMissions() // Funzione per il controllo delle missioni odierne
-deadlineCheck(bot, 1) // Funzione che controlla le missioni e notifica la base più vicina se il personale non ha risposto in tempo
+deadlineCheck(bot, 120) // Funzione che controlla le missioni e notifica la base più vicina se il personale non ha risposto in tempo
 
 bot.command(['requestMission', 'requestmission'], ctx => {
 	if (!ctx.session.userData.commands.includes('/requestMission')) {
