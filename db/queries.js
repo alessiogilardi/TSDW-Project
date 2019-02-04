@@ -92,7 +92,7 @@ exports.Base = Base = {
      * dell'Operatore.
      * Quando la query viene eseguita viene aggiunta la Base alla lista delle basi dell'Operatore Aereo.
      * 
-     * @param   {Base}      aBase
+     * @param   {Base}  aBase
      * @returns {Promise}
      */
     insert: async aBase => {
@@ -152,7 +152,7 @@ exports.Base = Base = {
 
     /**
      * Funzione che cerca una Base in base al nome.
-     * @param   {String} aName      nome della Base da cercare
+     * @param   {String} name      nome della Base da cercare
      * @param   {String} projection attributi da cercare
      * @returns {Promise}
      */
@@ -161,7 +161,32 @@ exports.Base = Base = {
             .where('name').equals(name)
             .select(projection)
             .exec()
-    }
+    },
+
+    /**
+     * Funzione che cerca una Base in base all'_id.
+     * @param   {String} aId      nome della Base da cercare
+     * @param   {String} projection attributi da cercare
+     * @returns {Promise}
+     */
+    findById: (aId, projection) => {
+        return models.Base.findOne()
+            .where('_id').equals(aId)
+            .select(projection)
+            .exec()
+    },
+
+    /**
+     * Funzione che esegue la ricerca di Basi
+     * @param   {Object} selection  parametro per selezionare i ducumenti da recuperare
+     * @param   {Object} projection parametro per selezionare gli attributi da cercare
+     * @returns {Promise}
+     */
+    find: (selection, projection) => {
+        return models.Base.find(selection)
+        .select(projection)
+        .exec()
+    },
 };
 
 /**
@@ -270,8 +295,7 @@ exports.Personnel = Personnel = {
     updateByIdTelegram: (aIdTelegram, newValues) => { return Personnel.update({'telegramData.idTelegram': aIdTelegram}, newValues) },
 
     /**
-     * Funzione che esegue la ricerca di membri del Personale e restituise i risultati
-     * passandoli alla funzione di callback.
+     * Funzione che esegue la ricerca di membri del Personale.
      * @param   {Object} selection  parametro per selezionare i ducumenti da recuperare
      * @param   {Object} projection parametro per selezionare gli attributi da cercare
      * @returns {Promise}
@@ -621,7 +645,7 @@ exports.EventLog = EventLog = {
             new models.EventLog(aEvent)
             .save((err, event) => {
                 if (err) return reject(err)
-                console.log(`Inserted new Event with _id: ${event._id}`)
+                console.log(`Inserted new Event of type: ${event.type}`)
                 resolve(event)
             })
         })
