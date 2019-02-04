@@ -3,6 +3,7 @@ const bf 		= require('../bot-functions')
 const Personnel = queries.Personnel
 const Mission   = queries.Mission
 const zip 		= bf.zip
+const utils 	= require('../../utils')
 
 /**
  * 1. Ricevo _id della missione accetttata tramite callbackButton
@@ -37,16 +38,20 @@ const notify = async (idTelegram, message, mission) => {
 	])))
 }
 
-const generateMessage = async accepted => {
+/**
+ * Genera il messaggio da inviare al baseSupervisor con il Personale che ha accettato la Missione
+ * e i rispettivi ruoli possibili.
+ * @param {Array} accepted 
+ */
+const generateMessage = async (accepted, missionDate) => {
 	let tmp = []
 	for (let person of accepted) {
 		let p = await Personnel.findById(person._id)
-		p.roles = person.roles // Setto i ruoli che ha in questa missone
-		tmp.push(`${p.name}\t${p.surname}\t[${p.roles.join(',')}]`)
+		//p.roles = person.roles // Setto i ruoli che ha in questa missone
+		tmp.push(`${p.name}\t${p.surname}\t[${person.roles.join(', ')}]`)
 	}
 
-	return 'C\'è un numero di persone sufficiente per formare un Team\n' +
-			tmp.join('\n')
+	return `C\'è un numero di persone sufficiente per formare un Team per la missione in data: ${utils.Date.format(missionDate, 'DD MMM YYYY')}\n\n${tmp.join('\n')}`
 }
 
 // Controlla che ci siano abbastanza persone per un team
@@ -64,7 +69,7 @@ const checkForTeam = async missionId => {
 				pilotCount++
 		}
 		if (pilotCount >= 2) {
-			const message 	 = await generateMessage(accepted)
+			const message 	 = await generateMessage(accepted, mission.date)
 			const supervisor = await Personnel.findById(aMission.supervisor)
 			notify(supervisor.telegramData.idTelegram, message, aMission)
 		}
@@ -112,14 +117,13 @@ const acceptMission = async (bot, ctx)=> {
 	for (let i in roles) {
 		roles[i] = bf.unZip[roles[i]]
 	}
-	const person 	= ctx.session.userData
+	const person 	= ctx.session.userData.person
 	const aMission 	= await Mission.findById(missionId, '')
 
-	//console.log(ctx)
 
 	await Personnel.updateById(person._id, { $push: { 'missions.accepted': { idMission: aMission._id, date: aMission.date, roles: roles} } })
-	await Mission.updateById(aMission._id, { $pull: { 'personnel.notified': person._id } })
-	await Mission.updateById(aMission._id, { $push: { 'personnel.accepted': person._id } })
+	// forse non serve rimuovere il personale dai notificati -> await Mission.updateById(aMission._id, { $pull: { 'personnel.notified': person._id } })
+	await Mission.updateById(aMission._id, { $push: { 'personnel.accepted': { _id: person._id, roles: roles} } })
 
 	checkForTeam(missionId)
 }
