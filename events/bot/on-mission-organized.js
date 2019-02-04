@@ -14,19 +14,16 @@ const Mission   = queries.Mission
 
 /**
  * Funzione che notifica il personale, mediante un messaggio Telegram.
- * @param {String} idTelegram 
- * @param {String} message 
- * @param {Array}  roles Possibili ruoli che la persona può ricoprire nella missione
+ * @param {String}   idTelegram 
+ * @param {String}   message 
+ * @param {Array}    roles      Possibili ruoli che la persona può ricoprire nella missione
+ * @param {ObjectId} missionId  _id della Missione
  */
 const notify = (idTelegram, message, roles, missionId) => {
     for (let i in roles) {
         roles[i] = zip[roles[i]];
     }
-    let buttonPayload = `${zip['acceptMission']}:${missionId}:${roles.join(',')}`
-    console.log('Print buttonPayload: ')
-    console.log(buttonPayload)
-    console.log(Buffer.byteLength(buttonPayload, 'utf8') + " bytes")
-    console.log(message)
+    
     this.bot.telegram.sendMessage(idTelegram, message, Telegraf.Extra
         .markdown()
         .markup( m => m.inlineKeyboard([
