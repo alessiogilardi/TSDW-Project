@@ -13,7 +13,7 @@ const addQtb = new WizardScene('addQtb',
         const person                = ctx.session.userData.person //await Personnel.findByIdTelegram(ctx.message.chat.id)
 
         // Cerco i droni che hanno il campo waitingForQtb non vuoto
-        ctx.scene.state.wfqtbDrones = await Drone.find({'missions.waitingForQtb': {$exists: true, $not: {$size: 0}}})
+        ctx.scene.state.wfqtbDrones = await Drone.find({'missions.waitingForQtb': {$exists: true, $not: {$size: 0}}}, '')
         // Per ognuno di questi droni, itero sulle missioni delle quali va inserito il qtb
         for (let drone of ctx.scene.state.wfqtbDrones) {
             // Controllo che la base a cui è assegnato il drone sia uguale a quella del supervisore: se non è così, ignoro questo drone
@@ -24,7 +24,7 @@ const addQtb = new WizardScene('addQtb',
                 // Invio un Button per ogni missione
                 const message       = `Missione del ${mission.date}`
                 const buttonText    = 'Aggiungi Qtb'
-                const buttonData    = `${'addQtb'}:${drone._id}:${mission._id}:${mission.date}`
+                const buttonData    = `${'addQtb'}:${drone._id}:${mission._id}:${mission.date}:${mission.status.waitingForDocuments.value}`
                 await ctx.reply(message, Telegraf.Extra
                     .markdown()
                     .markup(m => m.inlineKeyboard([
@@ -48,6 +48,7 @@ const addQtb = new WizardScene('addQtb',
         ctx.scene.state.currentDrone   = parts[1] 
         ctx.scene.state.currentMission = parts[2]
         ctx.scene.state.curMissionDate = parts[3]
+        ctx.scene.state.missionW4Docs  = parts[4]
         await ctx.editMessageReplyMarkup({})
         await ctx.reply('Inserisci il numero di protocollo del Qtb:')
 
@@ -142,6 +143,11 @@ const addQtb = new WizardScene('addQtb',
             'flights': flightsData
         }
         let newQtb = await Qtb.insert(qtb)
+        // Se la missione non era ancora nello stato waitingForDocuemnts, setto questo stato
+        if (ctx.scene.state.missionW4Docs === false) {
+            await Mission.updateById(ctx.scene.state.currentMission,
+                {$set: {'status.started.value': false, 'status.waitingForDocuments.value': true, 'status.waitingForDocuments.timestamp': new Date()}})
+        }
 
         let mEvent = { type: 'addQtb', actor: ctx.session.userData.person._id, subject: {type: 'Qtb', _id: newQtb._id}, timestamp: new Date() }
 		EventLog.insert(mEvent)
