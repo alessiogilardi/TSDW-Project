@@ -8,10 +8,10 @@ const Personnel = queries.Personnel
 
 
 
-const showTeam = new WizardScene('showTeam',
+const createTeam = new WizardScene('createTeam',
     async ctx => {
         ctx.scene.state.mission = await Mission.findById(ctx.scene.state.mission._id, '')
-        const accepted  = ctx.scene.state.mission
+        const accepted  = ctx.scene.state.mission.personnel.accepted
         ctx.scene.state.personnel = { loaded: [], chosen: [] }
         for (let person of accepted) {
             let tmp = utils.copyObject(await Personnel.findById(person._id))
@@ -127,4 +127,4 @@ const showTeam = new WizardScene('showTeam',
         })()
     })
 
-module.exports = showTeam
+module.exports = createTeam
