@@ -82,7 +82,7 @@ const onMissionOrganized = async (bot, mission) => {
             person.roles.occupation.pilot = false
         // Se la persona è un manutentore ma la missione dura meno di 3h, gli viene rimosso il ruolo di manutentore
         if (person.roles.occupation.maintainer == true && mission.description.duration.expected < 3)
-            person.roles.occupation.maintainer = false;
+            person.roles.occupation.maintainer = false
         // Se la persona ha ancora almeno un ruolo, viene notificata
         if (person.roles.occupation.pilot || person.roles.occupation.crew || person.roles.occupation.maintainer)
             personnel.push(person)
