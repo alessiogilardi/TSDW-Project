@@ -7,7 +7,7 @@ const Mission       = queries.Mission
 const Personnel     = queries.Personnel
 
 
-
+// TODO: se vengono aggiunti più di 2 piloti non devo poterne aggiungere altri
 const createTeam = new WizardScene('createTeam',
     async ctx => {
         ctx.scene.state.mission = await Mission.findById(ctx.scene.state.mission._id, '')
