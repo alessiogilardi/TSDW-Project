@@ -79,10 +79,10 @@ const createTeam = new WizardScene('createTeam',
             if (person.role === 'maintainer') { maintCount++ }
         }
         if (pilotCount !== 2) {
-            return await ctx.reply('Devi scegliiere 2 piloti daaggiungere al Team.')
+            return await ctx.reply('Devi scegliiere 2 piloti da aggiungere al Team.')
         }
         if (maintCount !== 1) {
-            return await ctx.reply('Devi scegliiere 1 manutentore daaggiungere al Team.')
+            return await ctx.reply('Devi scegliiere 1 manutentore da aggiungere al Team.')
         }
         return ctx.scene.leave()
     })
