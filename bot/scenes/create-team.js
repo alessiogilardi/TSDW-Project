@@ -1,10 +1,10 @@
 
 const WizardScene   = require('telegraf/scenes/wizard/index')
 const Composer      = require('telegraf/composer')
-const utils     = require('../../utils')
-const queries   = require('../../db/queries')
-const Mission   = queries.Mission
-const Personnel = queries.Personnel
+const utils         = require('../../utils')
+const queries       = require('../../db/queries')
+const Mission       = queries.Mission
+const Personnel     = queries.Personnel
 
 
 
@@ -70,7 +70,7 @@ const createTeam = new WizardScene('createTeam',
                 if (person.role === 'pilot') { pilotCount++ }
             }
             if (pilotCount !== 2) {
-                return await ctx.reply('Devi scegliiere 2 piloti daaggiungere al Team.')
+                return await ctx.reply('Devi scegliiere 2 piloti da aggiungere al Team.')
             }
             return ctx.scene.leave()
         }
