@@ -1,6 +1,5 @@
-const { Personnel } = require('../../db/queries')
-const { EventLog }  = require('../../db/queries')
-const utils         = require('../../utils')
+const { Personnel, EventLog } = require('../../db/queries')
+const utils = require('../../utils')
 
 /**
  *  Event handler che gestisce le operazioni successive alla creazione di un Team
@@ -29,6 +28,8 @@ const onTeamCreated = (bot, mission, team) => {
         toNotify.push(p)
     }
 
+    // TODO: specificare ruolo
+
     ;(async () => {
         for (let p of toNotify) {
             const person     = await Personnel.findById(p)
@@ -48,7 +49,7 @@ const onTeamCreated = (bot, mission, team) => {
         }
     })()
 
-    EventLog.insert({ type: 'teamCreated', actor: mission.supervisor, subject: {type: 'Mission', _id: mission._id}, timestamp: new Date() })
+    EventLog.insert({ type: 'teamCreated', actor: mission.supervisor, subject: { type: 'Mission', _id: mission._id }, timestamp: new Date() })
 }
 
 module.exports = onTeamCreated
