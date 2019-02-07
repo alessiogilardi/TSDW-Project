@@ -20,12 +20,12 @@ const { leave } 		= Stage
 
 const backtick = '\`';
 
- // TODO: definire una funzione che fa passare le missioni started a waitingForDocuments e setta il timestamp
+ // TODO: definire una funzione che fa passare le missioni started a waitingForDocuments e setta il timestamp -> FATTO quando si inserisce il primo QTB
 
 const stage = new Stage([organizeMission, requestMission, createTeam, manageDrones, addLogbook, addQtb])
 stage.command('cancel', leave())
 
-const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN);
+const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN)
 eventRegister(bot)
 
 // session({ ttl: 10 })
@@ -86,13 +86,10 @@ bot.command(['addQtb', 'addqtb'], ctx => {
 
 //////////// DEGUGGING DA CANCELLARE ////////////////////
 bot.hears(['A','a'], ctx => {
-    var message = 'Vuoi iniziare ad organizzare la missione?'
-    var buttonText = 'Organizza'
-    var buttonData = zip['organizeMission'] + ':' + '5c092341589dce22acc1f9ef' + ':' + 33017299
-    ctx.reply(message, Telegraf.Extra
-    .markdown()
-    .markup(m => m.inlineKeyboard([
-        m.callbackButton(buttonText, buttonData)
+    ctx.reply('DEBUG: creazione team', Telegraf.Extra
+		.markdown()
+		.markup( m => m.inlineKeyboard([
+			m.callbackButton('Accetta', `${zip['createTeam']}:${'5c5c06bbd9397029782fef6b'}`)
 	])))
 })
 /*
