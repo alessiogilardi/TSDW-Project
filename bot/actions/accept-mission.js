@@ -1,6 +1,6 @@
-const utils 		 	= require('../../utils')
-const Telegraf 		 	= require('telegraf')
-const { zip, unZip } 	= require('../bot-functions')
+const utils = require('../../utils')
+const Telegraf = require('telegraf')
+const { zip, unZip } = require('../bot-functions')
 const { Personnel, Mission } = require('../../db/queries')
 
 
@@ -30,11 +30,11 @@ const { Personnel, Mission } = require('../../db/queries')
 
 const notify = async (idTelegram, message, mission) => {
 	this.bot.telegram
-	.sendMessage(idTelegram, message, Telegraf.Extra
-		.markdown()
-		.markup( m => m.inlineKeyboard([
-			m.callbackButton('Accetta', `${zip['createTeam']}:${mission._id}`)
-	])))
+		.sendMessage(idTelegram, message, Telegraf.Extra
+			.markdown()
+			.markup(m => m.inlineKeyboard([
+				m.callbackButton('Accetta', `${zip['createTeam']}:${mission._id}`)
+			])))
 }
 
 /**
@@ -59,19 +59,19 @@ const generateMessage = async (accepted, missionDate) => {
 const checkForTeam = async missionId => {
 	const aMission = await Mission.findById(missionId, '')
 	const accepted = aMission.personnel.accepted
-	
+
 	if (accepted.length < 3) { return }
 
 	// Se la missione dura meno di 3h
 	if (aMission.description.duration.expected < 3) {
 		let pilotCount = 0
 		for (let person of accepted) {
-			if (person.roles.includes('pilot')) 
+			if (person.roles.includes('pilot'))
 				pilotCount++
 		}
 
 		if (pilotCount >= 2) {
-			const message 	 = await generateMessage(accepted, aMission.date)
+			const message = await generateMessage(accepted, aMission.date)
 			const supervisor = await Personnel.findById(aMission.supervisor)
 			notify(supervisor.telegramData.idTelegram, message, aMission)
 		}
@@ -85,44 +85,44 @@ const checkForTeam = async missionId => {
 	let maintCount = 0
 	let pilotAndMaintCount = 0
 	for (let person of accepted) {
-		if (person.roles.includes('pilot') && 
-			!person.roles.includes('maintainer')) { 
-				pilotCount++ 
+		if (person.roles.includes('pilot') &&
+			!person.roles.includes('maintainer')) {
+			pilotCount++
 		}
 		if (person.roles.includes('maintainer') &&
-			!person.roles.includes('pilot')) { 
-				maintCount++
+			!person.roles.includes('pilot')) {
+			maintCount++
 		}
-		if (person.roles.includes('pilot') && 
-			person.roles.includes('maintainer')) { 
-				pilotAndMaintCount++ 
+		if (person.roles.includes('pilot') &&
+			person.roles.includes('maintainer')) {
+			pilotAndMaintCount++
 		}
 	}
 
-	if (pilotCount >= 2 && 
-		maintCount >= 1 && 
+	if (pilotCount >= 2 &&
+		maintCount >= 1 &&
 		pilotCount + maintCount + pilotAndMaintCount >= 3) {
-		const message 	 = await generateMessage(accepted)
+		const message = await generateMessage(accepted)
 		const supervisor = await Personnel.findById(aMission.supervisor)
 		notify(supervisor.telegramData.idTelegram, message, aMission)
 	}
 }
 
-const acceptMission = async (bot, ctx)=> {
+const acceptMission = async (bot, ctx) => {
 	if (bot === undefined || bot === null) throw new Error('Missing Telegram Bot')
 	this.bot = bot
-	
+
 	const missionId = ctx.state.data[0]
-	let roles 	= ctx.state.data[1].split(',') // Ruoli che può ricoprire nella missione
+	let roles = ctx.state.data[1].split(',') // Ruoli che può ricoprire nella missione
 	for (let i in roles) {
 		roles[i] = unZip[roles[i]]
 	}
-	const person 	= ctx.session.userData.person
-	const aMission 	= await Mission.findById(missionId, '')
+	const person = ctx.session.userData.person
+	const aMission = await Mission.findById(missionId, '')
 
-	Personnel.updateById(person._id, { $push: { 'missions.accepted': { idMission: aMission._id, date: aMission.date, roles: roles} } })
+	Personnel.updateById(person._id, { $push: { 'missions.accepted': { idMission: aMission._id, date: aMission.date, roles: roles } } })
 	// forse non serve rimuovere il personale dai notificati -> await Mission.updateById(aMission._id, { $pull: { 'personnel.notified': person._id } })
-	await Mission.updateById(aMission._id, { $push: { 'personnel.accepted': { _id: person._id, roles: roles} } })
+	await Mission.updateById(aMission._id, { $push: { 'personnel.accepted': { _id: person._id, roles: roles } } })
 
 	checkForTeam(aMission._id)
 }
