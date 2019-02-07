@@ -1,47 +1,57 @@
-
+const Telegraf      = require('telegraf')
 const WizardScene   = require('telegraf/scenes/wizard/index')
 const Composer      = require('telegraf/composer')
 const utils         = require('../../utils')
-const queries       = require('../../db/queries')
-const Mission       = queries.Mission
-const Personnel     = queries.Personnel
+const { Mission, Personnel } = require('../../db/queries')
 
-
-// TODO: se vengono aggiunti più di 2 piloti non devo poterne aggiungere altri
+// DEBUG:   controllare che il team sia inserito correttamente e che
+//          l'evento onTeamCreated funzioni correttamente
 const createTeam = new WizardScene('createTeam',
     async ctx => {
-        ctx.scene.state.mission = await Mission.findById(ctx.scene.state.mission._id, '')
-        const accepted  = ctx.scene.state.mission.personnel.accepted
-        ctx.scene.state.personnel = { loaded: [], chosen: [] }
-        for (let person of accepted) {
+        const mission   = await Mission.findById(ctx.scene.state.mission._id, '')
+        const accepted  = mission.personnel.accepted
+        const personnel = []
+        for (const person of accepted) {  
             let tmp = utils.copyObject(await Personnel.findById(person._id))
             tmp.roles = person.roles
-            ctx.scene.state.personnel.loaded.push(tmp)
+            personnel.push(tmp)
         }
-        await ctx.reply('Scegli tra queste persone chi aggiungere al team della missione.\n' +
-                        'Il primo Pilota che sceglierai sarà il Pilot in Chief.')
-        // Mostro le persone
-        const personnel = ctx.scene.state.personnel.loaded
-        for (let i in personnel) {
-            const message = `${personnel[i].name} ${personnel[i].surname}`
 
+        await ctx.reply('Scegli tra queste persone chi aggiungere al team della missione.\n' +
+                        'Il primo Pilota che sceglierai sarà il Pilot in Chief.\n' +
+                        'Usa il comando /end quando hai finito.')
+
+        for (const [i, person] of personnel.entries()) {
+            const message = `${person.name} ${person.surname}\naggiungi come:`
+            const roles   = person.roles
+
+            let   buttons = []
+            for (const [j, role] of roles.entries()) {
+                const buttonText = role
+                const buttonData = `${zip['addToTeam']}:${i}:${j}` // Persona -> i ; Ruolo -> j
+                buttons[j] = Telegraf.Markup.callbackButton(buttonText, buttonData) 
+            }
+        
             await ctx.reply(message, Telegraf.Extra
                 .markdown()
-                .markup(m => {
-                    const roles = personnel[i].roles
-                    let buttons = []
-                    for (let j in roles) {
-                        const buttonText = `Aggiungi come ${roles[j]}`
-                        const buttonData = `${zip['addToTeam']}:${i}:${j}` // Persona -> i ; Ruolo -> j
-                        buttons.push(m.callbackButton(buttonText, buttonData))
-                    }
-                    m.inlineKeyboard([buttons])
-                }
+                .markup(m => m.inlineKeyboard(buttons)                
             ))
         }
+
+        ctx.scene.state.mission     = mission
+        ctx.scene.state.personnel   = { loaded: personnel, chosen: [] }
+        ctx.scene.state.pilotCount  = 0
+        ctx.scene.state.maintCount  = 0
+        ctx.scene.state.crewCount   = 0
+
+
+        return ctx.wizard.next()
     },
     new Composer((ctx, next) => {
         // Codice che ignora i comandi che non fanno parte di questa Scene
+        if (ctx.updateType !== 'callback_query' && ctx.updateType !== 'message') {
+                return
+        }
         if (ctx.updateType === 'message' && ctx.updateSubTypes.includes('text')) {
             if (ctx.message.text !== '/end') { return }
         }
@@ -50,40 +60,96 @@ const createTeam = new WizardScene('createTeam',
     .on('callback_query', ctx => { // Rispondo alla pressione di un bottone e aggiungo la persona al team con un ruolo
         const parts = ctx.callbackQuery.data.split(':')
         if (unZip[parts[0]] !== 'addToTeam') { return }
-    
-        ctx.answerCbQuery('Aggiunto al team')
-        ctx.editMessageReplyMarkup({})
-        const i      = parts[1]
-        const j      = parts[2]
-        const loaded = ctx.scene.state.personnel.loaded
 
-        let   chosen = loaded[i]
-        chosen.role  = chosen.roles[j]
+        const i = parts[1]
+        const j = parts[2]
+
+        let chosen  = ctx.scene.state.personnel.loaded[i]
+        chosen.role = chosen.roles[j]
+
+
+        /*** Se la durata è inferiore a 3h ***/
+        if (ctx.scene.state.mission.description.duration.expected < 3) {
+
+            // Se sto inserendo un pilota
+            if (chosen.role === 'pilot') {
+                // Se ho già inserito 2 piloti
+                if (ctx.scene.state.pilotCount === 2) {
+                    return ctx.answerCbQuery('Hai già aggiunto 2 piloti!')
+                }
+                ctx.scene.state.pilotCount++
+            }
+            // Se sto inserendo un crew
+            if (chosen.role === 'crew') {
+                // Chiedo di inserire prima i piloti
+                if (ctx.scene.state.pilotCount < 2) {
+                    return ctx.answerCbQuery('Inserisci prima i piloti!')
+                }
+                ctx.scene.state.crewCount++
+            }
+            ctx.scene.state.personnel.chosen.push(chosen)
+            ctx.answerCbQuery('Aggiunto al team')
+            ctx.editMessageReplyMarkup({})
+            return
+        }
+
+        /*** Se la durata è superiore a 3h ***/
+
+        // Se sto inserendo un pilota
+        if (chosen.role === 'pilot') {
+            // Se ho già inserito 2 piloti
+            if (ctx.scene.state.pilotCount === 2) {
+                return ctx.answerCbQuery('Hai già aggiunto 2 piloti!')
+            }
+            ctx.scene.state.pilotCount++
+        }
+
+        // Se sto inserendo un crew
+        if (chosen.role === 'crew') {
+            // Chiedo di inserire prima i piloti
+            if (ctx.scene.state.pilotCount < 2) {
+                return ctx.answerCbQuery('Inserisci prima i piloti!')
+            }
+            // Chiedo di inserire prima almeno un manutentore
+            if (ctx.scene.state.maintCount < 1) {
+                return ctx.answerCbQuery('Inserisci prima almeno un manutentore!')
+            }
+            ctx.scene.state.crewCount++
+        }
+
+        // Se sto inserendo un manutentore
+        if (chosen.role === 'maintainer') {
+            // Chiedo di inserire prima i piloti
+            if (ctx.scene.state.pilotCount < 2) {
+                return ctx.answerCbQuery('Inserisci prima i piloti!')
+            }
+            ctx.scene.state.maintCount++
+        }
+
         ctx.scene.state.personnel.chosen.push(chosen)
+        ctx.answerCbQuery('Aggiunto al team!')
+        ctx.editMessageReplyMarkup({})
     })
     .command('end', async ctx => {
-        let pilotCount = 0
-        let maintCount = 0
-        const chosen = ctx.scene.state.personnel.chosen
-        if (ctx.scene.state.mission.description.duration.expected < 3) {
-            for (let person of chosen) {
-                if (person.role === 'pilot') { pilotCount++ }
-            }
-            if (pilotCount !== 2) {
-                return await ctx.reply('Devi scegliiere 2 piloti da aggiungere al Team.')
-            }
-            return ctx.scene.leave()
-        }
-        for (let person of chosen) {
-            if (person.role === 'pilot')      { pilotCount++ }
-            if (person.role === 'maintainer') { maintCount++ }
-        }
+        const pilotCount = ctx.scene.state.pilotCount
+        const maintCount = ctx.scene.state.maintCount
+        const crewCount  = ctx.scene.state.crewCount
+        
+        // Se ho meno di 2 piloti ne devo aggiungere
         if (pilotCount !== 2) {
-            return await ctx.reply('Devi scegliiere 2 piloti da aggiungere al Team.')
+            return ctx.reply('Devi scegliiere 2 piloti da aggiungere al Team.')
         }
-        if (maintCount !== 1) {
-            return await ctx.reply('Devi scegliiere 1 manutentore da aggiungere al Team.')
+
+        if (crewCount < 1) {
+            return ctx.reply('Devi aggiungere almeno un crew al Team.')
         }
+
+        // Se la durata è superiore a 3 ore e non ho aggiunto almeno un manutentore
+        if (ctx.scene.state.mission.description.duration.expected >= 3 &&
+            maintCount < 1) {
+                return ctx.reply('Devi scegliiere almeno un manutentore da aggiungere al Team.')
+        }
+        
         return ctx.scene.leave()
     })
     ).leave(ctx => {
@@ -94,7 +160,7 @@ const createTeam = new WizardScene('createTeam',
          *  4. Emetto l'evento teamCreated:
          *      1. Notifico chi è stato aggiunto alla missione
          *      2. Avviso chi non è stato scelto
-         *      2. Notifico l'AM della creazione del Team ???
+         *      3. ??? Notifico l'AM della creazione del Team ???
          */
         const chosen  = ctx.scene.state.personnel.chosen
         let team = {
@@ -118,6 +184,7 @@ const createTeam = new WizardScene('createTeam',
         }
 
         ;(async () => {
+// DEBUG:   PROSEGUIRE DA QUI
             await Mission.updateById(ctx.scene.state.mission._id, {
                 $push: { teams: team }, 
                 teamCreated: { value: true, timestamp: team.timestamp }})
