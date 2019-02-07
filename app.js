@@ -1,5 +1,5 @@
 require('dotenv').config()
-const db 		= require('./db/db-connect.js')
+const db = require('./db/db-connect.js')
 const Telegraf = require('telegraf')
 const session = require('telegraf/session')
 const dataLoader = require('./bot/middlewares/data-loader')
