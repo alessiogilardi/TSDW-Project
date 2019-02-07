@@ -14,7 +14,8 @@ exports.unZip = unZip = {
     '5': 'createTeam',
     '6': 'pilot',
     '7': 'crew',
-    '8': 'maintainer'
+    '8': 'maintainer',
+    '9': 'addToTeam'
 }
 /**
  * Dizionario usato per comprimenre i nomi delle actions per evitare il limite di 64 byte
@@ -28,7 +29,8 @@ exports.zip = zip = {
     createTeam:         '5',
     pilot:              '6',
     crew:               '7',
-    maintainer:         '8'
+    maintainer:         '8',
+    addToTeam:          '9'
 }
 
 /**
@@ -127,7 +129,7 @@ exports.checkTodaysMissions = async () => {
         // Queste missioni vengono settate come 'started'
         // Il controllo serve per evitare che venga eseguita la query sempre, così non viene emesso l'evento di modifica ogni volta
         if (todaysMissions.length > 0) {
-            await Mission.update({date: today, 'status.teamCreated': true},
+            Mission.update({date: today, 'status.teamCreated': true},
                                          {$set: {'status.teamCreated.value': false,
                                                  'status.started.value': true,
                                                  'status.started.timestamp': Date.now()}})
@@ -135,11 +137,14 @@ exports.checkTodaysMissions = async () => {
         // Per ogni missione di oggi
         for (let mission of todaysMissions) {
             // Setto i droni come 'in missione'
-            for (let drone of mission.drones)
-                await Drone.updateById(drone._id, {$set: {'state.availability': 1}})
+            for (let drone of mission.drones) {
+                Drone.updateById(drone._id, {$set: {'state.availability': 1}})
+            }
             // Setto il campo Personnel.missions.pilot.waitingForLogbook del chief pilot
-            for (let team of mission.teams)
-                await Personnel.updateById(team.pilots.chief, {$push: {'missions.pilot.waitingForLogbook': mission._id}})
+            for (let team of mission.teams) {
+                Personnel.updateById(team.pilots.chief, { $push: { 'missions.pilot.waitingForLogbook': mission._id }})
+                Personnel.updateById(team.pilots.co,    { $push: { 'missions.pilot.waitingForLogbook': mission._id }})
+            }
         }
     }, 60000)
 }
