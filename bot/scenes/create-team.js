@@ -2,6 +2,7 @@ const Telegraf      = require('telegraf')
 const WizardScene   = require('telegraf/scenes/wizard/index')
 const Composer      = require('telegraf/composer')
 const utils         = require('../../utils')
+const ee            = require('../../events/event-emitters')
 const { Mission, Personnel } = require('../../db/queries')
 
 // DEBUG:   controllare che il team sia inserito correttamente e che
@@ -184,11 +185,11 @@ const createTeam = new WizardScene('createTeam',
         }
 
         ;(async () => {
-// DEBUG:   PROSEGUIRE DA QUI
-            await Mission.updateById(ctx.scene.state.mission._id, {
-                $push: { teams: team }, 
-                teamCreated: { value: true, timestamp: team.timestamp }})
-            const mission = await Mission.findById(ctx.scene.state.mission._id)
+            const missionId = ctx.scene.state.mission._id
+            await Mission.updateById(missionId,
+                { $push: { teams: team }}, 
+                { $set:  { teamCreated: { value: true, timestamp: team.timestamp }}})
+            const mission = await Mission.findById(missionId)
             ctx.reply('Team creato!')
             ee.bot.emit('teamCreated', mission, team)
         })()
