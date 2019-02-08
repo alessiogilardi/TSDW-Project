@@ -72,3 +72,11 @@ exports.copyObject = copyObject = obj => {
     }
     return ret
 }
+
+exports.arrayToLowerCase = arrayToLowerCase = aArray => {
+    let ret = []
+    for (const string of aArray) {
+        ret.push(string.toLowerCase())
+    }
+    return ret
+}
