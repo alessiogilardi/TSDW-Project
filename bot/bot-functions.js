@@ -163,7 +163,7 @@ exports.checkTodaysMissions = async () => {
 exports.checkMissionDocuments = async aMissionId => {
     const mission = await Mission.findById(aMissionId)
     if (mission.logbooks.length === 2 && mission.qtbs.length === mission.drones.length) {
-        Mission.updateById(mission._id, { 'status.waitingForDocuments.value': false, 'status.completed.value': true, 'status.completed.timestamp': new Date()})
+        Mission.updateById(mission._id, { $set: { 'status.waitingForDocuments.value': false, 'status.completed.value': true, 'status.completed.timestamp': new Date() }})
     }
 
 }
