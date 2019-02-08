@@ -42,7 +42,9 @@ const roleToOperation = {
 	pilot:      ['/addLogbook'],
     crew:       ['/accept', '/refuse'], // Usabili anche dai piloti e manutentori
     maintainer: ['/manageDrones'] // Usabile anche dal base supervisor
-};
+}
+
+exports.genericCommands = genericCommands = ['/end', '/cancel', '/help', '/start']
 
 /**
  * Funzione che restituisce i comandi che una certa persione può eseguire in base ai ruoli che ricopre
