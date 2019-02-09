@@ -187,6 +187,10 @@ exports.missionsSchema = new Schema({
         },
         waitingForTeam: { // Il baseSup ha preso in carico la missione, l'AM è notificato e si attende che le persone diano disponibilità 
             value: {type: Boolean, default: false},
+            createTeamButton: { // Messaggio al BaseSup che gli permette di creare un Team
+                //chatId:     {type: Number, default: undefined},
+                messageId:  {type: Number, default: undefined} // Identificatore del messaggio
+            },
             timestamp: {type: Date, default: Date.now}
         },
         teamCreated: { // Il team viene creato dal baseSup e l'AM viene notificato
