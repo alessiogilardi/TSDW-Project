@@ -8,12 +8,14 @@ const Composer      = require('telegraf/composer')
 
 const addQtb = new WizardScene('addQtb', 
     async ctx => {
-        // 
-
-        const person                = ctx.session.userData.person //await Personnel.findByIdTelegram(ctx.message.chat.id)
+        const person = ctx.session.userData.person
 
         // Cerco i droni che hanno il campo waitingForQtb non vuoto
-        ctx.scene.state.wfqtbDrones = await Drone.find({'missions.waitingForQtb': {$exists: true, $not: {$size: 0}}}, '')
+        ctx.scene.state.wfqtbDrones = await Drone.find({'missions.waitingForQtb': { $exists: true, $not: { $size: 0 }}}, '')
+        if (ctx.scene.state.wfqtbDrones.length === 0) {
+            await ctx.reply('Non ci sono QTB da aggiungere!')
+            return ctx.scene.leave()
+        }
         // Per ognuno di questi droni, itero sulle missioni delle quali va inserito il qtb
         for (let drone of ctx.scene.state.wfqtbDrones) {
             // Controllo che la base a cui è assegnato il drone sia uguale a quella del supervisore: se non è così, ignoro questo drone
@@ -133,7 +135,7 @@ const addQtb = new WizardScene('addQtb',
          * 1. Inserisco il qtb nel database
          * 2. Aggiorno lo stato della missione per quel drone, che passa da waitingForQtb a completed
          * 3. Inserisco il qtb appena inserito nell'array qtbs della relativa missione
-         * (I punti 2 e 3 vengono fatti in automatico dalla qury di insert del Qtb)
+         * (I punti 2 e 3 vengono fatti in automatico dalla query di insert del Qtb)
          */
         let qtb = {
             '_id': undefined,
@@ -152,10 +154,11 @@ const addQtb = new WizardScene('addQtb',
         let mEvent = { type: 'addQtb', actor: ctx.session.userData.person._id, subject: {type: 'Qtb', _id: newQtb._id}, timestamp: new Date() }
 		EventLog.insert(mEvent)
 
+        ctx.reply('Fine procedura inserimento qtb')
         return ctx.scene.leave()
     })
 ).leave(ctx => {
-    ctx.message.reply('Fine procedura inserimento qtb')
+    
 })
 
 module.exports = addQtb
