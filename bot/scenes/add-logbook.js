@@ -9,14 +9,16 @@ const Composer      = require('telegraf/composer')
 const addLogbook = new WizardScene('addLogbook', 
     async ctx => {
         // Qui elenco le missioni in Personnel.missions.pilot.waitingForLogbook
-
-        const person                = ctx.session.userData.person //await Personnel.findByIdTelegram(ctx.message.chat.id)
-        ctx.scene.state.missions    = await Mission.find({ _id: { $in: person.missions.pilot.waitingForLogbook } })
-        ctx.scene.state.currentMission = undefined
-        
-        for (let i in ctx.scene.state.missions) {
-            // Invio un Button per ogni missione
-            const message       = `Missione del ${missions[i].date}`
+        //
+        // Riscrivo
+        const person    = ctx.session.userData.person
+        const missions  = await Mission.find({ _id: { $in: person.missions.pilot.waitingForLogbook } })
+        if (missions.length === 0) {
+            await ctx.reply('Non ci sono logbook da aggiungere!')
+            return ctx.scene.leave()
+        }
+        for (const [i, mission] of missions.entries()) {
+            const message       = `Missione del ${mission.date}`
             const buttonText    = 'Aggiungi Logbook'
             const buttonData    = `${'addLogbook'}:${i}`
             await ctx.reply(message, Telegraf.Extra
@@ -27,6 +29,9 @@ const addLogbook = new WizardScene('addLogbook',
             ))
         }
 
+        ctx.scene.state.missions        = missions
+        ctx.scene.state.currentMission  = undefined
+
         return ctx.wizard.next()
     },
     new Composer((ctx, next) => {
@@ -34,6 +39,11 @@ const addLogbook = new WizardScene('addLogbook',
         return next()
     })
     .on('callback_query', async ctx => {
+        // Se ho già selezionato una missione scarto l'input
+        if (ctx.scene.state.currentMission) { 
+            return ctx.answerCbQuery('Hai già selezionato una missione!')
+        }
+
         const parts = ctx.callbackQuery.data.split(':')
         if (parts[0] !== 'addLogbook') { return }
 
