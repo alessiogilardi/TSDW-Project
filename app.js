@@ -33,6 +33,7 @@ bot.catch(err => console.log(err))
 
 eventRegister(bot)
 
+// MIDDLEWARES
 // session({ ttl: 10 })
 bot.use(session())
 bot.use(dataLoader())
@@ -57,34 +58,18 @@ bf.checkTodaysMissions() // Funzione per il controllo delle missioni odierne
 deadlineCheck(bot, 120) // Funzione che controlla le missioni e notifica la base più vicina se il personale non ha risposto in tempo
 
 bot.command(['requestMission', 'requestmission'], ctx => {
-	/*if (!ctx.session.userData.commands.includes('/requestMission')) {
-		ctx.reply('Mi spiace, non hai i diritti per eseguire questo comando.')
-		return
-	}*/
 	ctx.scene.enter('requestMission')
 })
 
 bot.command(['manageDrones', 'managedrones'], ctx => {
-	/*if (!ctx.session.userData.commands.includes('/manageDrones')) {
-		ctx.reply('Mi spiace, non hai i diritti per eseguire questo comando.')
-		return
-	}*/
 	ctx.scene.enter('manageDrones');
 })
 
 bot.command(['addLogbook', 'addlogbook'], ctx => {
-	/*if (!ctx.session.userData.commands.includes('/addLogbook')) {
-		ctx.reply('Mi spiace, non hai i diritti per eseguire questo comando.')
-		return
-	}*/
 	ctx.scene.enter('addLogbook')
 })
 
 bot.command(['addQtb', 'addqtb'], ctx => {
-	/*if (!ctx.session.userData.commands.includes('/addQtb')) {
-		ctx.reply('Mi spiace, non hai i diritti per eseguire questo comando.')
-		return
-	}*/
 	ctx.scene.enter('addQtb')
 })
 
@@ -126,6 +111,7 @@ router.on('declineMission', ctx => {
 })
 
 router.on('createTeam', ctx => {
+	ctx.deleteMessage()
 	ctx.scene.enter('createTeam', { mission: { _id: ctx.state.data[0] } })
 })
 
