@@ -117,7 +117,7 @@ router.on('organizeMission', ctx => {
 router.on('acceptMission', ctx => {
 	ctx.answerCbQuery('Missione accettata')
 	ctx.editMessageReplyMarkup({})
-	acceptMission(bot, ctx)
+	acceptMission(ctx)
 })
 
 router.on('declineMission', ctx => {
@@ -136,11 +136,3 @@ bot.on('callback_query', router)
 	bot.startPolling()
 	console.log('Bot Started!')
 })()
-
-/*
-db.connect(process.env.DB_ADDRESS, process.env.DB_PORT, process.env.DB_NAME)
-	.then(() => {
-		console.log('Bot started!')
-		bot.startPolling()
-	})
-	*/
