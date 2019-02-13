@@ -2,7 +2,7 @@ const { Mission, Drone, Qtb, Personnel } = require('../../db/queries')
 const WizardScene   = require('telegraf/scenes/wizard/index')
 const Composer      = require('telegraf/composer')
 const Telegraf      = require('telegraf')
-
+const utils         = require('../../utils')
 /**
  * Scene che gestisce l'inserimento del Qtb e delle relative informazioni per le Missioni in cui manca
  */
@@ -23,11 +23,13 @@ const addQtb = new WizardScene('addQtb',
             // Controllo che la base a cui è assegnato il drone sia uguale a quella del supervisore: se non è così, ignoro questo drone
             if (person.base.toString() === drone.base.toString()) {
                 await ctx.reply(`Per il drone targato ${drone.number} manca il qtb per le seguenti missioni:`)
-                for (let mission of drone.missions.waitingForQtb) {
+                for (const mission of drone.missions.waitingForQtb) {
+                    //const miss = await Mission.findById(mission.idMission, '')
+                    //console.log(mission._id)
                     // Invio un Button per ogni missione
-                    const message       = `Missione del ${mission.date}`
+                    const message       = `Missione del ${utils.Date.format(mission.date, 'DD MMM YYYY')}`
                     const buttonText    = 'Aggiungi Qtb'
-                    const buttonData    = `${'addQtb'}:${drone._id}:${mission._id}:${mission.date}:${mission.status.waitingForDocuments.value}`
+                    const buttonData    = `${'addQtb'}:${drone._id}:${mission.idMission}`/*:${mission.date}:${miss.status.waitingForDocuments.value}`*/
                     await ctx.reply(message, Telegraf.Extra
                         .markdown()
                         .markup(m => m.inlineKeyboard([
@@ -52,8 +54,12 @@ const addQtb = new WizardScene('addQtb',
 
         ctx.scene.state.currentDrone   = parts[1] 
         ctx.scene.state.currentMission = parts[2]
-        ctx.scene.state.curMissionDate = parts[3]
-        ctx.scene.state.missionW4Docs  = parts[4]
+        const mission = await Mission.findById(ctx.scene.state.currentMission, '')
+        
+        ctx.scene.state.curMissionDate = mission.date
+        ctx.scene.state.missionW4Docs  = mission.status.waitingForDocuments.value
+        /*ctx.scene.state.curMissionDate = parts[3]
+        ctx.scene.state.missionW4Docs  = parts[4]*/
         await ctx.editMessageReplyMarkup({})
         await ctx.reply('Inserisci il numero di protocollo del Qtb:')
 
