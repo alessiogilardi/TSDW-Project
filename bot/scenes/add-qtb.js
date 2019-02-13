@@ -1,6 +1,7 @@
 const { Mission, Drone, Qtb, Personnel } = require('../../db/queries')
 const WizardScene   = require('telegraf/scenes/wizard/index')
 const Composer      = require('telegraf/composer')
+const Telegraf      = require('telegraf')
 
 /**
  * Scene che gestisce l'inserimento del Qtb e delle relative informazioni per le Missioni in cui manca
@@ -16,6 +17,7 @@ const addQtb = new WizardScene('addQtb',
             await ctx.reply('Non ci sono QTB da aggiungere!')
             return ctx.scene.leave()
         }
+
         // Per ognuno di questi droni, itero sulle missioni delle quali va inserito il qtb
         for (let drone of ctx.scene.state.wfqtbDrones) {
             // Controllo che la base a cui è assegnato il drone sia uguale a quella del supervisore: se non è così, ignoro questo drone
@@ -158,6 +160,7 @@ const addQtb = new WizardScene('addQtb',
         return ctx.scene.leave()
     })
 ).leave(ctx => {
+    ctx.reply('Fine dell\'inserimento di qtb')
     
 })
 
