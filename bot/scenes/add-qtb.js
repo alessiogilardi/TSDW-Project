@@ -13,9 +13,7 @@ const addQtb = new WizardScene('addQtb',
 
         // Cerco i droni che hanno il campo waitingForQtb non vuoto
         ctx.scene.state.wfqtbDrones = await Drone.find({'missions.waitingForQtb': { $exists: true, $not: { $size: 0 }}}, '')
-        // DEBUG:
-        await ctx.reply(ctx.scene.state.wfqtbDrones.length)
-        //
+
         if (ctx.scene.state.wfqtbDrones.length === 0) {
             await ctx.reply('Non ci sono QTB da aggiungere!')
             return ctx.scene.leave()
