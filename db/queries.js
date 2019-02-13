@@ -434,7 +434,7 @@ exports.Drone = Drone = {
     },
 
     /**
-     * Funzione che ricercaa un drone in base al tipo e ai parametri inseriti in selection.
+     * Funzione che ricerca un drone in base al tipo e ai parametri inseriti in selection.
      * @param {String} aType      Tipo di drone da cercare
      * @param {Object} selection  parametri di reicerca del drone
      * @param {Object} projection attributi da cercare
