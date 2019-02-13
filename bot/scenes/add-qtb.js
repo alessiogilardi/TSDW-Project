@@ -13,36 +13,39 @@ const addQtb = new WizardScene('addQtb',
 
         // Cerco i droni che hanno il campo waitingForQtb non vuoto
         ctx.scene.state.wfqtbDrones = await Drone.find({'missions.waitingForQtb': { $exists: true, $not: { $size: 0 }}}, '')
+        // DEBUG:
+        await ctx.reply(ctx.scene.state.wfqtbDrones.length)
+        //
         if (ctx.scene.state.wfqtbDrones.length === 0) {
             await ctx.reply('Non ci sono QTB da aggiungere!')
             return ctx.scene.leave()
         }
-
         // Per ognuno di questi droni, itero sulle missioni delle quali va inserito il qtb
         for (let drone of ctx.scene.state.wfqtbDrones) {
             // Controllo che la base a cui è assegnato il drone sia uguale a quella del supervisore: se non è così, ignoro questo drone
-            if (person.base != drone.base)
-                continue
-            await ctx.reply(`Per il drone targato ${drone.number} manca il qtb per le seguenti missioni:`)
-            for (let mission of drone.missions.waitingForQtb) {
-                // Invio un Button per ogni missione
-                const message       = `Missione del ${mission.date}`
-                const buttonText    = 'Aggiungi Qtb'
-                const buttonData    = `${'addQtb'}:${drone._id}:${mission._id}:${mission.date}:${mission.status.waitingForDocuments.value}`
-                await ctx.reply(message, Telegraf.Extra
-                    .markdown()
-                    .markup(m => m.inlineKeyboard([
-                        m.callbackButton(buttonText, buttonData)
-                    ])
-                ))
+            if (person.base.toString() === drone.base.toString()) {
+                await ctx.reply(`Per il drone targato ${drone.number} manca il qtb per le seguenti missioni:`)
+                for (let mission of drone.missions.waitingForQtb) {
+                    // Invio un Button per ogni missione
+                    const message       = `Missione del ${mission.date}`
+                    const buttonText    = 'Aggiungi Qtb'
+                    const buttonData    = `${'addQtb'}:${drone._id}:${mission._id}:${mission.date}:${mission.status.waitingForDocuments.value}`
+                    await ctx.reply(message, Telegraf.Extra
+                        .markdown()
+                        .markup(m => m.inlineKeyboard([
+                            m.callbackButton(buttonText, buttonData)
+                        ])
+                    ))
+                }
             }
         }
 
         return ctx.wizard.next()
     },
     new Composer((ctx, next) => {
-        // TODO: devo scartare gli input non validi
-
+        if (ctx.updateType !== 'callback_query') {
+            return
+        }
         return next()
     })
     .on('callback_query', async ctx => {
