@@ -37,6 +37,16 @@ exports.Date = this.Date = {
     validFormats: ['YYYY-MM-DD', 'DD-MM-YYYY']
 }
 
+exports.Time = this.Time = {
+    parse: aTime => {
+        return moment(aTime, this.Time.validFormats).toDate()
+    },
+    isValid: aTime => {
+        return moment(aTime, this.Time.validFormats).isValid()
+    },
+    validFormats: ['hh:mm']
+}
+
 exports.stringToUTM = utmString => {
     var tmp = utmString.split(' ')
     if (tmp.length !== 4) {
