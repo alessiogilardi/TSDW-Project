@@ -13,9 +13,10 @@ const createTeam 		= require('./bot/scenes/create-team')
 const addLogbook 		= require('./bot/scenes/add-logbook')
 const addQtb 			= require('./bot/scenes/add-qtb')
 const acceptMission 	= require('./bot/actions/accept-mission')
+const declineMission 	= require('./bot/actions/decline-mission')
 const eventRegister 	= require('./events/event-register')
 const router 			= require('./bot/router')
-const deadlineCheck 	= require('./bot/missions-deadline-check')
+//const deadlineCheck 	= require('./bot/missions-deadline-check')
 const { leave } 		= Stage
 
 
@@ -55,7 +56,7 @@ bot.help(ctx => ctx.reply(`Command list:\n${ctx.session.userData.commands.join('
 // CHIAMATA DELLE FUNZIONI PERIODICHE
 bf.checkTimeout(bot) // Funzione per il controllo del timeout dell'organizzazione delle missioni
 bf.checkTodaysMissions() // Funzione per il controllo delle missioni odierne
-deadlineCheck(bot, 120) // Funzione che controlla le missioni e notifica la base più vicina se il personale non ha risposto in tempo
+//deadlineCheck(bot, 120) // Funzione che controlla le missioni e notifica la base più vicina se il personale non ha risposto in tempo
 
 bot.command(['requestMission', 'requestmission'], ctx => {
 	ctx.scene.enter('requestMission')
@@ -106,8 +107,9 @@ router.on('acceptMission', ctx => {
 })
 
 router.on('declineMission', ctx => {
+	ctx.answerCbQuery('Missione rifiutata')
 	ctx.deleteMessage()
-	const data = ctx.state.data
+	declineMission(ctx)
 })
 
 router.on('createTeam', ctx => {
