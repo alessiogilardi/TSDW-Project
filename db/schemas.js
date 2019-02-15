@@ -187,7 +187,7 @@ exports.missionsSchema = new Schema({
     status: {
         requested: { // la missione è richietsa dall'AM ad un BaseSup
             value: {type: Boolean, default: false},
-            timestamp: {type: Date, default: Date.now}
+            timestamp: {type: Date, default: undefined}
             //timeout: Date // Tempo entro il quale il BaseSup deve rispondere, se non risponde va notificato l'AM
         },
         waitingForTeam: { // Il baseSup ha preso in carico la missione, l'AM è notificato e si attende che le persone diano disponibilità 
@@ -196,23 +196,27 @@ exports.missionsSchema = new Schema({
                 //chatId:     {type: Number, default: undefined},
                 messageId:  {type: Number, default: undefined} // Identificatore del messaggio, usato per consentire aggiornamento del messaggio
             },
-            timestamp: {type: Date, default: Date.now}
+            timestamp: {type: Date, default: undefined}
         },
         teamCreated: { // Il team viene creato dal baseSup e l'AM viene notificato
             value: {type: Boolean, default: false},
-            timestamp: {type: Date, default: Date.now}
+            timestamp: {type: Date, default: undefined}
         },
         started: { // Il baseSup dichiara iniziata la missione
             value: {type: Boolean, default: false},
-            timestamp: {type: Date, default: Date.now}
+            timestamp: {type: Date, default: undefined}
         },
         waitingForDocuments: { // La missione è stata completata, il baseSup e l'AM vengono notificati. Si resta in attesa della documentazione di droni e piloti
             value: {type: Boolean, default: false},
-            timestamp: {type: Date, default: Date.now}
+            timestamp: {type: Date, default: undefined}
         },
         completed: { // La missione è completata e la documentazione è stata inserita
             value: {type: Boolean, default: false},
-            timestamp: {type: Date, default: Date.now}
+            timestamp: {type: Date, default: undefined}
+        },
+        aborted: { // Non è stato possibile creare la missione
+            value: {type: Boolean, default: false},
+            timestamp: {type: Date, default: undefined}
         }
     },
     personnel: {
@@ -222,9 +226,8 @@ exports.missionsSchema = new Schema({
             roles:  [{type: String, enum: ['pilot', 'crew', 'maintainer']}], // Ruoli che può ricoprire nella missione
             timestamp: {type: Date, default: Date.now}
         }],
-        refused: [{ // Elenco delle persone che hanno rifiutato la missione
+        declined: [{ // Elenco delle persone che hanno rifiutato la missione
             _id: {type: ObjectId, ref: 'personnel'},
-            //roles:  [{type: String, enum: ['pilot', 'crew', 'maintainer']}], // Ruoli che può ricoprire nella missione
             timestamp: {type: Date, default: Date.now}
         }]
     },
