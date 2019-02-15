@@ -124,6 +124,59 @@ exports.Personnel = [{
         },
     }
 },
+
+{
+    _id: null,
+    telegramData: {
+        idTelegram: 283625324
+    },
+    name: 'Gianni',
+    surname: 'Vercelli',
+    cf: 'AAAASS91S13E463A',
+    location: {
+        country: 'Italy',
+        city: 'Genoa',
+        address: '12353'
+    },
+    airOperator: 'eurodrone',
+    base: 'Base1',
+    roles: {
+        command: {
+            airOperator: {
+                AM: false,
+                SM: false
+            },
+            base: {
+                supervisor: false
+            }
+        },
+        occupation: {
+            pilot: true,
+            maintainer: true
+        }
+    },
+    pilot: {
+        license: {
+            id: 'lic-id-02',
+            type: 'vl/l',
+            maxMissionRank: 4,
+            expiring: new Date()
+        },
+        droneTypes: schemas.droneTypes
+    },
+    missions: {
+        supervisor:  {
+            completed: [],
+            pending: []
+        },
+        maintainers:  {
+            completed: []
+        },
+    }
+},
+
+
+
 {
     _id: null,
     telegramData: {
@@ -138,7 +191,7 @@ exports.Personnel = [{
         address: '12353'
     },
     airOperator: 'eurodrone',
-    base: 'Base2',
+    base: 'Base1',
     roles: {
         command: {
             airOperator: {
@@ -146,7 +199,7 @@ exports.Personnel = [{
                 SM: false
             },
             base: {
-                supervisor: true
+                supervisor: false
             }
         },
         occupation: {
