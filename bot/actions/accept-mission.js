@@ -15,8 +15,7 @@ const ee = require('../../events/event-emitters')
 
 /**
  * Funzione che esegue il parsing dei parametri passati tramite ctx.state
- * @param {*} bot 
- * @param {*} ctx 
+ * @param {Context} ctx 
  */
 const parseParams = ctx => {
 	const missionId = ctx.state.data[0]
