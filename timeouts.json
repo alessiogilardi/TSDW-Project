@@ -1,0 +1,14 @@
+{
+    "organize": {
+        "short": 5,
+        "long": 15
+    },
+    "extend": {
+        "short": 5,
+        "long": 15
+    },
+    "global": {
+        "short": 5,
+        "long": 15
+    }
+}
