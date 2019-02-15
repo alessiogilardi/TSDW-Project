@@ -165,7 +165,7 @@ exports.batterySchema = new Schema({
 });
 
 exports.missionsSchema = new Schema({
-    id:         ObjectId,
+    _id:         ObjectId,
     date:       Date, // Giorno in cui viene effettuata la missione
     base:       {type: ObjectId, ref: 'base'},
     supervisor: {type: ObjectId, ref: 'personnel'},
@@ -174,11 +174,16 @@ exports.missionsSchema = new Schema({
         latitude:   Number,
         longitude:  Number
     },
-    droneType: {type: String, enum: droneTypes},
+    droneType: { type: String, enum: droneTypes },
+    notifiedBases: [{
+        _id:        { type: ObjectId, ref: 'base' },
+        timestamp:  { type: Date, default: Date.now }
+    }],
+    /*
     notifiedNearestBase: {
         value:      {type: Boolean, default: false},
         timestamp:  {type: Date, default: undefined}
-    },
+    },*/
     status: {
         requested: { // la missione è richietsa dall'AM ad un BaseSup
             value: {type: Boolean, default: false},
@@ -189,7 +194,7 @@ exports.missionsSchema = new Schema({
             value: {type: Boolean, default: false},
             createTeamButton: { // Messaggio al BaseSup che gli permette di creare un Team
                 //chatId:     {type: Number, default: undefined},
-                messageId:  {type: Number, default: undefined} // Identificatore del messaggio
+                messageId:  {type: Number, default: undefined} // Identificatore del messaggio, usato per consentire aggiornamento del messaggio
             },
             timestamp: {type: Date, default: Date.now}
         },
@@ -215,6 +220,11 @@ exports.missionsSchema = new Schema({
         accepted: [{ // Elenco delle persone che hanno accettato la missione
             _id: {type: ObjectId, ref: 'personnel'},
             roles:  [{type: String, enum: ['pilot', 'crew', 'maintainer']}], // Ruoli che può ricoprire nella missione
+            timestamp: {type: Date, default: Date.now}
+        }],
+        refused: [{ // Elenco delle persone che hanno rifiutato la missione
+            _id: {type: ObjectId, ref: 'personnel'},
+            //roles:  [{type: String, enum: ['pilot', 'crew', 'maintainer']}], // Ruoli che può ricoprire nella missione
             timestamp: {type: Date, default: Date.now}
         }]
     },
