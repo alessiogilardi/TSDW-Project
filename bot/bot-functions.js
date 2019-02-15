@@ -15,7 +15,9 @@ exports.unZip = unZip = {
     '6': 'pilot',
     '7': 'crew',
     '8': 'maintainer',
-    '9': 'addToTeam'
+    '9': 'addToTeam',
+    '10': 'extendToBase',
+    '11': 'abortMission'
 }
 /**
  * Dizionario usato per comprimenre i nomi delle actions per evitare il limite di 64 byte
@@ -30,7 +32,9 @@ exports.zip = zip = {
     pilot:              '6',
     crew:               '7',
     maintainer:         '8',
-    addToTeam:          '9'
+    addToTeam:          '9',
+    extendToBase:       '10',
+    abortMission:       '11'
 }
 
 /**
