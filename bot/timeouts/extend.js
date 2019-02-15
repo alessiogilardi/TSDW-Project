@@ -9,7 +9,7 @@
  *  3. Aggiungo la Base all'elenco delle Basi notificate in Mission.notifiedBases
  */
 const Telegraf 		 	= require('telegraf')
-const { Mission, Base } = require('../../db/queries')
+const { Mission, Base, Personnel } = require('../../db/queries')
 const moment            = require('moment')
 const timers            = require('timers')
 const utils             = require('../utils')
@@ -143,7 +143,7 @@ const missedDeadlines = async () => {
  * @returns {Array}
  */
 const exceededTimeoutCheck = async (timeout) => {
-    const missions = await Mission.find({ 'notifiedBases': { $exists: true, $not: {$size: 0} }, 'status.waitingForTeam.value': true, 'status.teamCreated.value': false }, '')
+    const missions = await Mission.find({ 'notifiedBases': { $exists: true, $size: 0 }, 'status.waitingForTeam.value': true, 'status.teamCreated.value': false, 'status.aborted.value': false }, '')
     let ret = []
     const now = new Date().getTime()
     for (const mission of missions) {
@@ -162,15 +162,15 @@ const exceededTimeoutCheck = async (timeout) => {
 }
 
 /**
- * Funzione che notifica il personale, mediante un messaggio Telegram.
+ * Funzione che permette al BS di contattare le altre basi oppure di abortire la missione
  * @param {String}   idTelegram
  * @param {Mission}  mission
  * @param {Array}    bases
  */
-const sendMessage = (idTelegram, mission, bases) => {
-    const message = `Non riesco a trovare abbstanza personale per la missione del ${utils.format(mission.date, 'DD MMM YYYY hh:mm')}.\n` + 
-    `Vuoi contattare le seguenti Basi o Abortire la missione?\n` +
-    `Premi sulle basi che vuoi conattare.`
+const sendChoose = async (idTelegram, mission, bases) => {
+    const message =/* `Non riesco a trovare abbastanza personale per la missione del ${utils.Date.format(mission.date, 'DD MMM YYYY hh:mm')}.\n` + */
+    `Vuoi contattare altre Basi o Abortire la missione?\n` +
+    `Premi sulle basi che vuoi contattare.`
 
     let buttons = []
     for (const base of bases) {
@@ -184,21 +184,54 @@ const sendMessage = (idTelegram, mission, bases) => {
         .markdown()
         .markup(m => m.inlineKeyboard(buttons)                
     ))
+    await this.bot.sendMessage(idTelegram, 'Vuoi abortire la missione?', Telegraf.Extra
+        .markdown()
+        .markup(m => m.inlineKeyboard([
+            m.callbackButton('Abort', `${zip['abortMission']}:${mission_id}`)
+    ])))
     
 }
 
 /**
+ * Invia un report al BS con chi ha accettato, chi ha rifiutato e chi non ha risposto.
+ * @param {*} notified 
+ * @param {*} accepted 
+ * @param {*} declined 
+ */
+const sendReport = async (idTelegram, notified, accepted, declined) => {
+    let message = `Non riesco a trovare abbastanza personale per la missione del ${utils.Date.format(mission.date, 'DD MMM YYYY hh:mm')}.\n`
+    let acceptedMessage = `Hanno accettato:\n`
+    let declinedMessage  = `Hanno rifiutato:\n`
+    let othersMessage   = `Non hanno risposto:\n`
+    for (const p of notified) {
+        const person = await Personnel.findById(p, '')
+        if (accepted.includes(p)) {
+            acceptedMessage += `${person.name} ${person.surname}\n` 
+        } else if (declined.includes(p)) {
+            declinedMessage += `${person.name} ${person.surname}\n` 
+        } else {
+            othersMessage += `${person.name} ${person.surname}\n` 
+        }
+    }
+
+    await this.bot.sendMessage(idTelegram, message + acceptedMessage + declinedMessage + othersMessage)
+}
+/**
  * Funzione che notifica il BS su quali missioni hanno sforato il timeout per notificare le basi vicine.
- * Vengono mandati al BS dei bottoni per poter aggiungere le basi oppure abortire la missione
+ * Vengono mandati al BS dei bottoni per poter aggiungere le basi oppure abortire la missione.
  * @param {Array} missions 
  */
-const notifyBaseSupervisor = async (missions) => {
+const notifyBaseSupervisors = async (missions) => {
     if (missions.length === 0) { return }
 
     for (const mission of missions) {
         const supervisor    = await Personnel.findById(mission.supervisor, '')
         const bases         = await Base.find({ _id: { $ne: mission.base } }, '')
-        sendMessage(supervisor.telegramData.idTelegram, mission, bases)
+
+        const accepted  = mission.personnel.accepted.map(p => p._id)
+        const declined  = mission.personnel.declined.map(p => p._id)
+        await sendReport(supervisor.telegramData.idTelegram, notified, accepted, declined)
+        await sendChoose(supervisor.telegramData.idTelegram, mission, bases)
     }
 
 }
@@ -211,6 +244,8 @@ const periodicTask = async (bot, deadline) => {
     timers.setInterval(async () => {
         const { extend }    = JSON.parse(fs.readFileSync('file', 'utf8'))
         const missions      = await exceededTimeoutCheck(extend)
+
+        notifyBaseSupervisors(missions)
 
 
         //let missions = await missedDeadlines()
