@@ -54,7 +54,7 @@ const command = {
  * Funzione che richiede una nuova missione e fa partire l'iter corrispondente.
  * 
  * Si richiedono:
- *  1. Data della missione
+ *  1. Data e ora della missione
  *  2. Base di partenza
  *  3. Location di inizio della missione
  *  4. Descrizione
@@ -87,14 +87,26 @@ const requestMission = new WizardScene('requestMission',
         ctx.wizard.next()
     },
     new Composer()
-    .on('text', ctx => {
+    .on('text', async ctx => {
         // Verifico che la data inserita sia in un formato corretto e che sia successiva ala data di oggi
         if (!utils.Date.isValid(ctx.message.text)) {
-            ctx.reply('La data inserita non è valida, per favore reinseriscila')
-            return
+            return await ctx.reply('La data inserita non è valida, per favore reinseriscila')
         }
         ctx.scene.state.command.mission.date = utils.Date.parse(ctx.message.text)
-        ctx.reply('A quale base vuoi affidare la missione? Inserisci il nome della base:')
+        await ctx.reply('Inserisci l\'orario indicativo a cui dovrà iniziare la missione (hh:mm):')
+        return ctx.wizard.next()
+    }),
+    new Composer()
+    .on('text', async ctx => {
+        // Verifico che la data inserita sia in un formato corretto e che sia successiva ala data di oggi
+        if (!utils.Time.isValid(ctx.message.text)) {
+            return await ctx.reply('L\'orario inserito non è valido, per favore reinseriscilo')
+        }
+        //ctx.scene.state.command.mission.date = utils.Date.parse(ctx.message.text)
+        const tmp = utils.Time.parse(ctx.message.text)
+        ctx.scene.state.command.mission.date.setHours(tmp.getHours(), tmp.getMinutes(), 0, 0)
+
+        await ctx.reply('A quale base vuoi affidare la missione? Inserisci il nome della base:')
         return ctx.wizard.next()
     }),
     new Composer()
