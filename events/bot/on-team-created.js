@@ -65,7 +65,23 @@ const onTeamCreated = async (bot, mission, team) => {
 
     // Cerco tra quelli che avevano accettato e che non sono stati inseriti nel team
     ;(async () => {
-        const accepted  = mission.personnel.accepted
+        const accepted = new Set(mission.personnel.accepted.map(p => p._id.toString()))
+        const notifiedStr = new Set(notified.map(id => id.toString()))
+
+        const toNotify = [...new Set([...accepted].filter(p => !notifiedStr.has(p)))]
+
+        for (const p of toNotify) {
+            const person     = await Personnel.findById(p)
+            const idTelegram = person.telegramData.idTelegram
+            bot.telegram.sendMessage(idTelegram,
+                `**NON** sei stato aggiunto alla missione del giorno **${utils.Date.format(mission.date, 'DD MMM YYYY')}**`,
+                Telegraf.Extra.markdown())
+                .catch(err => {})
+            // Rimuovo la missione da quelle Accettate in modo che la persona sia di nuovo disponibile
+            Personnel.updateById(p, { $pull: { 'missions.accepted': { idMission: mission._id }}})
+        }
+
+        /*
         const notif     = utils.arrayToArrayOfStrings(notified)
         for (const p of accepted) {
             if (!notif.includes(p._id.toString())) {
@@ -78,7 +94,7 @@ const onTeamCreated = async (bot, mission, team) => {
                 // Rimuovo la missione da quelle Accettate in modo che la persona sia di nuovo disponibile
                 Personnel.updateById(p, { $pull: { 'missions.accepted': { idMission: mission._id }}})
             }
-        }
+        }*/
     })()
 
     EventLog.insert({ type: 'teamCreated', actor: mission.supervisor, subject: { type: 'Mission', _id: mission._id }, timestamp: new Date() })
