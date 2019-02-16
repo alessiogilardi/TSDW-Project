@@ -56,7 +56,7 @@ const generateMessage = async (accepted, missionDate) => {
 	let tmp = []
 	for (let person of accepted) {
 		let p = await Personnel.findById(person._id)
-		tmp.push(`${p.name}\t${p.surname}\t->\t[${person.roles.join(', ')}]`)
+		tmp.push(`${p.name}\t${p.surname}\t->\t\[${person.roles.join(', ')}\]`)
 	}
 	return `C\'è un numero di persone sufficiente per formare un Team per la missione in data: ${utils.Date.format(missionDate, 'DD MMM YYYY')}\n\n${tmp.join('\n')}`
 }
