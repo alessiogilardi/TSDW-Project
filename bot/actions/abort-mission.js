@@ -84,6 +84,8 @@ const abortMission = async () => async (ctx) => {
         }
         notifyPersonnel(personnel, mission, mainBase)
     })()
+
+    EventLog.insert({ type: 'missionAborted', actor: undefined, subject: {type: 'Mission', _id: this.missionId}, timestamp: new Date() })
 }
 
 module.exports = abortMission
