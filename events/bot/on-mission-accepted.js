@@ -78,6 +78,7 @@ const checkForTeam = async aMission => {
 				pilotCount++
 		}
 
+		
 		if (pilotCount >= 2) {
 			const message = await generateMessage(accepted, aMission.date)
             const supervisor = await Personnel.findById(aMission.supervisor)
