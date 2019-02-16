@@ -1,23 +1,12 @@
 const moment = require('moment')
 const fs = require('fs')
 
-/*
-exports.arrayContainsArray = (superset, subset) => {
-    if (0 === subset.length || superset.length < subset.length) return false
-    subset.forEach(subVal => {
-        console.log('Checking array contains array')
-        if (!superset.includes(subVal)) return false
-    })
-    return true
-}
-*/
-
 const capitalizeFirstLetter = string => { return string.charAt(0).toUpperCase() + string.slice(1) }
 
 exports.arrayContainsArray = (superset, subset) => {
     if (0 === subset.length || superset.length < subset.length) { return false }
     
-    for (let s of subset) {
+    for (const s of subset) {
         if (!superset.includes(s)) { return false }
     }
     return true
@@ -90,27 +79,3 @@ exports.arrayToLowerCase = arrayToLowerCase = aArray => {
     }
     return ret
 }
-
-/**
- * Converte un campo di un array di dizionari in array
- */
-/*exports.arrayDictToArray = arrayDictToArray = (aArray, aField) => {
-    let ret = []
-    for (const elem of aArray) {
-        ret.push(elem[aField])
-    }
-    return ret
-}*/
-
-/**
- * Converte un array di elementi in array di stringhe (converte ogni elementoin stringa)
- */
-/*
-exports.arrayToArrayOfStrings = arrayToArrayOfStrings = (aArray) => {
-    let ret = []
-    for (const elem of aArray) {
-        ret.push(elem.toString())
-    }
-
-    return ret
-}*/
