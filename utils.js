@@ -94,17 +94,18 @@ exports.arrayToLowerCase = arrayToLowerCase = aArray => {
 /**
  * Converte un campo di un array di dizionari in array
  */
-exports.arrayDictToArray = arrayDictToArray = (aArray, aField) => {
+/*exports.arrayDictToArray = arrayDictToArray = (aArray, aField) => {
     let ret = []
     for (const elem of aArray) {
         ret.push(elem[aField])
     }
     return ret
-}
+}*/
 
 /**
  * Converte un array di elementi in array di stringhe (converte ogni elementoin stringa)
  */
+/*
 exports.arrayToArrayOfStrings = arrayToArrayOfStrings = (aArray) => {
     let ret = []
     for (const elem of aArray) {
@@ -112,4 +113,4 @@ exports.arrayToArrayOfStrings = arrayToArrayOfStrings = (aArray) => {
     }
 
     return ret
-}
+}*/
