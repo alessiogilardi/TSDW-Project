@@ -131,16 +131,16 @@ exports.checkOrganizeTimeout = async (bot) => {
 }
 
 /**
- * Funzione che, dopo un certo tempo e dopo aver notificato altre basi, se ancora non c'è il numero sufficiente di persone per
- * formare un team, notifica il base supervisor e chiede se vuole abortire al missione
+ * Funzione che, dopo un certo tempo, se ancora non c'è il numero sufficiente di persone per formare un team, notifica il base
+ * supervisor e chiede se vuole abortire al missione
  */
 exports.checkGlobalTimeout = async (bot) => {
     timers.setInterval(async () => {
         // Carico il file con i timeout
         let timeout_file = JSON.parse(fs.readFileSync('timeouts.json', 'utf8'))
-        // Controllo le missioni che ancora non hanno un team e per cui sono state contattate altre basi
+        // Controllo le missioni che ancora non hanno un team
         let now = new Date().getTime()
-        let missions = await Mission.find({'status.waitingForTeam.value': true, 'status.teamCreated.value': false, 'status.aborted.value': false, notifiedBases: {$size: {$gt: 0}}}, '')
+        let missions = await Mission.find({'status.waitingForTeam.value': true, 'status.teamCreated.value': false, 'status.aborted.value': false}, '')
         for (let m of missions) {
             let missionReq  = new Date(m.status.requested.timestamp).getTime()
             let missionDate = new Date(m.date).getTime()
@@ -149,9 +149,9 @@ exports.checkGlobalTimeout = async (bot) => {
             // altrimenti si usa il timeout lungo
             let timeout = 0
             if (missionDate - missionReq < 12 * 60 * 60 * 1000) // 12 ore * 60 min all'ora * 60 sec al min * 1000 msec al sec
-                timeout = timeout_file.organize.short
+                timeout = timeout_file.global.short
             else
-                timeout = timeout_file.organize.long
+                timeout = timeout_file.global.long
             // Se il timeout è superato, si notifica il base supervisor (distanza di tempo tra ora e quando sono state mandate le richieste)
             if (now - missionTeamReq >= timeout * 60000) {
                 // invio messaggio al BS
