@@ -10,21 +10,34 @@
  */
 
 const { Mission, Personnel, Base } = require('../../db/queries')
+const utils = require('../../utils')
+
+const sendMessage = async (idTelegram, message) => {
+    this.ctx.telegram.sendMessage(idTelegram, message)
+}
 
 const notifyAM = async (AM, mission) => {
-
+    const message = `La missione del ${utils.Date.format(mission.date, 'DD MMM YYYY kk:mm')} è stata annullata`
+    sendMessage(AM.telegramData.idTelegram, message)
 }
 
 const notifyMainBaseSup = async (baseSup, mission) => {
-
+    const message = `La missione del ${utils.Date.format(mission.date, 'DD MMM YYYY kk:mm')} è stata annullata`
+    sendMessage(baseSup.telegramData.idTelegram, message)
 }
 
-const notifySupervisors = async (supervisors, mission) => {
-
+const notifySupervisors = async (supervisors, mission, mainBase) => {
+    const message = `La missione del ${utils.Date.format(mission.date, 'DD MMM YYYY kk:mm')} partita dalla Base: ${mainBase.name} è stata annullata`
+    for (const person of supervisors) {
+        sendMessage(person.telegramData.idTelegram, message)
+    }
 }
 
-const notifyPersonnel = async (personnel, mission) => {
-
+const notifyPersonnel = async (personnel, mission, mainBase) => {
+    const message = `La missione del ${utils.Date.format(mission.date, 'DD MMM YYYY kk:mm')} partita dalla Base: ${mainBase.name} è stata annullata`
+    for (const person of personnel) {
+        sendMessage(person.telegramData.idTelegram, message)
+    }
 }
 
 const parseParam = () => {
@@ -33,36 +46,44 @@ const parseParam = () => {
 
 const abortMission = async () => async (ctx) => {
     this.ctx = ctx
-    parseParam(ctx)
+    parseParam()
     ctx.answerCbQuery('Missione annullata')
     ctx.deleteMessage()
     
     const mission       = await Mission.findById(this.missionId, '')
     const AM            = await Personnel.findById(mission.AM, '')
     const mainBaseSup   = await Personnel.findById(mission.supervisor, '')
-    let   supervisors   = []
-    for (const baseId of mission.notifiedBases) {
-        const base = await Base.findById(baseId, '')
-        supervisors.push(base.supervisor)
-    }
-    
-    // restano da notificare i notified - declined
-    const notifiedIds = new Set(mission.notified.map(p => p._id.toString()))
-    const declinedIds = new Set(mission.declined.map(p => p._id.toString()))
+    const mainBase      = await Base.findById(mission.base)
 
-    const toNotify = [...new Set([...notifiedIds].filter(p => !declinedIds.has(p)))]
+    notifyAM(AM, mission)
+    notifyMainBaseSup(mainBaseSup, mission)
 
-    console.log(toNotify)
-    
-
-/*
-    let personnelToNotify = []
-    for (const p of mission.notified) {
-        if (!declinedIds.includes(p._id.toString())) {
-            personnelToNotify.push(p._id)
+    // Cerco i BS delle Basi contattate e li notifico
+    ;(async () => {
+        let supervisors = []
+        const notifiedBasesIds = mission.notifiedBases.map(b => b._id)
+        for (const baseId of notifiedBasesIds) {
+            const base = await Base.findById(baseId, '')
+            const supervisor = utils.copyObject(await Personnel.findById(base.supervisor))
+            supervisors.push(supervisor)
         }
-    }
-*/
+        notifySupervisors(supervisors, mission, mainBase)
+    })()
+    
+    // Cerco il Personale che è stato notificato e non ha rifiutato la missione
+    ;(async () => {
+        // Ricavo gli _id di chi è stato notificato e non ha rifiutato
+        const notifiedIds = new Set(mission.personnel.notified.map(p => p._id.toString()))
+        const declinedIds = new Set(mission.personnel.declined.map(p => p._id.toString()))
+
+        const personneIds = [...new Set([...notifiedIds].filter(p => !declinedIds.has(p)))]
+        let   personnel   = []
+        for (const p of personneIds) {
+            const person = utils.copyObject(await Personnel.findById(p))
+            personnel.push(person)
+        }
+        notifyPersonnel(personnel, mission, mainBase)
+    })()
 }
 
 module.exports = abortMission
