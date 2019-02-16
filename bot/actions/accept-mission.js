@@ -34,8 +34,11 @@ const parseParams = ctx => {
  * 	2. Aggiunge la persona a quelle che hanno accettato la missione in Mission
  * @param {Context} ctx 
  */
-const acceptMission = async ctx => {
+const acceptMission = async () => async ctx => {
 	parseParams(ctx)
+	ctx.answerCbQuery('Missione accettata')
+	ctx.editMessageReplyMarkup({})
+
 	const person 	= ctx.session.userData.person
 	const aMission 	= await Mission.findById(this.missionId, '')
 
