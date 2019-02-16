@@ -179,6 +179,10 @@ exports.missionsSchema = new Schema({
         _id:        { type: ObjectId, ref: 'base' },
         timestamp:  { type: Date, default: Date.now }
     }],
+    notified: {
+        global: { type: Boolean, default: false},
+        extend: { type: Boolean, default: false}
+    },
     /*
     notifiedNearestBase: {
         value:      {type: Boolean, default: false},
