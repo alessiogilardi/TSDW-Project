@@ -23,17 +23,17 @@ const fs                = require('fs')
  * @returns {Array}
  */
 const exceededTimeoutCheck = async (timeout) => {
-    const missions = await Mission.find({ 'notifiedBases': { $exists: true, $size: 0 }, 'status.waitingForTeam.value': true, 'status.teamCreated.value': false, 'status.aborted.value': false }, '')
+    const missions = await Mission.find({ 'notified.extend': false, 'notifiedBases': { $exists: true, $size: 0 }, 'status.waitingForTeam.value': true, 'status.teamCreated.value': false, 'status.aborted.value': false }, '')
     let ret = []
     const now = new Date().getTime()
     for (const mission of missions) {
         // Se la missione ha data di inizio entro 12h uso il timeout breve
         if (mission.date.getTime() - mission.status.requested.timestamp.getTime() < 12*60*60*1000) {
-            if (now - mission.status.waitingForTeam.timestamp >= timeout.short) {
+            if (now - mission.status.waitingForTeam.timestamp >= timeout.short*60000) {
                 ret.push(mission)
             } 
         } else {
-            if (now - mission.status.waitingForTeam.timestamp >= timeout.long) {
+            if (now - mission.status.waitingForTeam.timestamp >= timeout.long*60000) {
                 ret.push(mission)
             }
         }
@@ -59,14 +59,14 @@ const sendChoose = async (idTelegram, mission, bases) => {
         buttons.push(Telegraf.Markup.callbackButton(buttonText, buttonData))
     }
     
-    await this.bot.sendMessage(idTelegram, message, Telegraf.Extra
+    await this.bot.telegram.sendMessage(idTelegram, message, Telegraf.Extra
         .markdown()
         .markup(m => m.inlineKeyboard(buttons)                
     ))
-    await this.bot.sendMessage(idTelegram, 'Vuoi abortire la missione?', Telegraf.Extra
+    await this.bot.telegram.sendMessage(idTelegram, 'Vuoi abortire la missione?', Telegraf.Extra
         .markdown()
         .markup(m => m.inlineKeyboard([
-            m.callbackButton('Abort', `${zip['abortMission']}:${mission_id}`)
+            m.callbackButton('Abort', `${zip['abortMission']}:${mission._id}`)
     ])))
     
 }
@@ -77,7 +77,7 @@ const sendChoose = async (idTelegram, mission, bases) => {
  * @param {*} accepted 
  * @param {*} declined 
  */
-const sendReport = async (idTelegram, notified, accepted, declined) => {
+const sendReport = async (idTelegram, mission, notified, accepted, declined) => {
     let message = `Non riesco a trovare abbastanza personale per la missione del ${utils.Date.format(mission.date, 'DD MMM YYYY hh:mm')}.\n`
     let acceptedMessage = `Hanno accettato:\n`
     let declinedMessage  = `Hanno rifiutato:\n`
@@ -93,7 +93,8 @@ const sendReport = async (idTelegram, notified, accepted, declined) => {
         }
     }
 
-    await this.bot.sendMessage(idTelegram, message + acceptedMessage + declinedMessage + othersMessage)
+    await this.bot.telegram
+    .sendMessage(idTelegram, `${message}\n${acceptedMessage}\n${declinedMessage}\n${othersMessage}`)
 }
 /**
  * Funzione che notifica i BS su quali missioni hanno sforato il timeout "locale".
@@ -110,8 +111,11 @@ const notifyBaseSupervisors = async (missions) => {
 
         const accepted  = mission.personnel.accepted.map(p => p._id)
         const declined  = mission.personnel.declined.map(p => p._id)
-        await sendReport(supervisor.telegramData.idTelegram, notified, accepted, declined)
+        const notified  = mission.personnel.notified.map(p => p._id)
+        await sendReport(supervisor.telegramData.idTelegram, mission, notified, accepted, declined)
         await sendChoose(supervisor.telegramData.idTelegram, mission, bases)
+
+        Mission.updateById(mission._id, { $set: { 'notified.extend': true } })
     }
 
 }
