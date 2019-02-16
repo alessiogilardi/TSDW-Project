@@ -154,6 +154,7 @@ const createTeam = new WizardScene('createTeam',
         return ctx.scene.leave()
     })
     ).leave(ctx => {
+        if (ctx.message.text === '/cancel') { return }
         /**
          *  1. Creo un Team
          *  2. Lo inserisco nella missione di riferimento
