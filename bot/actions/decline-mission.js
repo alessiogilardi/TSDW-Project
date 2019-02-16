@@ -20,7 +20,7 @@ const declineMission = async () => async (ctx) => {
     ctx.answerCbQuery('Missione rifiutata')
     ctx.deleteMessage()
     
-    const person = ctx.person.userData
+    const person = ctx.session.userData.person
     Mission.updateById(this.missionId, { $push: { 'personnel.declined': { _id: person._id, timestamp: new Date() } }})
     EventLog.insert({ type: 'missionDeclined', actor: person._id, subject: {type: 'Mission', _id: this.missionId}, timestamp: new Date() })
 }
