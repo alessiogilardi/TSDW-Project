@@ -2,20 +2,32 @@ require('dotenv').config()
 const db 				= require('./db/db-connect.js')
 const Telegraf 			= require('telegraf')
 const session 			= require('telegraf/session')
+const Stage 			= require('telegraf/stage')
+
 const dataLoader 		= require('./bot/middlewares/data-loader')
 const cmdPermissionChk	= require('./bot/middlewares/command-permission-check')
+
 const bf 				= require('./bot/bot-functions.js')
-const Stage 			= require('telegraf/stage')
+
 const organizeMission 	= require('./bot/scenes/organize-mission')
 const requestMission 	= require('./bot/scenes/request-mission')
 const manageDrones 		= require('./bot/scenes/manage-drones')
 const createTeam 		= require('./bot/scenes/create-team')
 const addLogbook 		= require('./bot/scenes/add-logbook')
 const addQtb 			= require('./bot/scenes/add-qtb')
+
 const acceptMission 	= require('./bot/actions/accept-mission')
 const declineMission 	= require('./bot/actions/decline-mission')
+const abortMission		= require('./bot/actions/abort-mission')
+const extendToBase		= require('./bot/actions/extend-mission-to-base')
+
 const eventRegister 	= require('./events/event-register')
+
 const router 			= require('./bot/router')
+
+const organizeTimeout 	= require('./bot/timeouts/organize')
+const globalTimeout 	= require('./bot/timeouts/global')
+const extendTimeout 	= require('./bot/timeouts/extend')
 //const deadlineCheck 	= require('./bot/missions-deadline-check')
 const { leave } 		= Stage
 
@@ -54,8 +66,12 @@ bot.help(ctx => ctx.reply(`Command list:\n${ctx.session.userData.commands.join('
 // bot.action('delete', ctx => bf.resetBotStarted(ctx.message.from.id))
 
 // CHIAMATA DELLE FUNZIONI PERIODICHE
-bf.checkTimeout(bot) // Funzione per il controllo del timeout dell'organizzazione delle missioni
-bf.checkTodaysMissions() // Funzione per il controllo delle missioni odierne
+organizeTimeout(bot)
+extendTimeout(bot)
+globalTimeout(bot)
+
+//bf.checkOrganizeTimeout(bot) // Funzione per il controllo del timeout dell'organizzazione delle missioni
+//bf.checkTodaysMissions() // Funzione per il controllo delle missioni odierne
 //deadlineCheck(bot, 120) // Funzione che controlla le missioni e notifica la base più vicina se il personale non ha risposto in tempo
 
 bot.command(['requestMission', 'requestmission'], ctx => {
@@ -77,10 +93,10 @@ bot.command(['addQtb', 'addqtb'], ctx => {
 
 //////////// DEGUGGING DA CANCELLARE ////////////////////
 bot.hears(['A', 'a'], ctx => {
-	ctx.reply('DEBUG: creazione team', Telegraf.Extra
+	ctx.reply('DEBUG: Abort Mission', Telegraf.Extra
 		.markdown()
 		.markup(m => m.inlineKeyboard([
-			m.callbackButton('Accetta', `${zip['createTeam']}:${'5c5c06bbd9397029782fef6b'}`)
+			m.callbackButton('Abort', `${zip['abortMission']}:${''}`)
 		])))
 })
 /*
@@ -100,17 +116,13 @@ router.on('organizeMission', ctx => {
 	ctx.scene.enter('organizeMission', { mission: { _id: ctx.state.data[0] } })
 })
 
-router.on('acceptMission', ctx => {
-	ctx.answerCbQuery('Missione accettata')
-	ctx.editMessageReplyMarkup({})
-	acceptMission(ctx)
-})
+router.on('acceptMission', acceptMission())
 
-router.on('declineMission', ctx => {
-	ctx.answerCbQuery('Missione rifiutata')
-	ctx.deleteMessage()
-	declineMission(ctx)
-})
+router.on('declineMission', declineMission())
+
+router.on('extendToBase', extendToBase())
+
+router.on('abortMission', abortMission())
 
 router.on('createTeam', ctx => {
 	ctx.deleteMessage()
