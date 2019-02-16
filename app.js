@@ -28,13 +28,8 @@ const router 			= require('./bot/router')
 const organizeTimeout 	= require('./bot/timeouts/organize')
 const globalTimeout 	= require('./bot/timeouts/global')
 const extendTimeout 	= require('./bot/timeouts/extend')
-//const deadlineCheck 	= require('./bot/missions-deadline-check')
+
 const { leave } 		= Stage
-
-
-const backtick = '\`';
-
-// TODO: definire una funzione che fa passare le missioni started a waitingForDocuments e setta il timestamp -> FATTO quando si inserisce il primo QTB
 
 const stage = new Stage([organizeMission, requestMission, createTeam, manageDrones, addLogbook, addQtb])
 stage.command('cancel', leave())
@@ -62,17 +57,11 @@ bot.start(async ctx => {
 	bf.setBotStarted(ctx.message.from.id)
 })
 bot.help(ctx => ctx.reply(`Command list:\n${ctx.session.userData.commands.join('\n')}`));
-// TODO: action -> delete non funziona -> Da verificare il tipo di action
-// bot.action('delete', ctx => bf.resetBotStarted(ctx.message.from.id))
 
 // CHIAMATA DELLE FUNZIONI PERIODICHE
 organizeTimeout(bot)
 extendTimeout(bot)
 globalTimeout(bot)
-
-//bf.checkOrganizeTimeout(bot) // Funzione per il controllo del timeout dell'organizzazione delle missioni
-//bf.checkTodaysMissions() // Funzione per il controllo delle missioni odierne
-//deadlineCheck(bot, 120) // Funzione che controlla le missioni e notifica la base più vicina se il personale non ha risposto in tempo
 
 bot.command(['requestMission', 'requestmission'], ctx => {
 	ctx.scene.enter('requestMission')
@@ -96,7 +85,7 @@ bot.hears(['A', 'a'], ctx => {
 	ctx.reply('DEBUG: Abort Mission', Telegraf.Extra
 		.markdown()
 		.markup(m => m.inlineKeyboard([
-			m.callbackButton('Abort', `${zip['abortMission']}:${''}`)
+			m.callbackButton('Abort', `${zip['abortMission']}:${'5c68581bc63a900ad4a4a087'}`)
 		])))
 })
 /*
@@ -125,7 +114,9 @@ router.on('extendToBase', extendToBase())
 router.on('abortMission', abortMission())
 
 router.on('createTeam', ctx => {
+	ctx.answerCbQuery(undefined)
 	ctx.deleteMessage()
+	
 	ctx.scene.enter('createTeam', { mission: { _id: ctx.state.data[0] } })
 })
 
