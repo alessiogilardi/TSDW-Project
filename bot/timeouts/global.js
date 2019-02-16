@@ -1,5 +1,7 @@
+const Telegraf  = require('telegraf')
 const timers    = require('timers')
 const fs        = require('fs')
+const utils     = require('../../utils')
 
 /**
  * Funzione che, dopo un certo tempo, se ancora non c'è il numero sufficiente di persone per formare un team, notifica il base
@@ -11,7 +13,7 @@ const checkGlobalTimeout = async (bot) => {
         let timeout_file = JSON.parse(fs.readFileSync('timeouts.json', 'utf8'))
         // Controllo le missioni che ancora non hanno un team
         let now = new Date().getTime()
-        let missions = await Mission.find({'status.waitingForTeam.value': true, 'status.teamCreated.value': false, 'status.aborted.value': false}, '')
+        let missions = await Mission.find({ 'notified.global': false, 'status.waitingForTeam.value': true, 'status.teamCreated.value': false, 'status.aborted.value': false}, '')
         for (let m of missions) {
             let missionReq  = new Date(m.status.requested.timestamp).getTime()
             let missionDate = new Date(m.date).getTime()
@@ -27,13 +29,14 @@ const checkGlobalTimeout = async (bot) => {
             if (now - missionTeamReq >= timeout * 60000) {
                 // invio messaggio al BS
                 let bs = await Personnel.findById(m.supervisor, 'telegramData.idTelegram')
-                let message = `La missione programmata per il giorno ${m.date} non ha ancora un team pronto.\n
-                               Vuoi annullare la missione?`
+                let message = `La missione programmata per il giorno ${utils.Date.format(m.date, 'DD MMM YYY kk:mm')} non ha ancora un team pronto.\n` +
+                `Vuoi annullare la missione?`
                 bot.telegram.sendMessage(bs.telegramData.idTelegram, message, Telegraf.Extra
                     .markdown()
                     .markup( m => m.inlineKeyboard([
                         m.callbackButton('Abort', `${m._id}`)
                 ])))
+                Mission.updateById(m._id, { $set: { 'notified.global': true } })
             }
         }
     }, 1 * 60000)
