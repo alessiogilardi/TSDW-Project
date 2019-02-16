@@ -58,7 +58,7 @@ const notifyPersonnel = async (persons, mission) => {
  * @param {Mission} mission 
  */
 const notifyBasePersonnel = async (base, mission) => {
-    // Aggiungo la abse a quele notificate
+    // Aggiungo la base a quelle notificate
     Mission.updateById(mission._id, { $push: { notifiedBases: { _id: base._id, timestamp: new Date() }}})
 
     // Vengono cercati tutti i membri del personale che ricoprono almeno uno dei ruoli pilota, crew, manutentore
