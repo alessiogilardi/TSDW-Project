@@ -410,12 +410,16 @@ exports.Drone = Drone = {
     updateByNumber: (aNumber, newValues) => { return Drone.update({ number: aNumber }, newValues) },
     /**
      * Funzione che esegue l'operazione di update selezionando il Drone per id.
-     * 
+     * @param {ObjectId} aId
+     * @param {Object} newValues
      */
     updateById: (aId, newValues) => { return Drone.update({ _id: aId }, newValues) },
     
     /**
      * Funzione che ricerca un Drone in base all'id.
+     * @param {ObjectId} aId
+     * @param {String} projection
+     * @returns {Promise}
      */
     findById: (aId, projection) => {
         return models.Drone.findOne()
@@ -426,6 +430,9 @@ exports.Drone = Drone = {
 
     /**
      * Funzione generica di ricerca Droni (Recupera più Droni)
+     * @param {Object} selection
+     * @param {String} projection
+     * @returns {Promise}
      */
     find: (selection, projection) => {
         return models.Drone.find(selection)
@@ -438,6 +445,7 @@ exports.Drone = Drone = {
      * @param {String} aType      Tipo di drone da cercare
      * @param {Object} selection  parametri di reicerca del drone
      * @param {Object} projection attributi da cercare
+     * @returns {Promise}
      */
     findByType: (aType, selection, projection) => {
         return models.Drone.find(selection)
@@ -448,6 +456,9 @@ exports.Drone = Drone = {
 
     /**
      * Funzione che ricercaa un Drone in base al numero di targa.
+     * @param {String} aNumber
+     * @param {String} projection
+     * @returns {Promise}
      */
     findByNumber: (aNumber, projection) => {
         return models.Drone.findOne()
@@ -473,6 +484,11 @@ exports.Battery = Battery = {
 }
 */
 exports.Mission = Mission = {
+    /**
+     * Funzione che inserisce una nuova Missione.
+     * @param {Mission} aMission La missione da inserire
+     * @returns {Promise}
+     */
     insert: aMission => {
         return new Promise((resolve, reject) => {
             aMission._id = mongoose.Types.ObjectId()
@@ -489,6 +505,12 @@ exports.Mission = Mission = {
         })
     },
 
+    /**
+     * Funzione che esegue la query di update di una Missione.
+     * @param {Object} selection
+     * @param {Object} newValues
+     * @returns {Promise}
+     */
     update: (selection, newValues) => {
         return new Promise((resolve, reject) => {
             models.Mission.updateOne(selection, newValues, err => {
@@ -504,8 +526,20 @@ exports.Mission = Mission = {
         })
     },
 
+    /**
+     * Funzione che esegue la query di update di una Missione selezionando per _id.
+     * @param {ObjectId} aId
+     * @param {Object} newValues
+     * @returns {Promise}
+     */
     updateById: (aId, newValues) => { return Mission.update({_id: aId}, newValues) },
 
+    /**
+     * Funzione che cerca una Missione per _id.
+     * @param {ObjectId} aId
+     * @param {String} projection
+     * @returns {Promise}
+     */
     findById: (aId, projection) => {
         return models.Mission.findOne()
         .where('_id').equals(aId)
@@ -513,6 +547,12 @@ exports.Mission = Mission = {
         .exec()
     },
 
+    /**
+     * Funzione di ricerca generica di Missioni (Ritorna più Missioni)
+     * @param {Object} selection
+     * @param {String} projection
+     * @returns {Promise}
+     */
     find: (selection, projection) => {
         return models.Mission.find(selection)
         .select(projection)
@@ -554,6 +594,12 @@ exports.Logbook = Logbook = {
         })   
     },
 
+    /**
+     * Funzione che usegue l'update di un Logbook.
+     * @param {Object} selection
+     * @param {Object} newValues
+     * @returns {Promise}
+     */
     update: (selection, newValues) => {
         return new Promise((resolve, reject) => {
             models.Logbook.updateOne(selection, newValues, err => {
@@ -569,20 +615,40 @@ exports.Logbook = Logbook = {
         })
     },
 
+    /**
+     * Funzione che usegue l'update di un Logbook selezionando per _id.
+     * @param {ObjectId} aId
+     * @param {Object} newValues
+     * @returns {Promise}
+     */
     updateById: (aId, newValues) => { return Logbook.update({ _id: aId }, newValues) },
 
-
+    /**
+     * Funzione che cerca un Logbook per _id.
+     * @param {ObjectId} aId
+     * @param {String} projection
+     * @returns {Promise}
+     */
     findById: (aId, projection/*, callback*/) => {
         return models.Logbook.findOne()
         .where('_id').equals(aId)
         .select(projection)
-        .exec(/*(err, logbook) => {
-            callback(logbook);
-        }*/)
+        .exec()
     }
 };
 
 exports.Qtb = Qtb = {
+    /**
+     * Funzione che inserisce un QTB.
+     * Una volta inserito il QTB viene aggiunto a quelli della missione,
+     * la missione è rimossa dalle waitingForQtb del Drone ed aggiunta 
+     * alle completed.
+     * Infine controllo se la Missione ha tutta la documentazione (Logbook + QTB)
+     * e in caso affermativo viene settata come completed.
+     * 
+     * @param {Qtb} aQtb
+     * @returns {Promise}
+     */
     insert: aQtb => {
         aQtb._id = mongoose.Types.ObjectId();
         new models.Qtb(aQtb)
@@ -600,46 +666,59 @@ exports.Qtb = Qtb = {
         })
     },
 
+    /**
+     * Funzione che esegue l'update di un QTB.
+     * @param {Object} selection
+     * @param {Object} newValues
+     * @returns {Promise}
+     */
     update: (selection, newValues) => {
-        models.Qtb.updateOne(selection, newValues, err => {
-            if (err) return console.log(err)
-            ee.db.Qtb.emit('update')
-            console.log(`Updated Qtb selected by: ${JSON.stringify(selection)}`)
-        });
+        return new Promise((resolve, reject) => {
+            models.Logbook.updateOne(selection, newValues, err => {
+                if (err) { 
+                    console.log(err)
+                    return reject(err)
+                }
+                ee.db.Qtb.emit('update')
+                console.log(`Updated Qtb selected by: ${JSON.stringify(selection)}`)
+                resolve()
+            })
+        })
     },
 
-    updateById: (aId, newValues) => Qtb.update({_id: aId}, newValues),
-/*
-    updateById: (aId, newValues) => {
-        models.Qtb.updateOne({_id: aId}, newValues, err => {});
-    },
-*/
-    findById: (aId, projection /*, callback*/) => {
+    /**
+     * Funzione che esegue l'update di un QTB selezionando per _id.
+     * @param {ObjectId} aId
+     * @param {Object} newValues
+     * @returns {Promise}
+     */
+    updateById: (aId, newValues) => { return Qtb.update({_id: aId}, newValues) },
+
+    /**
+     * Funzione che cerca un QTB per _id.
+     * @param {ObjectId} aId
+     * @param {String} projection
+     * @returns {Promise}
+     */
+    findById: (aId, projection) => {
         return models.Qtb.findOne()
         .where('_id').equals(aId)
         .select(projection)
-        .exec(/*(err, qtb) => {
-            callback(qtb);
-        }*/)
+        .exec()
     },
-/*
-    findByIdSync: (aId, projection) => {
-        var ret = null;
-        models.Qtb.findOne()
-        .where('_id').equals(aId)
-        .select(projection)
-        .exec((err, doc) => {
-            ret = doc;
-        });
-
-        while (ret == null)
-            deasync.runLoopOnce();
-        return ret;
-    }
-*/
 }
 
 exports.EventLog = EventLog = {
+    /**
+     * Funzione che inserisce un EventLog.
+     * Gli EventLog registrano gli eventi di:
+     *  - missionRequested
+     *  - missionOrganized
+     *  - teamCreated
+     *  - missionAccepted
+     *  - missionDeclined
+     *  - missionAborted
+     */
     insert: aEvent => {
         return new Promise((resolve, reject) => {
             new models.EventLog(aEvent)
