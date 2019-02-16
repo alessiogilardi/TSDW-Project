@@ -120,7 +120,7 @@ const periodicTask = async (bot) => {
     this.bot = bot
     const period = 60000 // 60000ms -> 1min
     timers.setInterval(async () => {
-        const { extend }    = JSON.parse(fs.readFileSync('../../timeouts.json', 'utf8'))
+        const { extend }    = JSON.parse(fs.readFileSync('timeouts.json', 'utf8'))
         const missions      = await exceededTimeoutCheck(extend)
 
         notifyBaseSupervisors(missions)

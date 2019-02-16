@@ -7,7 +7,7 @@ const fs        = require('fs')
 const checkOrganizeTimeout = async (bot) => {
     timers.setInterval(async () => {
         // Carico il file con i timeout
-        let timeout_file = JSON.parse(fs.readFileSync('../../timeouts.json', 'utf8'))
+        let timeout_file = JSON.parse(fs.readFileSync('timeouts.json', 'utf8'))
         // Controllo le missioni
         let now = new Date().getTime()
         let missions = await Mission.find({'status.requested.value': true, 'status.waitingForTeam.value': false}, '')
