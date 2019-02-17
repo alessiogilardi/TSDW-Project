@@ -32,6 +32,16 @@ const extendTimeout 	= require('./bot/timeouts/extend')
 
 const { leave } 		= Stage
 
+
+
+// TODO: implementare caso in cui già nella Base principale non c'è abbastanza personale
+// per far partire la missione, in quel caso i timeout di extend possono essere impostati a 0
+/**
+ * 
+ */
+
+
+
 const stage = new Stage([organizeMission, requestMission, createTeam, manageDrones, addLogbook, addQtb])
 stage.command('cancel', leave())
 
@@ -83,7 +93,7 @@ bot.hears(['A', 'a'], ctx => {
 	ctx.reply('DEBUG: Abort Mission', Telegraf.Extra
 		.markdown()
 		.markup(m => m.inlineKeyboard([
-			m.callbackButton('Abort', `${zip['abortMission']}:${'5c68581bc63a900ad4a4a087'}`)
+			m.callbackButton('Abort', `${zip['abortMission']}:${'5c69a1d8b96aae2514703de8'}`)
 		])))
 })
 
