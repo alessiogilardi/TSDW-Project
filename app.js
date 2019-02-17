@@ -1,5 +1,6 @@
 require('dotenv').config()
 const db 				= require('./db/db-connect.js')
+
 const Telegraf 			= require('telegraf')
 const session 			= require('telegraf/session')
 const Stage 			= require('telegraf/stage')
@@ -36,9 +37,6 @@ stage.command('cancel', leave())
 
 const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN)
 
-// Stampo gli errori
-bot.catch(err => console.log(err))
-
 eventRegister(bot)
 
 // MIDDLEWARES
@@ -48,6 +46,10 @@ bot.use(dataLoader())
 bot.use(cmdPermissionChk())
 bot.use(stage.middleware())
 
+// CHIAMATA DELLE FUNZIONI PERIODICHE
+organizeTimeout(bot)
+extendTimeout(bot)
+globalTimeout(bot)
 
 bot.start(async ctx => {
 	if (ctx.session.userData.person.telegramData.botStarted) { return }
@@ -56,12 +58,8 @@ bot.start(async ctx => {
 	await ctx.reply(`Command list:\n ${ctx.session.userData.commands.join('\n')}`)
 	bf.setBotStarted(ctx.message.from.id)
 })
-bot.help(ctx => ctx.reply(`Command list:\n${ctx.session.userData.commands.join('\n')}`));
 
-// CHIAMATA DELLE FUNZIONI PERIODICHE
-organizeTimeout(bot)
-extendTimeout(bot)
-globalTimeout(bot)
+bot.help(ctx => ctx.reply(`Command list:\n${ctx.session.userData.commands.join('\n')}`));
 
 bot.command(['requestMission', 'requestmission'], ctx => {
 	ctx.scene.enter('requestMission')
@@ -88,19 +86,12 @@ bot.hears(['A', 'a'], ctx => {
 			m.callbackButton('Abort', `${zip['abortMission']}:${'5c68581bc63a900ad4a4a087'}`)
 		])))
 })
-/*
-bot.hears(['b', 'B'], ctx => {
-	let sendMsg = bot.telegram.sendMessage
-	sendMsg(33017299, 'Message')
-})
-*/
+
 ////////////////////////////////////////////////////////
 
 router.on('organizeMission', ctx => {
-	// Entro nella scene: OrganizeMission
-	//ctx.answerCbQuery({})
+	ctx.answerCbQuery(undefined)
 	ctx.deleteMessage()
-	//ctx.editMessageReplyMarkup({})
 	bot.telegram.sendMessage(ctx.state.data[1], 'Missione accettata dal responsabile di base')
 	ctx.scene.enter('organizeMission', { mission: { _id: ctx.state.data[0] } })
 })
