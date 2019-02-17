@@ -111,43 +111,42 @@ const requestMission = new WizardScene('requestMission',
     }),
     new Composer()
     .on('text', async ctx => {
-        if (ctx.scene.state.command.searching)
-            return
+        if (ctx.scene.state.command.searching) { return }
+
         ctx.scene.state.command.searching = true
         const aBase = await Base.findByName(ctx.message.text, '')        
         ctx.scene.state.command.searching = false
         if (!aBase) {
-            ctx.reply('Mi spiace, hai inserito una base non valida, per favore inseriscine un\'altra.')
+            await ctx.reply('Mi spiace, hai inserito una base non valida, per favore inseriscine un\'altra.')
             return
         }
         ctx.scene.state.command.mission.base._id   = aBase._id
         ctx.scene.state.command.mission.base.name  = aBase.name
         ctx.scene.state.command.mission.supervisor = aBase.roles.supervisor
 
-        ctx.reply('Inserisci le coordinate dove avrà luogo la missione.\nInserisci una posizione da GPS oppure scrivile in formato UTM (es: 33 T 0298830 4646912):')
+        await ctx.reply('Inserisci le coordinate dove avrà luogo la missione.\nInserisci una posizione da GPS oppure scrivile in formato UTM (es: 33 T 0298830 4646912):')
         return ctx.wizard.next()
         
         //.catch(err => console.log(err))
     }),
     new Composer()
-    .on('text', ctx => { // Leggo la location in coordinate UTM
+    .on('text', async ctx => { // Leggo la location in coordinate UTM
         let coordinates = utils.stringToUTM(ctx.message.text) // Converto in coordinate UTM
         if (coordinates === null) {
-            ctx.reply('Mi spiace, le coordinate che hai inserito non sono valide, reinseriscile in formato UTM.')
+            await ctx.reply('Mi spiace, le coordinate che hai inserito non sono valide, reinseriscile in formato UTM.')
             return
         }
         coordinates = utm.convertUtmToLatLng(coordinates.easting, coordinates.northing, coordinates.zoneNumber, coordinates.zoneLetter)
         ctx.scene.state.command.mission.location.latitude  = coordinates.lat
         ctx.scene.state.command.mission.location.longitude = coordinates.lng
 
-        ctx.reply('Inserisci la durata prevista in ore:')
+        await ctx.reply('Inserisci la durata prevista in ore:')
         return ctx.wizard.next()
-
     })
-    .on('location', ctx => { // Inserisco la location da GPS mediante modulo Telegram
+    .on('location', async ctx => { // Inserisco la location da GPS mediante modulo Telegram
         ctx.scene.state.command.mission.location = ctx.message.location
 
-        ctx.reply('Inserisci la durata prevista in ore:')
+        await ctx.reply('Inserisci la durata prevista in ore:')
         return ctx.wizard.next()
     }),
     new Composer()
@@ -162,23 +161,23 @@ const requestMission = new WizardScene('requestMission',
         return ctx.wizard.next()
     }),
     new Composer()
-    .on('text', ctx => { // Leggo lo scenario A,B,C
+    .on('text', async ctx => { // Leggo lo scenario A,B,C
         if (!(ctx.message.text.toUpperCase() in ctx.scene.state.riskMatrix)) {
-            ctx.reply('Scenario non valido, inseriscine un altro.')
+            await ctx.reply('Scenario non valido, inseriscine un altro.')
             return
         }
         ctx.scene.state.command.mission.description.riskEvaluation.scenario = ctx.message.text.toUpperCase()
 
-        ctx.reply('Inserisci la difficoltà della missione:')
+        await ctx.reply('Inserisci la difficoltà della missione:')
         return ctx.wizard.next()
     }),
     new Composer()
-    .on('text', ctx => { // Leggo il riskLevel della missione
+    .on('text', async ctx => { // Leggo il riskLevel della missione
         // Controllo che il valore inserito sia numerico e che sia un valore valido
-        let scenario = ctx.scene.state.command.mission.description.riskEvaluation.scenario
-        let diff = ctx.message.text
+        const scenario = ctx.scene.state.command.mission.description.riskEvaluation.scenario
+        const diff = ctx.message.text
         if (diff < 1 || diff > ctx.scene.state.riskMatrix[scenario].length) {
-            ctx.reply('Ops, la difficoltà che hai inserito non è valida, inserisci un valore diverso.')
+            await ctx.reply('Ops, la difficoltà che hai inserito non è valida, inserisci un valore diverso.')
             return
         }
         ctx.scene.state.command.mission.description.riskEvaluation.level = diff
@@ -186,9 +185,9 @@ const requestMission = new WizardScene('requestMission',
 
         return ctx.scene.leave()
     })
-).leave(ctx => {
+).leave(async ctx => {
     if (ctx.message.text === '/cancel') {
-        ctx.reply('Richiesta missione annullata.')
+        await ctx.reply('Richiesta missione annullata.')
         delete ctx.scene.state.command
         return
     }
@@ -213,9 +212,9 @@ const requestMission = new WizardScene('requestMission',
 
     // 1 - Inserire la Missione nel DB
     // 2 - Notificare il responsabile di base
-    // 3 - Inserire l'evento nell'EventLog
-    let days = Math.ceil(mission.description.duration.expected/24)
-    let startDate = mission.date
+    // 3 - Inserire l'evento nell'EventLog --> Fatto nell'Event handler onMissionOrganized
+    const days = Math.ceil(mission.description.duration.expected/24)
+    const startDate = mission.date
     let missions = []
     ;(async () => {
         for (let i = 0; i < days; i++) {        
