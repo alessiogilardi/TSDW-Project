@@ -1,7 +1,7 @@
 const { Personnel, Mission, EventLog } = require('../../db/queries')
 const utils = require('../../utils')
 const Telegraf = require('telegraf')
-const { zip } = require('../../bot/bot-functions')
+const { zip, checkForTeam } = require('../../bot/bot-functions')
 
 /**
  * Man mano che le persone accettano controllo quanti hanno
