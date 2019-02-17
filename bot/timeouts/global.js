@@ -2,6 +2,7 @@ const Telegraf  = require('telegraf')
 const timers    = require('timers')
 const fs        = require('fs')
 const utils     = require('../../utils')
+const { zip }   = require('../bot-functions')
 
 /**
  * Funzione che, dopo un certo tempo, se ancora non c'è il numero sufficiente di persone per formare un team, notifica il base
@@ -34,7 +35,7 @@ const checkGlobalTimeout = async (bot) => {
                 bot.telegram.sendMessage(bs.telegramData.idTelegram, message, Telegraf.Extra
                     .markdown()
                     .markup( m => m.inlineKeyboard([
-                        m.callbackButton('Abort', `${m._id}`)
+                        m.callbackButton('Abort', `${zip['abortMission']}:${m._id}`)
                 ])))
                 Mission.updateById(m._id, { $set: { 'notified.global': true } })
             }
