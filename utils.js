@@ -72,10 +72,15 @@ exports.copyObject = copyObject = obj => {
     return ret
 }
 
-exports.arrayToLowerCase = arrayToLowerCase = aArray => {
+/**
+ * Funzione che converte le Stringhe in un array in LowerCase
+ */
+exports.stringArray2LC = stringArray2LC = aArray => {
+    return aArray.map(str => str.toLowerCase())
+    /*
     let ret = []
     for (const string of aArray) {
         ret.push(string.toLowerCase())
     }
-    return ret
+    return ret*/
 }
