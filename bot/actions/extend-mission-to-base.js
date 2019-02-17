@@ -46,7 +46,7 @@ const notifyPersonnel = async (persons, mission) => {
             if (roles[i]) { tmp.push(r[i]) }
         }
         roles = tmp
-        //console.log(`Notifing in nearest base: ${person.name} ${person.surname} as ${roles}`)
+        console.log(`Notifing in other base: ${person.name} ${person.surname} as ${roles}`)
 
         const message = `Richiesta di missione in una Base diversa dalla tua, come ${roles.join(', ')}:\n${utils.Date.format(mission.date, 'DD MMM YYYY')}\nScenario: ${mission.description.riskEvaluation.scenario}\nLivello: ${mission.description.riskEvaluation.level}`
         sendMessage(person.telegramData.idTelegram, message, roles, mission._id)
@@ -71,6 +71,7 @@ const notifyBasePersonnel = async (base, mission) => {
     }
     
     const persons = await Personnel.find(selection, '') // tutto il personale che può svolgere la missione
+    console.log(persons[0].surname)
     notifyPersonnel(persons, mission)
 }
 
@@ -89,8 +90,9 @@ const parseParams = () => {
  * @param {*} mission 
  */
 const notifyBaseSupervisor = async (telegramId, startBase, mission) => {
-    await this.ctx.telegram.sendMessage(telegramId, `La richiesta per la missione in data: ${utils.Date.format(mission.date, 'DD MMM YYYY kk:mm')} ` + 
-    `partita dalla Base: ${startBase.name} è stata estesa alla tua Base.\n` +
+    await this.ctx.telegram
+    .sendMessage(telegramId, `La richiesta di Missione in data: ${utils.Date.format(mission.date, 'DD MMM YYYY kk:mm')} ` + 
+    `partita dalla Base: ${startBase.name}, è stata estesa alla tua Base.\n` +
     `Il personale sarà notificato.`)
 }
 
@@ -101,13 +103,12 @@ const extendMissionToBase = async () => async (ctx) => {
     parseParams()
 
     const mission       = await Mission.findById(this.missionId, '')
-    const startBase     = await Base.findById(this.baseId, '')
+    const startBase     = await Base.findById(mission.base, '')
     const newBase       = await Base.findById(this.baseId, '')
-    const supervisor    = await Personnel.findById(newBase.supervisor, '')
+    const supervisor    = await Personnel.findById(newBase.roles.supervisor, '')
 
-    notifyBaseSupervisor(supervisor.telegramData.telegramId, startBase, mission)
+    notifyBaseSupervisor(supervisor.telegramData.idTelegram, startBase, mission)
     notifyBasePersonnel(newBase, mission)
-
 }
 
 module.exports = extendMissionToBase
