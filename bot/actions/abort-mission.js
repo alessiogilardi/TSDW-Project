@@ -9,6 +9,8 @@
  *  3. Inserisco l'evento nell'EventLog
  */
 
+// TODO: aggiungere possbilità di capire se l'Abort è stato fatto da BS o AM
+
 const { Mission, Personnel, Base } = require('../../db/queries')
 const utils = require('../../utils')
 
