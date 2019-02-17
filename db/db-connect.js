@@ -9,9 +9,9 @@ const mongoose = require('mongoose');
 /**
  * Funzione che esegue la connessione al DB
  * 
- * @param {*} dbAddress Indirizzo IP del DB
- * @param {*} dbPort    Porta a cui connettersi
- * @param {*} dbName    Node del DB
+ * @param {String} dbAddress Indirizzo IP del DB
+ * @param {String} dbPort    Porta a cui connettersi
+ * @param {String} dbName    Node del DB
  * 
  * @returns {Promise}
  */
@@ -25,7 +25,7 @@ const connect = async (dbAddress, dbPort, dbName) => {
         })
     })
     mongoose.set('useCreateIndex', true)
-    return mongoose.connect(`mongodb://${dbAddress}:${dbPort}/${dbName}`, {useNewUrlParser: true})
+    return mongoose.connect(`mongodb://${dbAddress}:${dbPort}/${dbName}`, { useNewUrlParser: true })
 }
 
 /**
