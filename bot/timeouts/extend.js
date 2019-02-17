@@ -19,24 +19,31 @@ const fs                = require('fs')
  * Funzione che cerca tra le Missioni e recupera quelle per cui la otifica ancora NON è stata estesa alle Basi
  * vicine.
  * Poi ritorna un Array di missioni per cui il timeout è stato superato.
- * @param {Object} timeout
+ * @param {Object} extendTimeout
  * @returns {Array}
  */
-const exceededTimeoutCheck = async (timeout) => {
+const exceededTimeoutCheck = async (extendTimeout) => {
     const missions = await Mission.find({ 'notified.extend': false, 'notifiedBases': { $exists: true, $size: 0 }, 'status.waitingForTeam.value': true, 'status.teamCreated.value': false, 'status.aborted.value': false }, '')
     let ret = []
+    let timeout = 0
     const now = new Date().getTime()
     for (const mission of missions) {
+//        timeout = (mission.date.getTime() - mission.status.requested.timestamp.getTime() < 12*60*60*1000) ? extendTimeout.short : extendTimeout.long
         // Se la missione ha data di inizio entro 12h uso il timeout breve
         if (mission.date.getTime() - mission.status.requested.timestamp.getTime() < 12*60*60*1000) {
-            if (now - mission.status.waitingForTeam.timestamp >= timeout.short*60000) {
+            timeout = extendTimeout.short
+            /*if (now - mission.status.waitingForTeam.timestamp >= timeout.short*60000) {
                 ret.push(mission)
-            } 
+            }*/ 
         } else {
-            if (now - mission.status.waitingForTeam.timestamp >= timeout.long*60000) {
+            timeout = extendTimeout.long
+            /*if (now - mission.status.waitingForTeam.timestamp >= timeout.long*60000) {
                 ret.push(mission)
-            }
+            }*/
         }
+        if (now - mission.status.waitingForTeam.timestamp >= timeout*60000) {
+            ret.push(mission)
+        } 
     }
     return ret
 }
@@ -78,7 +85,8 @@ const sendChoose = async (idTelegram, mission, bases) => {
  * @param {*} declined 
  */
 const sendReport = async (idTelegram, mission, notified, accepted, declined) => {
-    let message = `Non riesco a trovare abbastanza personale per la missione del ${utils.Date.format(mission.date, 'DD MMM YYYY hh:mm')}.\n`
+    let message = `TIMEOUT LOCALE\n` +
+    `Non riesco a trovare abbastanza personale per la missione del ${utils.Date.format(mission.date, 'DD MMM YYYY hh:mm')}.\n`
     let acceptedMessage = `Hanno accettato:\n`
     let declinedMessage  = `Hanno rifiutato:\n`
     let othersMessage   = `Non hanno risposto:\n`
@@ -109,9 +117,9 @@ const notifyBaseSupervisors = async (missions) => {
         const supervisor    = await Personnel.findById(mission.supervisor, '')
         const bases         = await Base.find({ _id: { $ne: mission.base } }, '')
 
-        const accepted  = mission.personnel.accepted.map(p => p._id)
-        const declined  = mission.personnel.declined.map(p => p._id)
-        const notified  = mission.personnel.notified.map(p => p._id)
+        const accepted  = mission.personnel.accepted.map(p => p._id.toString())
+        const declined  = mission.personnel.declined.map(p => p._id.toString())
+        const notified  = mission.personnel.notified.map(p => p._id.toString())
         await sendReport(supervisor.telegramData.idTelegram, mission, notified, accepted, declined)
         await sendChoose(supervisor.telegramData.idTelegram, mission, bases)
 
