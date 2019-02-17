@@ -180,8 +180,9 @@ exports.missionsSchema = new Schema({
         timestamp:  { type: Date, default: Date.now }
     }],
     notified: {
-        global: { type: Boolean, default: false},
-        extend: { type: Boolean, default: false}
+        global:     { type: Boolean, default: false },
+        extend:     { type: Boolean, default: false },
+        organize:   { type: Boolean, default: false }
     },
     /*
     notifiedNearestBase: {
