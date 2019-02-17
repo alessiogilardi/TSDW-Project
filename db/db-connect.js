@@ -15,7 +15,7 @@ const mongoose = require('mongoose');
  * 
  * @returns {Promise}
  */
-const connect = (dbAddress, dbPort, dbName) => {
+const connect = async (dbAddress, dbPort, dbName) => {
     mongoose.connection.on('error', console.error.bind(console, 'connection error:'))
     mongoose.connection.once('open', () => {
         console.log('Mongoose connection started')
@@ -24,6 +24,7 @@ const connect = (dbAddress, dbPort, dbName) => {
             .then(() => process.exit(0))
         })
     })
+    mongoose.set('useCreateIndex', true)
     return mongoose.connect(`mongodb://${dbAddress}:${dbPort}/${dbName}`, {useNewUrlParser: true})
 }
 
