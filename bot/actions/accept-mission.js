@@ -1,8 +1,3 @@
-const { unZip } = require('../bot-functions')
-const { Personnel, Mission } = require('../../db/queries')
-const ee = require('../../events/event-emitters')
-
-
 /**
  * 1. Ricevo _id della missione accetttata tramite callbackButton
  * 2. Aggiungo la missione a quelle accettate in
@@ -12,6 +7,10 @@ const ee = require('../../events/event-emitters')
  * 		--> aggiungo in personnel.accepted
  * 4. Emetto l'evento onMissionAccepted
  */
+
+const { unZip } = require('../bot-functions')
+const { Personnel, Mission } = require('../../db/queries')
+const ee = require('../../events/event-emitters')
 
 /**
  * Funzione che esegue il parsing dei parametri passati tramite ctx.state
