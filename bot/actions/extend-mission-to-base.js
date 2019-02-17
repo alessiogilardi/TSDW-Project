@@ -5,6 +5,8 @@
  *  3. Aggiungo la base a notifiedBases in Missions
  */
 
+// TODO: il button della Base non viene disabilitato
+
 const { Base, Mission, Personnel } = require('../../db/queries')
 const utils = require('../../utils')
 
@@ -98,10 +100,10 @@ const extendMissionToBase = async () => async (ctx) => {
     ctx.answerCbQuery('Richiesta estesa')
     parseParams()
 
-    const mission   = await Mission.findById(this.missionId, '')
-    const startBase = await Base.findById(this.baseId, '')
-    const newBase   = await Base.findById(this.baseId, '')
-    const supervisor = await Personnel.findById(newBase.supervisor, '')
+    const mission       = await Mission.findById(this.missionId, '')
+    const startBase     = await Base.findById(this.baseId, '')
+    const newBase       = await Base.findById(this.baseId, '')
+    const supervisor    = await Personnel.findById(newBase.supervisor, '')
 
     notifyBaseSupervisor(supervisor.telegramData.telegramId, startBase, mission)
     notifyBasePersonnel(newBase, mission)
