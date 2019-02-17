@@ -1,10 +1,20 @@
 const bf = require('../bot-functions')
 const utils = require('../../utils')
 
+/**
+ * Funzione che controlla se il messaggio ricevuto è un messaggio di testo.
+ * @param {Context} ctx
+ * @returns {Boolean}
+ */
 const isText = (ctx) => {
     return (ctx.updateType === 'message' && ctx.updateSubTypes.includes('text'))
 }
 
+/**
+ * Funzione che controlla se il messaggio ricevuto è un comando.
+ * @param {Context} ctx
+ * @returns {Boolean}
+ */
 const isCommand = (ctx) => {
     return (isText(ctx) && ctx.update.message.text.startsWith('/'))
 }
@@ -13,13 +23,19 @@ const isCommand = (ctx) => {
  * Funzione che restituisce i comandi disponibili all'utente.
  * Comandi specifici del ruolo e comandi generici
  * @param {Context} ctx 
+ * @returns {Array}
  */
 const getCommands = (ctx) => {
-    const commands  = utils.stringArray2LC(ctx.session.userData.commands)
+    const commands  = utils.stringArray2LC(ctx.session.userData.commands)    
     const generic   = bf.genericCommands
     return commands.concat(generic)
 }
 
+/**
+ * Funzione che verifica che l'utente abbia i diritti per eseguire il comando.
+ * @param {Context} ctx
+ * @returns {Boolean}
+ */
 const hasRight = (ctx) => {
     const text = ctx.update.message.text.toLowerCase()
     return getCommands(ctx).includes(text)
@@ -27,24 +43,17 @@ const hasRight = (ctx) => {
 
 const middleware = () => async (ctx, next) => {
     if (!isCommand(ctx) || hasRight(ctx)) {
-        return next() 
+        return next()
     }
-    //if (!hasRight(ctx)) { return next() }
-    return ctx.reply('Non hai i diritti per eseguire questo comando!')
 
-    /*if (ctx.updateType === 'message' && ctx.updateSubTypes.includes('text')) {
-        const text = ctx.update.message.text.toLowerCase()
-        if (text.startsWith('/')) {
-        if (isCommand(ctx)) {
-            const text = ctx.update.message.text.toLowerCase()
-            const commands = utils.arrayToLowerCase(ctx.session.userData.commands)
-            if(commands.includes(text) || bf.genericCommands.includes(text)) {
-                return next()
-            }
-            return ctx.reply('Non hai i diritti per eseguire questo comando!')
-        }
-    //}
-    return next()*/
+    /*
+    if (!isCommand(ctx)) {
+        return next()
+    }
+    if (isCommand(ctx) && hasRight(ctx)) {
+        return next() 
+    }*/
+    return await ctx.reply('Non hai i diritti per eseguire questo comando!')
 }
 
 module.exports = middleware
