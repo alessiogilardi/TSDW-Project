@@ -87,6 +87,7 @@ const abortMission = async () => async (ctx) => {
         notifyPersonnel(personnel, mission, mainBase)
     })()
 
+    Mission.updateById(mission._id, { $set: { 'status.aborted.value': true, 'status.aborted.timestamp': new Date() }})
     EventLog.insert({ type: 'missionAborted', actor: undefined, subject: {type: 'Mission', _id: this.missionId}, timestamp: new Date() })
 }
 
