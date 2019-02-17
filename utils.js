@@ -84,3 +84,7 @@ exports.stringArray2LC = stringArray2LC = aArray => {
     }
     return ret*/
 }
+
+exports.getDistance = getDistance = (p1, p2) => {
+    return Math.sqrt((p1.latitude - p2.latitude)^2 + (p1.longitude - p2.longitude)^2)
+}
