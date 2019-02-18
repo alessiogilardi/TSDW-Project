@@ -29,8 +29,8 @@ const parseParams = ctx => {
 
 /**
  * Funzione che esegue acceptMission
- * 	1. Aggiunge la missione a quelle accettate in Personnel
- * 	2. Aggiunge la persona a quelle che hanno accettato la missione in Mission
+ *  1. Aggiunge la missione a quelle accettate in Personnel
+ *  2. Aggiunge la persona a quelle che hanno accettato la missione in Mission
  * @param {Context} ctx 
  */
 const acceptMission = async () => async ctx => {
@@ -42,7 +42,6 @@ const acceptMission = async () => async ctx => {
 	const aMission 	= await Mission.findById(this.missionId, '')
 
 	Personnel.updateById(person._id, { $push: { 'missions.accepted': { idMission: aMission._id, date: aMission.date, roles: this.roles } } })
-	// forse non serve rimuovere il personale dai notificati -> await Mission.updateById(aMission._id, { $pull: { 'personnel.notified': person._id } })
 	await Mission.updateById(aMission._id, { $push: { 'personnel.accepted': { _id: person._id, roles: this.roles } } })
 
 	ee.bot.emit('missionAccepted', aMission._id, person)
