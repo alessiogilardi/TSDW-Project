@@ -15,6 +15,76 @@ const timers            = require('timers')
 const utils             = require('../../utils')
 const fs                = require('fs')
 
+const getPersonRoles = (aPerson, aMission) => {
+    let roles = []
+    let occupation = {
+        pilot:      aPerson.roles.occupation.pilot,
+        crew:       aPerson.roles.occupation.crew,
+        maintainer: aPerson.roles.occupation.maintainer
+    }
+
+
+    // Se la persona è un pilota e non soddisfa i requisiti sul tipo di drone gli viene rimosso il ruolo di pilota per questa missione
+    if (occupation.pilot
+        && !aPerson.pilot.droneTypes.includes(aMission.droneType)) {
+            occupation.pilot = false
+    }
+    // Se la persona è un manutentore ma la missione dura meno di 3h, gli viene rimosso il ruolo di manutentore
+    if (occupation.maintainer
+        && aMission.description.duration.expected < 3) {
+            occupation.maintainer = false
+    }
+    for (const key in occupation) {
+        if (occupation.hasOwnProperty(key)) {
+            if (occupation[key]) { roles.push(key.toString()) }
+        }
+    }
+    
+    return roles
+}
+
+/**
+ * Ritorna un array con i ruoli, ricopribili nella Mssione, di coloro che sono stati notificati.
+ * @param {Array} notified 
+ */
+const getNotifiedRolesCount = async (aMission) => {
+    const notified = aMission.personnel.notified
+    let roles = []
+
+    for (const p of notified) {
+        const person = await Personnel.findById(p, '')
+        roles.push(getPersonRoles(person, aMission))
+    }
+    roles = utils.flatten(roles)
+    roles = utils.getOccurrences(roles)
+
+    return roles
+}
+
+/**
+ * Funzione che controlla se i ruoli dei notificati sono sufficienti per la Missione.
+ * @param {Mission} aMission 
+ */
+const checkNotifiedRoles = async (aMission) => {
+    const notified = aMission.personnel.notified
+    const expected = aMission.description.duration.expected
+    if (notified.length < 3) { return false }
+
+    const roles = await getNotifiedRolesCount(aMission)
+
+    // Se la missione dura meno di 3h
+	if (expected < 3) {
+		// Ritorno true se ci sono almeno 2 piloti e almeno 1 crew
+		return (roles['pilot'] >= 2 && roles['crew'] >= 1)
+    }
+    
+    // Se la missione dura più di 3h
+	if (notified.length < 4) { return false }
+
+	// Ritorno true se ci sono almeno 2 piloti, 1 crew e 1 manutentore
+	return (roles['pilot'] >= 2 && roles['crew'] >= 1 && roles['maintainer'] >= 1)
+}
+
 /**
  * Funzione che cerca tra le Missioni e recupera quelle per cui la otifica ancora NON è stata estesa alle Basi
  * vicine.
@@ -28,19 +98,16 @@ const exceededTimeoutCheck = async (extendTimeout) => {
     let timeout = 0
     const now = new Date().getTime()
     for (const mission of missions) {
-//        timeout = (mission.date.getTime() - mission.status.requested.timestamp.getTime() < 12*60*60*1000) ? extendTimeout.short : extendTimeout.long
-        // Se la missione ha data di inizio entro 12h uso il timeout breve
-        if (mission.date.getTime() - mission.status.requested.timestamp.getTime() < 12*60*60*1000) {
+        // Setto il timeout da usare
+        if (!(await checkNotifiedRoles(mission))) {
+            timeout = 0
+        } else if (mission.date.getTime() - mission.status.requested.timestamp.getTime() < 12*60*60*1000) {
+            // Se la missione ha data di inizio entro 12h uso il timeout breve
             timeout = extendTimeout.short
-            /*if (now - mission.status.waitingForTeam.timestamp >= timeout.short*60000) {
-                ret.push(mission)
-            }*/ 
         } else {
             timeout = extendTimeout.long
-            /*if (now - mission.status.waitingForTeam.timestamp >= timeout.long*60000) {
-                ret.push(mission)
-            }*/
         }
+        // Se ho sforato il timeout aggiungo la Missione a quelle da notificare
         if (now - mission.status.waitingForTeam.timestamp >= timeout*60000) {
             ret.push(mission)
         } 
@@ -86,7 +153,7 @@ const sendChoose = async (idTelegram, mission, bases) => {
  */
 const sendReport = async (idTelegram, mission, notified, accepted, declined) => {
     let message = `TIMEOUT LOCALE\n` +
-    `Non riesco a trovare abbastanza personale per la missione del ${utils.Date.format(mission.date, 'DD MMM YYYY hh:mm')}.\n`
+    `Non riesco a trovare abbastanza personale per la missione del ${utils.Date.format(mission.date, 'DD MMM YYYY hh:mm')}, oppure non hai ancora creato un team.\n`
     let acceptedMessage = `Hanno accettato:\n`
     let declinedMessage  = `Hanno rifiutato:\n`
     let othersMessage   = `Non hanno risposto:\n`
