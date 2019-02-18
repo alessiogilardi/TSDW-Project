@@ -47,14 +47,6 @@ const roleToOperation = {
     crew:       [], // Usabili anche dai piloti e manutentori
     maintainer: ['/manageDrones'] // Usabile anche dal base supervisor
 }
-/*
-const roleToOperation_OLD = {
-	AM:         ['/requestMission'],
-	BS:         ['/createMission', '/acceptMission', '/addChiefPilot', '/addCoPilot', '/addCrew', '/addQtb'],
-	pilot:      ['/addLogbook'],
-    crew:       ['/accept', '/refuse'], // Usabili anche dai piloti e manutentori
-    maintainer: ['/manageDrones'] // Usabile anche dal base supervisor
-}*/
 
 exports.genericCommands = genericCommands = ['/end', '/cancel', '/help', '/start']
 
@@ -70,9 +62,9 @@ const getPermissions = aPerson => {
     if (aPerson.roles.command.base.supervisor)
         commands = commands.concat(roleToOperation.BS);
     if (aPerson.roles.occupation.pilot)
-        commands = commands.concat(roleToOperation.pilot);
+        commands = commands.concat(roleToOperation.pilot)
     if (aPerson.roles.occupation.pilot || aPerson.roles.occupation.crew || aPerson.roles.occupation.maintainer)
-        commands = commands.concat(roleToOperation.crew);
+        commands = commands.concat(roleToOperation.crew)
     if (aPerson.roles.occupation.maintainer || aPerson.roles.command.base.supervisor)   // listDrones può essere eseguito da bs e maintainer
         commands = commands.concat(roleToOperation.maintainer)
     
@@ -123,20 +115,20 @@ exports.resetBotStarted = idTelegram => Personnel.updateByIdTelegram(idTelegram,
 exports.checkTodaysMissions = async () => {
     timers.setInterval(async () => {
         // Cerco le missioni di oggi con il team già creato
-        const today = new Date()
-        const todaysMissions = await Mission.find({date: today, 'status.teamCreated.value': true}, '')
-        // Queste missioni vengono settate come 'started'
-        // Il controllo serve per evitare che venga eseguita la query sempre, così non viene emesso l'evento di modifica ogni volta
-        if (todaysMissions.length > 0) {
-            Mission.update({date: today, 'status.teamCreated': true},
-                                         {$set: {'status.started.value': true,
-                                                 'status.started.timestamp': Date.now()}})
-        }
+        const now = new Date()
+        const nowPlus2 = new Date().setMinutes(now.getMinutes() + 2)
+
+        //const today = new Date().setHours(0,0,0,0)
+        const todaysMissions = await Mission.find({ date: { $gte : now, $lte: nowPlus2 }, 'status.teamCreated.value': true, 
+                                                                    'status.started.value': false,
+                                                                    'status.aborted.value': false }, '')
         // Per ogni missione di oggi
         for (const mission of todaysMissions) {
+            // Setto la missione a started
+            Mission.updateById(mission._id, { $set: { 'status.started.value': true, 'status.started.timestamp': Date.now() }})
             // Setto i droni come 'in missione'
             for (const drone of mission.drones) {
-                Drone.updateById(drone._id, {$set: {'state.availability': 1}})
+                Drone.updateById(drone._id, { $set: {'state.availability': 1 }})
             }
             // Setto il campo Personnel.missions.pilot.waitingForLogbook del chief pilot
             for (const team of mission.teams) {
@@ -162,64 +154,4 @@ exports.checkMissionDocuments = async aMissionId => {
         Mission.updateById(mission._id, { $set: { 'status.waitingForDocuments.value': false, 'status.completed.value': true, 'status.completed.timestamp': new Date() }})
     }
 
-}
-
-/**
- * Funziona che controlla se c'è un numero sufficiente di persone per formare un team.
- * @param {ObjectId} missionId 
- */
-exports.checkForTeam = async (aMission) => {
-    const accepted = aMission.personnel.accepted
-    
-	if (accepted.length < 3) { return }
-
-	// Se la missione dura meno di 3h
-	if (aMission.description.duration.expected < 3) {
-		let pilotCount = 0
-		for (let person of accepted) {
-			if (person.roles.includes('pilot')) { pilotCount++ }
-		}
-
-		if (pilotCount >= 2) {
-			const message = await generateMessage(accepted, aMission.date)
-            const supervisor = await Personnel.findById(aMission.supervisor)
-            if (aMission.status.waitingForTeam.createTeamButton.messageId) {
-                await deletePrevMessage(supervisor.telegramData.idTelegram, aMission.status.waitingForTeam.createTeamButton.messageId)
-            }
-            const { message_id } = await notify(supervisor.telegramData.idTelegram, message, aMission)
-            Mission.updateById(aMission._id, { $set: { 'status.waitingForTeam.createTeamButton.messageId': message_id }})
-		}
-		return
-	}
-
-	// Se la missione dura più di 3h
-	if (accepted.length < 4) { return }
-
-	let pilotCount = 0
-	let maintCount = 0
-	let pilotAndMaintCount = 0
-	for (let person of accepted) {
-		if (person.roles.includes('pilot') &&
-			!person.roles.includes('maintainer')) {
-			pilotCount++
-		}
-		if (person.roles.includes('maintainer') &&
-			!person.roles.includes('pilot')) {
-			maintCount++
-		}
-		if (person.roles.includes('pilot') &&
-			person.roles.includes('maintainer')) {
-			pilotAndMaintCount++
-		}
-	}
-
-	if (pilotCount >= 2 &&
-		maintCount >= 1 &&
-		pilotCount + maintCount + pilotAndMaintCount >= 3) {
-		const message = await generateMessage(accepted)
-		const supervisor = await Personnel.findById(aMission.supervisor)
-		const { message_id } = await notify(supervisor.telegramData.idTelegram, message, aMission)
-        Mission.updateById(aMission._id, { $set: { 'status.waitingForTeam.createTeamButton.messageId': message_id }})
-    }
-    
 }
