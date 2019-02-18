@@ -88,3 +88,21 @@ exports.stringArray2LC = stringArray2LC = aArray => {
 exports.getDistance = getDistance = (p1, p2) => {
     return Math.sqrt((p1.latitude - p2.latitude)^2 + (p1.longitude - p2.longitude)^2)
 }
+
+/**
+ * Funzione che dato un array di array concatena ricorsivamente tutti gli elementi dei sotto Array
+ * in un unico Array
+ * @param {Array} arr 
+ */
+exports.flatten = flatten = (arr) => arr.reduce((a, b) => a.concat(Array.isArray(b) ? flatten(b) : b), [])
+
+/**
+ * Funzione che dato un Array conta per ogni valore le occorrenze di quel valore
+ * @param {Array} array 
+ */
+exports.getOccurrences = (array) => {
+    return array.reduce((accumulator, currentValue) => {
+        !accumulator.hasOwnProperty(currentValue) ? (accumulator[currentValue] = 1) : (accumulator[currentValue]++)
+        return accumulator
+    }, {})
+}
