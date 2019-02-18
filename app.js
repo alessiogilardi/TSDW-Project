@@ -32,16 +32,6 @@ const extendTimeout 	= require('./bot/timeouts/extend')
 
 const { leave } 		= Stage
 
-
-
-// TODO: implementare caso in cui già nella Base principale non c'è abbastanza personale
-// per far partire la missione, in quel caso i timeout di extend possono essere impostati a 0
-/**
- * 
- */
-
-
-
 const stage = new Stage([organizeMission, requestMission, createTeam, manageDrones, addLogbook, addQtb])
 stage.command('cancel', leave())
 
@@ -60,6 +50,7 @@ bot.use(stage.middleware())
 organizeTimeout(bot)
 extendTimeout(bot)
 globalTimeout(bot)
+bf.checkTodaysMissions()
 
 bot.start(async ctx => {
 	if (ctx.session.userData.person.telegramData.botStarted) { return }
