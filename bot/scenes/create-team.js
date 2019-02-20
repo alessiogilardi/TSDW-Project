@@ -5,8 +5,6 @@ const utils         = require('../../utils')
 const ee            = require('../../events/event-emitters')
 const { Mission, Personnel } = require('../../db/queries')
 
-// DEBUG:   controllare che il team sia inserito correttamente e che
-//          l'evento onTeamCreated funzioni correttamente
 const createTeam = new WizardScene('createTeam',
     async ctx => {
         const mission   = await Mission.findById(ctx.scene.state.mission._id, '')
