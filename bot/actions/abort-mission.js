@@ -87,6 +87,9 @@ const abortMission = async () => async (ctx) => {
         notifyPersonnel(personnel, mission, mainBase)
     })()
 
+    // TODO: aggiungere update Personnel e rimuovere la missione abortita da quelle accettate dalla persona,
+    // oppure aggiungere campo booleano
+
     Mission.updateById(mission._id, { $set: { 'status.aborted.value': true, 'status.aborted.timestamp': new Date() }})
     EventLog.insert({ type: 'missionAborted', actor: undefined, subject: {type: 'Mission', _id: this.missionId}, timestamp: new Date() })
 }
