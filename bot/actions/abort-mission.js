@@ -83,12 +83,12 @@ const abortMission = async () => async (ctx) => {
         for (const p of personneIds) {
             const person = utils.copyObject(await Personnel.findById(p))
             personnel.push(person)
+
+            // Rimuovo la missione da quelle accettate dal personale in modo che sia nuovamente disponibile
+            Personnel.updateById(p, { $pull: { 'missions.accepted': { idMission: mission._id} }})
         }
         notifyPersonnel(personnel, mission, mainBase)
     })()
-
-    // TODO: aggiungere update Personnel e rimuovere la missione abortita da quelle accettate dalla persona,
-    // oppure aggiungere campo booleano
 
     Mission.updateById(mission._id, { $set: { 'status.aborted.value': true, 'status.aborted.timestamp': new Date() }})
     EventLog.insert({ type: 'missionAborted', actor: undefined, subject: {type: 'Mission', _id: this.missionId}, timestamp: new Date() })
