@@ -98,14 +98,13 @@ exports.personnelSchema = new Schema({
             completed:  [{type: ObjectId, default: [], ref: 'mission'}],
             running:    {type: ObjectId, default: undefined, ref: 'mission'} // Indica la missione in cui è attualmente impegnato
         },
-        accepted: [{
-            idMission:  {type: ObjectId, default: undefined, ref: 'mission'},   // _id delle Missioni accettate
-            date:       {type: Date, default: undefined},                       // Data delle missioni accettate --> usata per vedere se è impegnato in missione
-            roles:      [{type: String, enum: ['pilot', 'crew', 'maintainer']}] // Ruoli che può ricoprire nella missione
+        accepted: [{ // Arrayusato per la ricerca di personale disponibile per Missione
+            idMission:  { type: ObjectId, default: undefined, ref: 'mission' },   // _id delle Missioni accettate
+            date:       { type: Date, default: undefined },                       // Data delle missioni accettate --> usata per vedere se è impegnato in missione
+            roles:      [{ type: String, enum: ['pilot', 'crew', 'maintainer'] }] // Ruoli che può ricoprire nella missione
         }]
-    },
-    locPermission: {type: Boolean, default: false} // Da rimuovere
-});
+    }
+})
 
 exports.basesSchema = new Schema({
     _id: ObjectId,
@@ -130,11 +129,11 @@ exports.basesSchema = new Schema({
         maintainers: [{type: ObjectId, default: [], ref: 'personnel'}]
     },
     drones: [{type: ObjectId, default: [], ref: 'drone'}]
-});
+})
 
 exports.dronesSchema = new Schema({
     _id: ObjectId,
-    number: {type: String, unique: true}, /* Non sapendo se sia numerico o alfanumerico */
+    number: {type: String, unique: true}, // Targa del drone
     type: {type: String, enum: droneTypes}, // Taglia del drone
     airOperator: {type: ObjectId, ref: 'air_operator'}, 
     base: {type: ObjectId, ref: 'base'},
