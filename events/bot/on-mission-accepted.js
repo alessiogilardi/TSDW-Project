@@ -1,8 +1,3 @@
-const { Personnel, Mission, EventLog } = require('../../db/queries')
-const utils = require('../../utils')
-const Telegraf = require('telegraf')
-const { zip } = require('../../bot/bot-functions')
-
 /**
  * Man mano che le persone accettano controllo quanti hanno
  * accettato finora e nel caso notifico il baseSup:
@@ -22,6 +17,11 @@ const { zip } = require('../../bot/bot-functions')
  * NOTE: il baseSup sceglierà i ruoli che ognuno avrà nella
  * 		 missione a sua discrezione
  */
+
+const { Personnel, Mission, EventLog } = require('../../db/queries')
+const utils = require('../../utils')
+const Telegraf = require('telegraf')
+const { zip } = require('../../bot/bot-functions')
 
 /**
  * Funzione che invia un Bottone al baseSupervisor per creare il Team
