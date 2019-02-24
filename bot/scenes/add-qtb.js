@@ -24,8 +24,6 @@ const addQtb = new WizardScene('addQtb',
             if (person.base.toString() === drone.base.toString()) {
                 await ctx.reply(`Per il drone targato ${drone.number} manca il qtb per le seguenti missioni:`)
                 for (const mission of drone.missions.waitingForQtb) {
-                    //const miss = await Mission.findById(mission.idMission, '')
-                    //console.log(mission._id)
                     // Invio un Button per ogni missione
                     const message       = `Missione del ${utils.Date.format(mission.date, 'DD MMM YYYY')}`
                     const buttonText    = 'Aggiungi Qtb'
