@@ -1,7 +1,3 @@
-/**
- *
- */
-
 const queries   = require('../../db/queries')
 const Telegraf  = require('telegraf')
 const bf        = require('../../bot/bot-functions')
@@ -9,8 +5,6 @@ const utils     = require('../../utils')
 const zip       = bf.zip
 const Personnel = queries.Personnel
 const Mission   = queries.Mission
-
-// TODO: recuperare anche le ore di volo dei piloti
 
 /**
  * Funzione che notifica il personale, mediante un messaggio Telegram.
@@ -78,14 +72,17 @@ const onMissionOrganized = async (bot, mission) => {
     let personnel = []
     for (let person of queryResult) {
         // Se la persona è un pilota e non soddisfa i requisiti sul tipo di drone gli viene rimosso il ruolo di pilota per questa missione
-        if (person.roles.occupation.pilot == true && !person.pilot.droneTypes.includes(mission.droneType))
+        if (person.roles.occupation.pilot == true && !person.pilot.droneTypes.includes(mission.droneType)) {
             person.roles.occupation.pilot = false
+        }
         // Se la persona è un manutentore ma la missione dura meno di 3h, gli viene rimosso il ruolo di manutentore
-        if (person.roles.occupation.maintainer == true && mission.description.duration.expected < 3)
+        if (person.roles.occupation.maintainer == true && mission.description.duration.expected < 3) {
             person.roles.occupation.maintainer = false
+        }
         // Se la persona ha ancora almeno un ruolo, viene notificata
-        if (person.roles.occupation.pilot || person.roles.occupation.crew || person.roles.occupation.maintainer)
+        if (person.roles.occupation.pilot || person.roles.occupation.crew || person.roles.occupation.maintainer) {
             personnel.push(person)
+        }
     }
     sendNotifications(personnel, mission)
 
