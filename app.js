@@ -40,8 +40,7 @@ const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN)
 eventRegister(bot)
 
 // MIDDLEWARES
-// session({ ttl: 10 })
-bot.use(session())
+bot.use(session()) // è possibile impostare un tempo di vita della sessione: session({ ttl: 10 })
 bot.use(dataLoader())
 bot.use(cmdPermissionChk())
 bot.use(stage.middleware())
@@ -84,7 +83,7 @@ bot.hears(['A', 'a'], ctx => {
 	ctx.reply('DEBUG: Abort Mission', Telegraf.Extra
 		.markdown()
 		.markup(m => m.inlineKeyboard([
-			m.callbackButton('Abort', `${zip['abortMission']}:${'5c69a1d8b96aae2514703de8'}`)
+			m.callbackButton('Abort', `${zip['abortMission']}:${''}`)
 		])))
 })
 
