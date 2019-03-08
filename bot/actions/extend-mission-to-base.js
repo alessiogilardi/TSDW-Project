@@ -99,11 +99,19 @@ const notifyBaseSupervisor = async (telegramId, startBase, mission) => {
 const extendMissionToBase = async () => async (ctx) => {
     this.ctx = ctx
     // TODO: trovare un modo per disabilitare il button appena premuto
-    ctx.answerCbQuery('Richiesta estesa')
     parseParams()
 
     const mission       = await Mission.findById(this.missionId, '')
     const startBase     = await Base.findById(mission.base, '')
+
+    const alreadyNotifiedBases = mission.notifiedBases.map(base => base._id)
+    if (alreadyNotifiedBases.includes(this.baseId)) {
+        ctx.answerCbQuery('Base già notificata')
+        return
+    }
+
+    ctx.answerCbQuery('Richiesta estesa')
+
     const newBase       = await Base.findById(this.baseId, '')
     const supervisor    = await Personnel.findById(newBase.roles.supervisor, '')
 
