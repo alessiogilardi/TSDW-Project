@@ -8,8 +8,8 @@
     "lzutf8": "^0.5.5",
     "moment": "^2.24.0",
     "mongodb": "^3.1.13",
-    "mongoose": "^5.4.8",
-    "npm": "^6.7.0",
+    "mongoose": "^5.4.19",
+    "npm": "^6.9.0",
     "telegraf": "^3.27.0",
     "utm-latlng": "^1.0.5"
   }
