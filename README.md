@@ -8,9 +8,9 @@ Il progetto implementa un BOT Telegram che gestise le informazioni di __Personal
 Per spiegazioni ulteriori fare riferimento al [manuale](./docs/manuale_v1.0.pdf).
 
 ### Installazione
-1. Installare [Node.js](www.nodejs.com)
-2. Installare [MongoDB Community Edition](www.mongodbcommunity.com)
-3. Installare [Git](www.git.com)
+1. Installare [NodeJS](https://nodejs.org)
+2. Installare [MongoDB Community Edition](https://docs.mongodb.com/manual/administration/install-community/)
+3. Installare [Git](https://git-scm.com/)
 4. Scaricare il [repository](https://github.com/BolleA7X/TSDW-Project)
 ```
 git clone https://github.com/BolleA7X/TSDW-Project.git
