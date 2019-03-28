@@ -77,18 +77,6 @@ bot.command(['addQtb', 'addqtb'], ctx => {
 	ctx.scene.enter('addQtb')
 })
 
-
-//////////// DEGUGGING DA CANCELLARE ////////////////////
-bot.hears(['A', 'a'], ctx => {
-	ctx.reply('DEBUG: Abort Mission', Telegraf.Extra
-		.markdown()
-		.markup(m => m.inlineKeyboard([
-			m.callbackButton('Abort', `${zip['abortMission']}:${''}`)
-		])))
-})
-
-////////////////////////////////////////////////////////
-
 router.on('organizeMission', ctx => {
 	ctx.answerCbQuery(undefined)
 	ctx.deleteMessage()

@@ -128,7 +128,7 @@ exports.Personnel = [{
 {
     _id: null,
     telegramData: {
-        idTelegram: 283625324
+        idTelegram: 0 //283625324
     },
     name: 'Gianni',
     surname: 'Vercelli',
