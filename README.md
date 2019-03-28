@@ -1,7 +1,7 @@
 # Drone and Mission Manager Bot (versione 1.0)
 ## Progetto di Transactional Systems and Data Warehouse
 
-<img src="https://nodejs.org/static/images/logos/nodejs-new-pantone-black.png" width="200px" /><img src="https://webassets.mongodb.com/_com_assets/cms/MongoDB-Logo-5c3a7405a85675366beb3a5ec4c032348c390b3f142f5e6dddf1d78e2df5cb5c.png" width="200px" /><img src="https://www.telegraph.co.uk/content/dam/technology/2016/08/03/telegram_3504581b_trans_NvBQzQNjv4BqpJliwavx4coWFCaEkEsb3kvxIt-lGGWCWqwLa_RXJU8.jpg" width="200px" />
+<img src="https://nodejs.org/static/images/logos/nodejs-new-pantone-black.png" width="200px" /><img src="https://www.worksonarm.com/wp-content/uploads/2017/03/mongodb-logo-1.png" width="150px" /><img src="https://www.telegraph.co.uk/content/dam/technology/2016/08/03/telegram_3504581b_trans_NvBQzQNjv4BqpJliwavx4coWFCaEkEsb3kvxIt-lGGWCWqwLa_RXJU8.jpg" width="200px" />
 
 
 Il progetto implementa un BOT Telegram che gestise le informazioni di __Personale__, __Missioni__ e __Droni__ di uno o più __Operatori Aerei__.
